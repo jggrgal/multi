@@ -1,0 +1,52 @@
+{% extends 'pedidos/base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+<div class="container">
+    
+
+    
+
+    <div class="col-md-4">
+        <div class="panel panel-success">
+            <div class="panel-heading">LOGIN</div>
+            <div class="panel-body">
+                 {% if error_message %}<p><strong> {{error_message}} </strong></p>{% endif %}
+                
+                <form action="{% url 'pedidos:acceso' %}" method="post" form>
+                    <div class="form-signin">
+                        <h6 class="form-signin-heading text-center"></h6>
+                        {% csrf_token %}
+                        {{ form| crispy }}
+                        <input class="btn btn-lg btn-success btn-block"  type="submit" value="Iniciar sesión" /><br><a align="right" href="{% url 'pedidos:password_reset' %}">Olvidó su contraseña ?</a>
+                        <br>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="alert alert-warning" role="alert"> {{ mensaje }}</div>
+        <p align="right">
+          <a class="btn btn-success btn-lg " href="/pedidos/index" role="button">Regresar</a>
+        </p>
+        
+    </div>
+    <div class='col-md-4'> 
+        <img src="{% static 'pedidos/modelo3.jpg' %}" alt="logo" style="height:100%; width:100%">
+        
+    </div>
+    <div class='col-md-4'>
+        <img src="{% static 'pedidos/modelos2.jpg' %}" alt="logo" style="height:100%; width:100%">
+        
+    </div>
+
+    
+</div>
+<script>
+var is_staff = '{{ is_staff }}';
+</script>
+
+{% endblock content %}
+
+
+

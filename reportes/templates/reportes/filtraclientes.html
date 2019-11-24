@@ -1,0 +1,15 @@
+{% extends 'reportes/base.html' %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+<h2>Búsqueda de clientes... </h2>
+{{ mensaje }}
+{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+<form action="{% url 'reportes:filtraclientes' %}" method="post">
+	<div class="form-group">
+		{% csrf_token %}
+		{{ form|crispy}}
+		<input type="submit" value="Enviar.." />
+	</div>
+</form>
+{% endblock %}

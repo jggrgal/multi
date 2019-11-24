@@ -1,0 +1,36 @@
+{% extends 'reportes/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  <div class="col-md-3"><h3>Clientes activos</h3></div>
+  <div class="col-md-3"></div>
+  <div class="col-md-3"></div>
+  <div class="col-md-3" align = "Right"><h3><a class="btn btn-info btn-normal" href="{% url 'reportes:creacliente' %}" role="button">Nuevo cliente </a></h3></div>
+</div>
+
+<form  action="{% url 'reportes:commitdelclientes' %}" method="post">
+	{% csrf_token %}
+	<div align = "Center">{% load render_table from django_tables2 %}</div>
+	<div align ="Center">{% render_table cl %}</div>
+	<div align ="Right"><input id="submcltes" type="submit" style="display: none;" class="btn btn-default" value="Eliminar(no se muestra)"/></div>
+</form>
+<br>
+
+<button  id="eliminaclientes" class="btn btn-danger btn-normal">Eliminar</button>
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

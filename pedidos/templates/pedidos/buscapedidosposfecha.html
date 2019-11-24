@@ -1,0 +1,63 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+
+{% load staticfiles %}
+{% block content %}
+
+
+
+
+<div class="row">
+  <div class="col-md-4">
+     
+    <div class="panel panel-success">
+      <div class='panel-heading'><h3> Consulta pedidos de socio. </h3></div>
+      <div class='panel-body'>
+    
+        <!--{{ mensaje }}
+      {% if error_messages %}<p><strong> {{form.error}}</p>{% endif %}
+
+      {% if form.message.errors %}
+          <ul>
+            {% for error in form.errors %}
+                <li><strong>{{ error }}</strong></li>
+            {% endfor %}
+          </ul>
+        {% endif %} -->
+
+
+        <form action="{% url 'pedidos:buscapedidosposfecha' %}" method="GET">
+          <div class="form-group">
+            {% csrf_token %}
+            
+            
+            {{ form | crispy }}
+
+            <input  class="btn btn-lg btn-success btn-block" type="submit" value="Buscar pedidos" />
+          </div>
+        </form>
+
+      </div>
+    
+
+    </div>
+
+         
+        
+          <a class="btn btn-success btn-lg" href="/pedidos/consulta_menu" role="button">Regresar</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    
+  </div>
+  	
+  <div class="col-md-4">
+   
+  </div>
+</div><br>
+<div class="row">
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h5> COLOCACIONES </h5><br>
+    <h5> Registros: {% if tipoconsulta == '1' %}
+
+                     Nuevos
+
+                   {% else %}
+
+                      Por confirmar
+
+                    {% endif %}</h5><br>
+
+    <h5>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>Sucursal</th>
+                    <th>Pedido</th>
+                	<th>Socio</th>
+                	<th>Fecha_Pedido</th>
+                	<th>Marca</th>
+                	<th>Estilo</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    <th>Fecha_SC</th>
+                    <th>Opcion_Compra</th>
+                    
+
+            	</tr>
+            	{% for item in pedidos %}
+                    
+            		<tr>
+                        <td>{{ item.idSucursal}}</td>
+                        <td> {{ item.Pedido }}</td>
+                        <td>{{ item.AsociadoNo }}</td>
+                        {% localize on %}
+                            <td>{{item.FechaPedido| date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        
+                        <td>{{ item.idmarca }}</td>
+                        <td>{{ item.idestilo }}</td>
+            			<td>{{ item.idcolor }}</td>
+                		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+                        <td>{{item.precio}}</td>
+                        {% localize on %}
+                		  <td>{{item.FechaMaximaEntrega | date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        <td>{{item.OpcionCompra}}</td>
+                                           
+                	</tr>
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div>
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/consultacolocaciones" role="button">Regresar</a>
+        </p>
+
+
+   
+</div>
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

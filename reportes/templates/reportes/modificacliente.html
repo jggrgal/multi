@@ -1,0 +1,66 @@
+{% extends 'reportes/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+	
+	<form action="{% url 'reportes:modificacliente' id_cliente %}" method="post"> 
+	{% csrf_token %}
+	<tr>
+		<th>
+			<label for="id_nombre">Nombre:</label>
+		</th><br>
+		<td id='name'>
+			{{form.nombre}}
+		</td>
+	</tr><br><br>
+	<tr>
+		<th>
+			<label for="id_domicilio">Domicilio:</label>
+		</th><br>
+		<td maxlength="100">
+			{{ form.domicilio}}
+		</td><br><br>
+	</tr>
+	<tr><br>
+		<th>
+			<label for="id_email">Email:</label>
+		</th>
+		<td><br>
+			{{ form.email }}
+		</td>
+	</tr><br><br>
+	<input type='submit' value='Enviar' />
+	</form>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+<h1>Editando </h1>
+{{ mensaje }}
+
+{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+<form action="{% url 'reportes:modificacliente' id_cliente %}" method="post">
+{% csrf_token %}
+{{ form | crispy }}
+<input type="submit" value="Enviar.." />
+</form>
+-->
+{% endblock %}
+
+
+
+

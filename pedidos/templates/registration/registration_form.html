@@ -1,0 +1,45 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  <div class="col-md-4"></div>
+  <div class="col-md-4">
+    <div class="panel panel-primary">
+        <div class='panel-heading'><h4 align='center'>Registro<h4></div>
+        <div class='panel-body'>
+    
+            {{ mensaje }}
+            {% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+            <form action={% url 'pedidos:registro_socio' %} method="post">
+                <div class="form-group">
+                    {% csrf_token %}
+
+                    <label for="">Usuario</label>
+                    {{ form.username}}<br><br>
+                    <label for"">email</label>
+                    {{form.email}}  
+                    <label for"">Password</label>
+                    {{form.password1}}
+                    <label for"">Confirme Password</label>
+                    {{form.password2}}
+
+                    
+                    <input  class="btn btn-default "  type="submit" value="Registrar" />
+                </div>
+            </form>
+
+        </div>
+       
+
+        </div>  
+    
+  </div>
+  <div class="col-md-4"></div>
+</div>
+    
+{% endblock content %}

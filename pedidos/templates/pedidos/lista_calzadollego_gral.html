@@ -1,0 +1,59 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h3> LISTA DE CALZADO QUE LLEGO GRAL </h3><br>
+    <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
+
+        <div class="table-responsive">
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>id Cierre</th>
+                    <th>Fecha_cierre</th>
+                	<th>Fecha_tentativa</th>
+                	<th>Proveedor</th>
+                	<th>Almacen</th>
+                    <th>No_pedido</th>
+                    <th>No_piezas</th>
+                    <th>Paqueteria</th>
+                    <th>No_guia</th>
+            	</tr>
+            	{% for item in pedidos %}
+                    
+            		<tr>
+                        <td>{{ item.id }}</td>
+                        {% localize on %}
+                            <td>{{item.fechacierre | date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        {% localize on %}
+                            <td>{{item.FTL | date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        <td>{{ item.provnombre }}</td>
+            			<td>{{ item.almacen }}</td>
+                		<td>{{ item.numpedido }}</td>
+                		<td>{{item.total_articulos}}</td>
+                		<td>{{item.paqueteria}}</td>
+                        <td>{{item.NoGuia}}</td>
+                       
+                	</tr>
+                {% endfor %}
+                
+        	</table>
+        </div><br>
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/calzadollego_gral" role="button">Salir</a>
+        </p>
+
+
+ </div>
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

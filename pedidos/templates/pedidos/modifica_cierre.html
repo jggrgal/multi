@@ -1,0 +1,79 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+
+<div class="row">
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-12">
+    <div class="panel panel-success">
+        <div class='panel-heading'><h4 align='left'>Edicion de Cierre<h4></div>
+        <div class='panel-body'>
+              
+                        
+            <form action="{% url 'pedidos:modifica_cierre' id %}" method="POST">
+
+
+
+                <div class="alert alert-danger" role="alert">
+              
+                  {% if msg %}<p><strong> {{msg}}</strong></p>{% endif %}
+                </div>
+                
+               
+                <div class="form-group" >
+                    {% csrf_token %}
+
+                   
+                         
+                        {{ form.id|as_crispy_field }} 
+                         
+                  
+                    <div class="form-group">
+                    {{form.referencia | as_crispy_field }}
+                    
+                        
+                       
+                    </div>
+                    
+
+                    {{ form.pedidonum | as_crispy_field }}
+                    {{ form.total_articulos | as_crispy_field }}
+                    {{ form.colocado_via  | as_crispy_field }}
+                    {{ form.paqueteria | as_crispy_field }}
+                    {{ form.noguia | as_crispy_field }}
+                    {{ form.total_art_recibidos | as_crispy_field }}
+
+                   <!-- {% if tipodedocumento == 'Credito' %}
+                        {{ form.bloquearnotacredito | as_crispy_field }}
+                    {% endif %}-->
+                    
+                    
+                
+                    <input  id='btn_modifica_cierre' class="btn btn-default"  type="submit" value="Enviar" />
+                
+
+                    
+                </div>
+             
+            </form>
+
+        </div><br>
+ 
+  </div>
+        
+
+
+
+
+
+
+  <script>
+    var is_staff = "{{ is_staff }}";
+  </script>  
+
+
+{% endblock content %}

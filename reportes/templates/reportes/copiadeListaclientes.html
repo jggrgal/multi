@@ -1,0 +1,19 @@
+{% extends 'reportes/base.html' %}
+
+
+
+{% block content %}
+
+<h3>CLIENTES ACTIVOS</h3><br>
+
+
+
+{% load render_table from django_tables2 %}
+
+{% render_table cl %}
+
+
+<h5> {{mensaje}} </h5><br><br>
+<a class="btn btn-default" href="{% url 'reportes:creacliente' %}" role="button">Agregar nuevo</a>
+
+{% endblock content %}

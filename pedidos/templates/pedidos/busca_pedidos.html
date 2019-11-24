@@ -1,0 +1,81 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+
+{% load staticfiles %}
+{% block content %}
+
+
+
+
+<div class="row">
+  <div class="col-md-4">
+     
+    <div class="panel panel-success">
+      <div class='panel-heading'><h3> Consulta pedidos. </h3></div>
+      <div class='panel-body'>
+    
+        <!--{{ mensaje }}
+      {% if error_messages %}<p><strong> {{form.error}}</p>{% endif %}
+
+      {% if form.message.errors %}
+          <ul>
+            {% for error in form.errors %}
+                <li><strong>{{ error }}</strong></li>
+            {% endfor %}
+          </ul>
+        {% endif %} -->
+
+
+        <form action="{% url 'pedidos:busca_pedidos' %}" method="post">
+          <div class="form-group">
+            {% csrf_token %}
+            
+            
+            {{ form | crispy }}
+
+            <input  class="btn btn-lg btn-success btn-block" type="submit" value="Buscar" />
+          </div>
+        </form>
+
+      </div>
+    
+
+    </div>
+
+    <div class="btn-group" role="group" aria-label="...">
+
+          
+          <a class="btn btn-success btn-lg" href="/pedidos/crea_pedidos" role="button">Nuevo pedido</a>
+        
+        
+          <a class="btn btn-success btn-lg" href="/pedidos/acceso" role="button">Regresar</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title">Ayuda</h3>
+      </div>
+      <div class="panel-body">
+        <strong>Consulte sus pedidos por:</strong><br><br>
+        <strong>Número. </strong>El sistema arrojará todos los productos con ese número de pedido de cualquier fecha y status.<br>
+        Cabe resaltar que esta es la manera más rápida para consultar<br><br>
+        <strong>Fecha en que se hizo. </strong> Se refiere a la fecha en la que Ud. hizo el pedido. El sistema le entregará un historial de 21 días hacia atrás de la fecha mostrada, siempre respetando el status que haya seleccionado.<br><br>
+
+        Nota: Recuerde ingresar la fecha en el formato que se le indica,<strong>debe incluir también las barras</strong>.
+      </div>
+    </div>
+    <a class="link" href="/pedidos/cambiar_password" role="button">  Cambiar Password</a><a class="link" href="/pedidos/busca_socio" role="button"> |  Nuevo Usuario</a><a class="link" href="/pedidos/entrada_sistema" role="button"> |  Empleados </a>
+
+  </div>
+  	
+  <div class="col-md-4">
+    <img src="{% static 'pedidos/ttblues1.png' %}" alt="logo" style="height:100%; width:100%"> 
+  </div>
+</div><br>
+<div class="row">
+
+</div>
+
+{% endblock %}

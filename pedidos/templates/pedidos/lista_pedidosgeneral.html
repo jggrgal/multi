@@ -1,0 +1,96 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class=row>
+    <div class='col-md-4'>
+         <h4 class='success'>CONSULTA DE PEDIDOS</h4>  
+
+       
+    </div>
+    <div class='col-md-4'>
+    </div>
+    <div class='col-md-4'>
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>   
+        
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+    	<table id="listapedidosgeneral" class='display table table-hover table-bordered table-condensed'>
+            
+        	
+            <thead>
+            <tr class='success'>
+
+        		<th>Pedido num</th>
+                <th style="display:none">productono</th>
+                <th style="display:none">catalogo</th>
+                <th style="display:none">nolinea</th>
+                <th>Socio Num</th>
+                <th>Nombre</th>
+                <th>Fecha</th>
+            	<th>Marca</th>
+            	<th>Estilo</th>
+            	<th>Color</th>
+            	<th>Talla</th>
+                <th>Precio</th>
+                <th>Status</th>
+                <th>Fecha llegada <small>(Puede cambiar)</small></th>
+                <th>Fecha Maxima Entrega</th>
+                <th> Cancel ?</th>
+                <th> Imp </th>
+        	</tr>
+            </thead>
+            <tbody>
+        	{% for item in pedidos %}
+                
+        		<tr>
+                    <td>{{item.pedido}} </td>
+                    <td style="display:none">{{item.productono}}</td>
+                    <td style="display:none">{{item.catalogo}}</td>
+                    <td style="display:none">{{item.nolinea}}</td>
+                    <td>{{item.asociadono}}</td>
+                    <td>{{item.socionomb}}</td>
+                    {% localize on %}
+                        <td>{{item.fechapedido | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{ item.idmarca }}</td>
+        			<td><a href="/pedidos/pedidosgeneraldetalle/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}"> {{ item.idestilo }} </a></td>
+            		<td>{{ item.idcolor }}</td>
+            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+            		<td>{{item.precio}}</td>
+                    <td>{{item.status}}</td>
+                    <td>{% localize on %}
+                        {% if "1901" in item.FechaTentativaLLegada %} NO ESP.{% endif %}
+                            {{item.FechaTentativallegada | date:'d/M/Y'  }}
+                    {% endlocalize %}</td>
+                    <td>{% localize on %}
+                        {% if "1901" in item.FechaMaximaEntrega %} NO ESP.{% endif %}
+                            {{item.FechaMaximaEntrega | date:'d/M/Y'  }}
+                    {% endlocalize %}</td>
+                    <!--<td><p align="left">
+                          <a id="btn_cancela_pedido" class="btn btn-danger btn-sm " href="/pedidos/cancelarpedidoadvertencia/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
+                        </p></td>-->
+                    <td><p align="left">
+                          <button id="btn_cancela_pedido" class="btn btn-danger btn-sm btn_cancela_pedido" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' or item.status == 'Devuelto' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</button>
+                        </p></td>
+                    <td><form id="imp_pedido_form" action="/pedidos/imprime_ticket/" method="GET">
+                        <input id="idpedido" name="p_num_pedido" class="btn-success-btn-lg&quot;" type="submit" value="{{item.pedido}}" >
+                    </form></td>
+                    
+            	</tr>
+            {% endfor %}
+        </tbody>
+                  
+    	</table>
+    </div>
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/pedidosgeneral" role="button">Salir</a>
+    </p>
+
+
+{% endblock %}

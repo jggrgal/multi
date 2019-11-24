@@ -1,0 +1,61 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h5>Pedidos sujetos a descuento a partir del 10-SEP-2018</h5>
+    <h5> Socio: {{socio_codigo}} {{socio_nombre}} {{socio_appaterno}}</h5><br>
+    <h5>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>Pedido</th>
+                	<th>Fecha_pedido</th>
+                	<th>Marca</th>
+                	<th>Estilo</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    
+
+            	</tr>
+            	{% for item in lista_pedidos %}
+                    
+            		<tr>
+                        
+                        <td> {{ item.Pedido }}</td>
+                        {% localize on %}
+                            <td>{{item.fechapedido | date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        
+                        <td>{{ item.idmarca }}</td>
+                        <td>{{ item.idestilo }}</td>
+            			<td>{{ item.idcolor }}</td>
+                		<td>{% if item.talla == 'NE' %} {{item.observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+                        <td>{{item.precio}}</td>
+                		                       
+                	</tr>
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div>
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/buscapedidosposfecha" role="button">Regresar</a>
+        </p>
+
+
+   
+</div>
+
+<!--<div class="col-md-6">
+</div>-->
+
+</div>
+ {% endblock %}

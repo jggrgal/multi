@@ -1,0 +1,47 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<div class="row">
+   
+  
+
+  <div class="col-md-12">  
+
+    
+    <div class="alert alert-warning" role="alert">
+        <h4>
+        <strong>Advertencia !</strong>  Se procederá a cancelar el pedido que seleccionó, si está seguro de la operación solo indique el motivo por el cual está cancelando y de clic en "Enviar", de otra manera de click en “Regresar” !
+
+
+        </h4>
+    </div>
+    
+  </div><br><br>
+<div class='col-md-12'>
+
+  <form action="." method="POST">
+    <div class="form-group">
+            {% csrf_token %}
+            
+            
+            {{ form | crispy }}
+
+            <input  class="btn btn-default " type="submit" value="Enviar" />
+             
+                <a class="btn btn-default" href="javascript:history.back()" role="button" align='right'>Regresar</a>
+           
+
+    </div>
+  </form>
+</div>
+  </div>
+  
+</div>
+    
+
+
+{% endblock content %}

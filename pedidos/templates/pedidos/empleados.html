@@ -1,0 +1,80 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+    
+{% load staticfiles %}
+
+
+
+
+<!-- El siguiente div es para probar que trabaja javascript, va amarrado con el script msgid al principio de pedidos.js
+
+<div id="msgid">
+</div> -->
+{% block content %}
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <h2 align="Center" style="color:green;">Acceso a Sistema</h2>
+            
+                <h3 align="Center"></h3>
+                <h2></h2>
+
+                
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consulta_menu' %}' role="button" >Consultas</a>
+                </div><br>
+                
+                <div class="row"> 
+                    <a class="btn btn-default btn-lg " href="{% url 'pedidos:logout_view' %}">Salir</a>
+                </div>
+
+
+                <div style="visibility: hidden">
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consulta_menu' %}' role="button" >Pedidos</a>
+
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consulta_menu' %}' role="button" >Colocaciones</a>
+
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consulta_menu' %}' role="button" >Recepcion</a>
+                </div>
+                </div>
+                <br>
+                
+            
+
+               
+       </div>
+        
+        
+    </div><br>
+    
+
+
+    <div class="row">
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>  
+        
+        
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        
+
+    </div>
+
+</div>
+{% endblock content %}
+ 

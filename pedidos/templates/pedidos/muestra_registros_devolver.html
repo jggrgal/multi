@@ -1,0 +1,130 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+
+<h4>Socio: {{ socio }}__{{ nombre_socio }}</h4>
+<h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
+
+    <div class="table-responsive">
+    	<table id="coloc_detail_table" class='display table table-hover table-bordered  table-condensed clase_tabla'>
+        <thead>
+        	<tr class='success'>
+                <th style="display: none">Pedido</th>
+                <th style="display: none">ProductoNo</th>
+                <th style="display: none">Catalogo</th>
+                <th style="display: none">NoLinea</th>
+                <th style="display: none">Status</th>
+
+        		<th>Suc.</th>
+                <th style="display: none">Socio</th>
+                <th>Fecha llegada</th>
+                <th>Marca</th>
+                <th>Estilo</th>
+                <th>Color</th>
+                <th>Talla</th>
+                <th>Precio</th>
+                <th>Causa devolucion</th>
+                
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for item in registros %}
+                
+        		<tr>
+        			<td style="display: none"> {{item.Pedido}}</td>
+        			<td style="display: none"> {{item.ProductoNo}}</td>
+        			<td style="display: none"> {{item.Catalogo}}</td>
+        			<td style="display: none"> {{item.NoLinea}}</td>
+    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
+    				<td style="display: none"> {{ item.status }}</td>
+                    <td>{{ item.nombre }}</td>
+                    <td style="display: none">{{ item.AsociadoNo }}</td>
+                    {% localize on %}
+                        <td>{{item.fechamvto | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{ item.idmarca }}</td>
+        			<td>{{ item.idestilo }}</td>
+            		<td>{{ item.idcolor }}</td>
+            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+            		<td>{{item.precio}}</td>
+            		<td name="incidencia">
+		                 <select class="select form-control sel_incidencia" id="id_incidencia" {% if marcartodo_nollego %} disabled {%endif%} >
+                            <option value = "Seleccionar" selected="selected">Seleccionar</option>
+		                 	<option value='ERROR TIENDA'>ERROR TIENDA</option>
+                            <option value='INCOMODOS'>INCOMODOS</option>
+                            <option value='MALA CALIDAD'>MALA CALIDAD</option>
+                            <option value='TALLA'>TALLA</option>
+                            <option value='OTRA'>OTRA</option>
+                            
+
+		                 	
+						</select> 
+					</td>
+						
+                    
+            	</tr>
+            {% endfor %}
+        </tbody>    
+    	</table>
+    </div>
+    <div class="row">
+        <!--<div class="col-md-6">
+            <h3>Articulos solicitados: <span id="col_art_encont" class="label label-primary">{{reg_encontrados}}</span></h3>
+        </div>-->
+
+    
+        <div class="col-md-12" >
+           <!-- <h3>Articulos  recibidos: <span id="total_recibidos" class="label label-primary">0</span></h3>
+        </div>-->
+    </div>
+
+    
+    <div class="row">
+        <div class='col-md-3'>
+            
+            <label for="usr_id">Usuario_id:</label> 
+            <input id="usr_id_pedidos_recepcionar" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>
+   
+
+        </div>
+        <div class ='col-md-3'>
+          <form id="imp_venta_form" action="{% url 'pedidos:imprime_credito' %}" method="GET" >
+                        <input id ='id_nuevo_credito' name ='p_num_credito' class="btn-success-btn" type="submit"  value="000000" />
+
+            </form>
+  
+
+
+        </div>
+        <div class='col-md-3'>
+    	    <p align='right'>
+    	        <a class="btn btn-default" href="/pedidos/devolucion_socio" role="button">Regresar</a>
+    	    </p>
+        </div>
+        <div class='col-md-3'>
+    	    <p align='right'>
+    	        <button id='procesar_devolucion_socio' class="btn btn-default" href="#" role="button">Procesar</button>
+    	    </p>
+
+            
+
+        </div>
+    	   
+    </div>
+	
+	<!-- El siguiente script no se definio dentro de pedidos.js ya que este ultimo se carga primero que las variables de manejadas dentro del request de django, asi puest, el script asigna variables recibidas en request  a variables visibles por JQuery -->
+	
+	<script>
+	var reg_encontrados = "{{ reg_encontrados }}";
+	var almacen = "{{ almacen }}";
+	var nueva_fecha_llegada = "{{ nueva_fecha_llegada }}";
+    var marcartodo_nollego ="{{ marcartodo_nollego }}"
+    var cierre = "{{ cierre }}"
+    var socio = "{{ socio }}";
+    var tipoconsulta ="{{ tipoconsulta }}"
+    </script>
+
+
+{% endblock %}	

@@ -1,0 +1,41 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<div class="row">
+   
+
+
+  <div class="col-md-12">  
+    <div class="alert alert-danger" role="alert"><strong>Error: </strong><p>{{ mensaje }}</p></div>   
+
+    <form action={% url 'pedidos:busca_socio' %}>
+    <input type="submit" value="Regresar">
+</form>
+     
+  </div>
+  
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

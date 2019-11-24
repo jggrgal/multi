@@ -1,0 +1,70 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h5> LISTA DE CALZADO QUE LLEGO EN DETALLE </h5><br>
+    <h5>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>id Cierre</th>
+                    <th>Pedido</th>
+                	<th>Fecha_pedido</th>
+                	<th>Proveedor</th>
+                	<th>Marca</th>
+                	<th>Estilo</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    <th>Sucursal</th>
+                    <th>Bodega_encontro</th>
+                    <th>Socio_num</th>
+                    <th>Socio_nombre</th>
+
+            	</tr>
+            	{% for item in lista_pedidos %}
+                    
+            		<tr>
+                        <td>{{ item.id_cierre}}</td>
+                        <td> {{ item.Pedido }}</td>
+                        {% localize on %}
+                            <td>{{item.fechapedido | date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        <td>{{ item.provnom }}</td>
+                        <td>{{ item.idmarca }}</td>
+                        <td>{{ item.idestilo }}</td>
+            			<td>{{ item.idcolor }}</td>
+                		<td>{% if item.talla == 'NE' %} {{item.observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+                        <td>{{item.sucnom}}</td>
+                		<td>{{item.precio}}</td>
+                		<td>{{item.almnom}}</td>
+                        <td>{{item.AsociadoNo}}</td>
+                        <td>{{item.nombre}} {{item.appaterno}} {{item.apmaterno}}</td>
+                       
+                	</tr>
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div>
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/calzadoquellego_detalle" role="button">Regresar</a>
+        </p>
+
+
+   
+</div>
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'reportes/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h3>Creando Cliente... </h3>
+{{ mensaje }}
+{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+<form action="{% url 'reportes:creacliente' %}" method="post">
+	<div class="form-group">
+		{% csrf_token %}
+		{{ form|crispy}}
+		<input type="submit" value="Enviar.." />
+	</div>
+</form>
+{% endblock %}
+<!--
+<label for="nombre">Nombre: </label>
+<input id="nombre" type='edit' name = "nombre:" value="{{cte.nombre}}"/><br>
+<label for="domicilio">Domicilio: </label>
+<input id="domicilio" type='edit' name = "domicilio:"  value="{{cte.domicilio}}"/><br>
+<label for="email">Buzon Electronico:</label>
+<input id ="email" type='email' name = "email:" value="{{cte.email}}"/><br><br>
+<input type='submit' value='Enviar' />
+</form>
+-->

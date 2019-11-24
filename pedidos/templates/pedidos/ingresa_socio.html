@@ -1,0 +1,84 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+    
+{% load staticfiles %}
+
+
+
+
+<!-- El siguiente div es para probar que trabaja javascript, va amarrado con el script msgid al principio de pedidos.js
+
+<div id="msgid">
+</div> -->
+{% block content %}
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-md-6">
+            
+            <div class="panel panel-success">
+                <div class='panel-heading'><h3> {% if tipo == 'P' %} Pedido nuevo {% elif tipo == 'V' %} Venta nueva  {% else %} Documento nuevo {% endif %}</h3></div>
+                    <div class='panel-body'>
+                
+                    <div class="alert alert-warning" role="alert"> {% if not existe_socio  %}
+
+                                    <h5> Numero de socio no registrado !!</h5>
+                            
+                            {% endif %}
+                    </div>
+                            
+                            <form action="{% url 'pedidos:ingresa_socio' tipo %}" method="post">
+                                <div class="form-group">
+                                    {% csrf_token %}
+                                    {{ form | crispy }}<br><br>    
+                                    
+                                    <input  class="btn btn-default "  type="submit" value="Enviar" />
+                                    <a class="btn btn-default btn-default " href="{% url 'pedidos:pedidosgeneral' %}">Salir</a>
+
+                                </div>
+                            </form>
+                                  
+
+                        
+                    </div>
+                  
+            </div>
+                
+
+                <br>
+                
+            
+
+               
+       </div>
+       <div class="col-md-6">
+       </div>
+        
+        
+    </div><br>
+    
+
+
+    <div class="row">
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>  
+        
+        
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        
+
+    </div>
+
+</div>
+{% endblock content %}
+ 

@@ -1,0 +1,35 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  <div class="col-md-3"><h3>Registro de Socio en Sitio Web</h3></div>
+  <div class="col-md-3">
+ 
+  Numero de Socio: <input type="text" name="nsocio"><br>
+
+  </div>
+  <div class="col-md-3"></div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

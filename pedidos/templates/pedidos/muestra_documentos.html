@@ -1,0 +1,94 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class=row>
+    <div class='col-md-4'>
+         <h4 class='success'>CONSULTA DE DOCUMENTOS</h4>  
+
+       
+    </div>
+    <div class='col-md-4'>
+    </div>
+    <div class='col-md-4'>
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>   
+        
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+    	<!--<table id="lista_documentos" class='display table table-hover table-bordered table-condensed'>-->
+        <table id="lista_documentos" class='table'>
+        
+            <thead>
+        	<tr class='success'>
+        		<th>Documento Num</th>
+                <th>Tipo</th>
+                 <th>Fecha</th>
+                <th>Socio Num</th>
+                <th>Nombre</th>
+               
+            	
+            	<th>Concepto</th>
+            	<th>Monto</th>
+                <th>Venta</th>
+                <th>Saldo / Credito aplic</th>
+                <th>Cargos</th>
+                <th>Descuento</th>
+                
+                <th> Cancel ?</th>
+                <th> Imprimir </th>
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for item in documentos %}
+                
+        		<tr>
+                    <td><a href="{% url 'pedidos:detalle_documento' item.NoDocto %}"> {{item.NoDocto}}</a> </td>
+                    <td>{{item.TipoDeDocumento}}</td>
+                    {% localize on %}
+                        <td>{{item.FechaCreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{item.asociado}}</td>
+                    <td>{{item.nombre_socio}}</td>
+                    
+                   
+        			<td>{{ item.concepto }}</td>
+            		<td>{{ item.monto }}</td>
+            		<td>{{item.venta}}</td>
+                    <td>{{item.saldo}}</td>
+                    <td>{{item.comisiones}}</td>
+                    <td>{{item.DescuentoAplicado}}</td>
+                  
+                    <td><p align="left">
+                          <a class="btn btn-danger btn-sm " href="/pedidos/cancelar_documento/{{ item.NoDocto }}" role="button" {% if  item.Cancelado  %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
+                        </p></td>
+                    <td><p align="left">
+                          <form id="imp_venta_form"  role="button" {% if  item.TipoDeDocumento == 'Remision'  %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  item.TipoDeDocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{item.NoDocto}} />
+                            </form>
+                          <!--
+                          <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET">class="btn btn-success btn-sm" 
+                                <input id ='idventa' name ='p_num_venta' class=btn-success-btn-lg" type="submit"  value="000000" />
+                
+
+                            </form><br>-->
+        
+
+
+
+                        </p></td>
+                    
+            	</tr>
+            {% endfor %}
+        </tbody>
+    	</table>
+    </div>
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/documentos" role="button">Salir</a>
+    </p>
+
+
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+<h5>{{mensaje}}</h5>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-success">
+        <div class='panel-heading'><h2 align='left'>Busqueda de documentos<h2></div>
+        <div class='panel-body'>
+            
+           
+             
+            <form id="documentos_form" action="{% url 'pedidos:documentos' %}" method="POST">
+                <div class="alert alert-danger" role="alert">
+              
+            {{form.non_field_errors}}
+            </div>
+
+                <div class="form-inline" >
+                    {% csrf_token %}
+                  
+                    <div class="form-group" >
+                        {{ form.documento_num | as_crispy_field }}
+                        {{form.tipo_movimiento | as_crispy_field }}
+                    </div>
+                    
+                    {{form.fechainicial | as_crispy_field}}
+                    {{form.fechafinal | as_crispy_field }}
+
+                    {{form.socio_num | as_crispy_field }}
+                    
+                    <!--<a class="btn btn-success btn-lg btn-space" id="btn_trae_colocaciones" href="#" role="button"> Traer pedidos...</a>
+                    <br> 
+                    <input  class="btn btn-default" style="display: none;  type="submit" value="Enviar" /> -->  
+               
+                  
+                    <input  class="btn btn-default" id="btn_documentos" type="submit" value="Enviar" /> -
+                
+
+                    
+                </div>
+            </form>
+
+        </div>
+       
+
+    </div>  
+    <a id="crearpedidogeneral" class="btn btn-success " href="{% url 'pedidos:ingresa_socio' tipo %}" role="button"><span class="glyphicon glyphicon-plus"></span> Crear </a>
+  </div>
+  <div >
+      <div class="table-responsive">
+          <table id="TablaColocaciones" class='table table-hover table-bordered table-condensed'>
+            <h6>
+              <secondary>
+                <thead>
+                  <tr class='warning'>
+
+                
+                    <th>Suc.</th>
+                    <th>Socio</th>
+                    <th>Fecha Pedido</th>
+                    <th>Marca</th>
+                    <th>Estilo</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    <th>Fecha-SC</th>
+                    <th>O. compra</th>
+                    <th>Encontrado</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <!--<th><input class='check_all' type='checkbox' onclick="select_all()"/></th>--> 
+                  
+
+                  </tr>
+                </thead>
+              <div id="searchResults">
+                <tbody id="CuerpoColocaciones">
+                  <tr>
+                  
+
+                  </tr> 
+
+
+                </tbody> 
+              </div> 
+
+              </secondary>
+            </h6>
+          </table>
+        </div>
+
+    
+    
+  </div>
+  <div class="col-md-4">
+    
+  </div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

@@ -1,0 +1,97 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+
+<div class="row">
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-12">
+    <div class="panel panel-success">
+        <div class='panel-heading'><h4 align='left'>Edicion de documento<h4></div>
+        <div class='panel-body'>
+              
+            {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
+
+            
+            <form action="{% url 'pedidos:detalle_documento' nodocto %}" method="POST">
+                <div class="alert alert-danger" role="alert">
+              
+                    {{form.non_field_errors}}
+                </div>
+                
+               
+                <div class="form-group" >
+                    {% csrf_token %}
+
+                   
+                         
+                        {{ form.nodocto|as_crispy_field }} 
+                         
+                  
+                    <div class="form-group">
+                    {{form.tipodedocumento | as_crispy_field }}
+                    
+                        
+                       {% if ventadecatalogo == 'Si' and tipodedocumento = 'Remision' %}
+                            <h5> * Venta de catalogo * </h5>
+                                               
+                        {% endif %} 
+                    </div>
+                    
+
+                    {{ form.asociado | as_crispy_field }}
+                    {{ form.concepto | as_crispy_field }}
+                    {{ form.monto  | as_crispy_field }}
+                    {{ form.bloquearnotacredito | as_crispy_field }}
+
+
+                   <!-- {% if tipodedocumento == 'Credito' %}
+                        {{ form.bloquearnotacredito | as_crispy_field }}
+                    {% endif %}-->
+                    
+                    
+                
+                    <input  id='btn_genera_rpte_cotejo' class="btn btn-default"  type="submit" value="Enviar" />
+                
+
+                    
+                </div>
+             
+            </form>
+
+        </div><br>
+ 
+  </div>
+        <div class="table-responsive">
+                  
+                            <table  class="table table-condensed  thead-default table-hover table-bordered table-inverse ">
+                              <tr>
+                                <th>id</th>
+                                <th> Referencia</th>
+                                <th> Fecha Coloc. </th>
+                                <th> Hora Colocacion </th> 
+                                <th> Tot. Articulos</th>
+                                <th> Importe </th>
+                                <th> Nombre </th>
+                                  
+                              </tr>
+
+                            
+                            </table>
+                    </div>
+        </div>
+
+
+
+
+
+
+  <script>
+    var is_staff = "{{ is_staff }}";
+  </script>  
+
+
+{% endblock content %}

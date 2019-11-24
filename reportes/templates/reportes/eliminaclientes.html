@@ -1,0 +1,19 @@
+{% extends 'reportes/base.html' %}
+
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	<span class="sr-only">Error:</span>
+	{{ mensaje }}
+</div>
+
+<form action="{% url 'reportes:commitdelclientes' %}" method="post">
+	{% csrf_token %}
+	<div align = "Center">{% load render_table from django_tables2 %}</div>
+	<div align = "Center">{% render_table cl %}</div>
+	
+    <div align = "Right"><input type="submit" class="btn btn-default" value="Confirmar"/></div>
+</form>
+<!--<a class="btn btn-default" href="{% url 'reportes:listaclientes' %}" role="button">Regresar</a> -->
+{% endblock content %}

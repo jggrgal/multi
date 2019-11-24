@@ -1,0 +1,54 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  <div class="col-md-3"><h3>Catalgo de Socios</h3></div>
+  <div class="col-md-3"></div>
+  <div class="col-md-3"></div>
+</div>
+    <div class="table-responsive">
+        
+    	<table class='table table-hover table-bordered table-condensed'>
+        	<tr class='success'>
+        		<th>id</th>
+            	<th>Nombre</th>
+            	<th>Ap Paterno</th>
+            	<th>Ap Materno</th>
+            	<th>Telefono</th>
+              
+        	</tr>
+        	{% for item in asociados %}
+        		<tr>
+        			<td>{{ item.asociadono }}</td>
+        			<td>{{ item.nombre }}</td>
+            		<td>{{ item.appaterno }}</td>
+            		<td>{{item.apmaterno}}</td>
+            		<td>{{item.telefono1}}</td>
+                    
+            	</tr>
+            {% endfor %}
+            
+    	</table>
+    </div>
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

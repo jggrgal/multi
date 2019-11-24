@@ -1,0 +1,24 @@
+<!--{% extends 'pedidos/base.html' %}-->
+<script src="../../dist/js/bootstrap.min.js"></script>
+    <script src="../../assets/js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script
+
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h3> Error en autenticacion... </h3>
+{{ mensaje }}
+<a href="/pedidos/acceso/">Ir acceso nuevamente</a>
+{% endblock %}
+<!--
+<label for="nombre">Nombre: </label>
+<input id="nombre" type='edit' name = "nombre:" value="{{cte.nombre}}"/><br>
+<label for="domicilio">Domicilio: </label>
+<input id="domicilio" type='edit' name = "domicilio:"  value="{{cte.domicilio}}"/><br>
+<label for="email">Buzon Electronico:</label>
+<input id ="email" type='email' name = "email:" value="{{cte.email}}"/><br><br>
+<input type='submit' value='Enviar' />
+</form>
+-->

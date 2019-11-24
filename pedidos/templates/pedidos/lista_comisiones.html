@@ -1,0 +1,70 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+{% load humanize %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h5> INGRESOS POR COMISIONES ( {{sucursal_nombre }} )</h5><br>
+    
+
+    <h5>{{mensaje}} {% if TotalRegistros > 0 %} {{TotalRegistros}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>Documento Num.</th>
+                    <th>Remision Num.</th>
+                	<th>Fecha</th>
+                    <th>Socio</th>
+                	<th>Nombre</th>
+                	<th>Monto</th>
+                    
+                    
+                    
+
+            	</tr>
+            	{% for item in registros_comisiones %}
+                    
+            		<tr>
+                        <td>{{ item.NoDocto}}</td>
+                        <td> {{ item.Consecutivo }}</td>
+                        {% localize on %}
+                            <td>{{item.FechaCreacion| date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        <td>{{ item.Asociado }}</td>
+                        <td>{{item.Nombre}} {{item.ApPaterno}} {{item.ApMaterno}}</td>
+                        <td>{{ item.Monto }}</td>
+                                           
+                	</tr>
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div><br>
+
+        <div>
+             <h5 align='right'> Total Comisiones: {{TotalVtaBruta | intcomma }} </h5>
+            
+        </div><br> 
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/consultacomisiones" role="button">Regresar</a>
+        </p>
+         
+            
+
+
+
+   
+</div>
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

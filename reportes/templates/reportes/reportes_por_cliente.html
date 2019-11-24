@@ -1,0 +1,7 @@
+<h1>REPORTES DE {{cl.nombre}}</h1><br>
+<ul>
+<h5><td>DESCRIPCION</td></H5>
+{% for x in re %}
+	<li>{{x.id}} {{x.descripcion}}</li>
+{% endfor %}
+</ul>

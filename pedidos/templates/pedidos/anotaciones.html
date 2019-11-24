@@ -1,0 +1,23 @@
+              $('#searchResults').show();
+
+                                    var len = data.length;
+                                    for (var i = 0; i< len; i++) {
+
+                                    var id = data[i].id;
+                                    var prov = data[i].id_prov;
+                                    var temp  = data[i].id_temp;
+                                    var est  = data[i].id_est;
+                                    var cat  = data[i].id_cat;
+                                    var pag  = data[i]].id_pag;
+                                    var mar = data[i].id_mar;
+                                    var col = data[i].id_col;
+                                    var talla = data[i].id_talla;
+                                    var precio = data[i].id_precio;
+
+                                    $("#cesto").append("<tr><td>"+ id +"</td><td>"+ pag +"</td><td>"+ est +"</td><td>"+ mar +"</td><td>"+ col +"</td><td>"+ talla +"</td><td>"+ precio +"</td></td>"+<td>Eliminar</td></tr>)
+
+
+
+# para remover un renglo de tabla de datos con jquery el renglon debera tener un id:
+
+$('#myTableRow').remove();                                

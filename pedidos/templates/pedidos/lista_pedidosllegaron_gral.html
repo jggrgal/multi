@@ -1,0 +1,52 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+
+<h3> LISTA DE CALZADO QUE LLEGO GRAL </h3><br>
+<h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
+
+    <div class="table-responsive-sm">
+    	<table class='table table-hover table-bordered '>
+        	<tr class='success'>
+        		<th>id Cierre</th>
+                <th>Fecha_colocacion</th>
+            	<th>Fecha_cierre</th>
+            	<th>Fecha_tentativa</th>
+            	<th>Proveedor</th>
+            	<th>Almacen</th>
+                <th>No_pedido</th>
+                <th>No_piezas</th>
+                <th>Paqueteria</th>
+                <th>No_guia</th>
+        	</tr>
+        	{% for item in pedidos %}
+                
+        		<tr>
+                    <td>{{ item.pedido }}</td>
+                    {% localize on %}
+                        <td>{{item.fechapedido | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{ item.idmarca }}</td>
+        			<td>{{ item.idestilo }}</td>
+            		<td>{{ item.idcolor }}</td>
+            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+            		<td>{{item.precio}}</td>
+                    <td>{{item.status}}</td>
+                    {% localize on %}
+                        <td>{% if "1901" in item.FechaTentativaLLegada %} NO ESP.{% endif %}
+                            {{item.FechaTentativallegada | date:'d/M/Y'  }}</td>
+                    {% endlocalize %}
+            	</tr>
+            {% endfor %}
+            
+    	</table>
+    </div>
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/con_pedidos_por_socio_status" role="button">Salir</a>
+    </p>
+
+
+{% endblock %}

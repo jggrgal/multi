@@ -1,0 +1,111 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+{% load humanize %}
+
+{% load l10n %}
+<div class="row">
+<!--<div class="col-md-4"> -->
+    <h5> DETALLE DE LA VENTA BRUTA DEL PROVEEDOR( {{ proveedor }} )</h5> <!-- <h6>  Entre el 
+    {% localize on %}    
+                 {{fechainicial | date:'d/M/Y'}}
+    {% endlocalize %} y el
+             {% localize on %}
+                            {{fechafinal | date:'d/M/Y'}}
+             {% endlocalize %}
+    </h6><br><br>-->
+    
+    
+
+    <h5> </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table id="listapedidosgeneral" class='table table-hover table-bordered table-condensed'>
+                <thead>
+            	<tr class='success'>
+
+                    <th>Remision No </th>
+                    <th>Asociado No</th>
+                	<th>Fecha Pedido</th>
+                    <th>Hora Pedido</th>
+                    <th>Marca</th>
+                    <th>Estilo</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    
+                                
+               
+            	</tr>
+                </thead>
+                <tbody>
+                
+            	{% for vta in vtasresult %}
+
+                    {% if  vta.ventas != 0 or vta.venta_FD != 0 or  vta.ventabruta  or vta.ventabruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.vtaneta != 0  %}
+            		<tr>
+                        <td> {{ vta.remision_num }}</td>
+                        <td>{{ vta.asociadono }}</td>
+                        <td>{% localize on %}
+                                {{ vta.fechapedido | date:'d/M/Y' }}
+                            {% endlocalize %}
+                        </td>
+                        <td> {% localize on %}
+                                {{ vta.horapedido | time }}
+                            {% endlocalize %}
+                        </td>
+                        <td>{{ vta.idmarca }}</td>
+                        <td>{{ vta.idestilo }}</td>
+                        <td>{{ vta.idcolor }}</td>
+                        <td>{% if vta.talla == 'NE' %} {{vta.observaciones}} {% else %} {{vta.talla}} {% endif %}</td>
+                        <td>{{ vta.preciooriginal | intcomma }} </td>
+                        
+                                                                                         
+                	</tr>
+                    {% endif %}
+                
+                {% endfor %}
+                    <!-- El siguiente renglon se usa para los totales
+                         por eso va fuera del for  -->
+                    
+                    <tr>
+                        <td>Total: </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>{{ totalvta | intcomma }} </td>
+
+                    </tr>
+
+                </tbody>
+                                
+                
+        	</table>
+           
+        </div><br>
+        <div>
+            
+        </div>        
+
+        <!-- <p align='right'>
+            <a class="btn btn-default" href="/pedidos/consultavtasxproveedor" role="button">Regresar</a>
+        </p> -->
+        
+            
+
+
+
+   
+<!-- </div> -->
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

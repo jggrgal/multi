@@ -1,0 +1,191 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<script>
+$(document).ready(function() {
+       
+  window.addEventListener("beforeunload", function (e) {
+    var confirmationMessage = "\o/";
+
+    e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+    return confirmationMessage; 
+
+  //alert("Alerta sobre uracan")             // Gecko, WebKit, Chrome <34
+  });
+
+  
+  
+
+});
+
+
+
+</script>
+
+
+
+<div class="row">
+  <!--<div class="col-md-4"></div> -->
+  <div class="col-md-4">
+
+  	<div class="panel panel-primary">
+  		<div class='panel-heading'>
+        <h3 class="panel-title">Elegir Articulo <h3>
+        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  
+      </div>
+  		<div class='panel-body'>
+  	
+  			 
+		  	{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+
+          </strong>	
+        <form id="PedidosForm" action="{% url 'pedidos:crea_pedidos' %}" method="post" class="form-inline">
+
+				  <div class="form-group">
+					 {% csrf_token %}
+            {{ form | crispy }}
+            <input  style="display: none;" class="btn btn-lg btn-primary btn-block" type="submit" value="Agregar" />
+				  </div>
+          <input id="grabar" class="btn btn-primary" type="button" value="Elegir" />
+          <div id="mensaje">
+          </div>
+			 </form>
+		  </div>
+		</div>	
+	
+  </div>
+  <div class="col-md-8">
+
+    
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Articulos elegidos</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table id="TablaCarrito" class='table table-hover table-bordered table-condensed'>
+            <h6>
+              <secondary>
+                <thead>
+                  <tr class='success'>
+
+                
+                    <th>id.</th>
+                    <th>Pagina</th>
+                    <th>Estilo</th>
+                    <th>Marca</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    <th></th>
+                    <!--<th><input class='check_all' type='checkbox' onclick="select_all()"/></th>--> 
+                  
+
+                  </tr>
+                </thead>
+              <div id="searchResults">
+                <tbody id="cesto">
+                  <tr>
+                  
+
+                  </tr> 
+
+
+                </tbody> 
+              </div> 
+
+              </secondary>
+            </h6>
+          </table>
+        </div>
+
+        
+                       
+        
+        <br>
+
+       
+        
+        
+        
+        
+    </div>
+
+          
+        
+          
+        
+
+
+  </div>
+  
+  <div class ="col-md-4">
+
+    <div ><h3>Artículos: <span id="contador" class="label label-primary">0</span></h3></div>
+        
+        <!--<p>Total de artículos :</p><div id="contador">0</div>-->
+        <!--<p>Monto Total:</p><div id="grantotal">0</div>-->
+  </div>
+
+  <div class="col-md-4" align="right">
+    <div ><h3>Total: $ <span id="grantotal" class="label label-primary">0</span></h3></div>
+  </div>
+
+  <br><br><br>
+  <div class="col-md-6">
+      
+    <label for="sucursal">Sucursal donde recogerá su pedido:</label>       <select id="sucursal" class="form-control">
+          <option value="0">Elija sucursal...</option>
+          <option value="1">LA FE</option>
+          <option value="2">DR. MIER</option>
+          <option value="3">ANAHUAC</option>
+            
+    </select>
+  </div>
+   <div class="col-md-2" align="left">
+       
+   </div>
+
+  
+  
+  <br><br><br><br>
+
+
+
+    
+  <div class="col-md-4">
+    <p align="left">
+      <a class="btn btn-default " href="/pedidos/busca_pedidos" role="button">Salir</a>
+    </p>
+  </div>
+
+  <div class="col-md-4">
+    <p align="right">
+      <button id='procesar' type="button" class="btn btn-primary "> Procesar</button>
+    </p>
+  </div>
+    
+
+  <br><br><br><br>
+  <div class="col-md-8">
+    <p class="bg-info"> Si al hacer un pedido tiene problemas, favor de eliminar el historial de navegación.
+
+      <a href="https://support.google.com/chrome/answer/2392709?co=GENIE.Platform%3DAndroid&hl=es-419">Más información...</a>`  
+    </p>
+                        
+        
+ 
+      
+  </div>
+  
+</div>
+
+
+
+
+
+
+{% endblock %}

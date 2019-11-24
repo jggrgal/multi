@@ -1,0 +1,65 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+{% load humanize %}
+
+{% load l10n %}
+<div class="row">
+<!--<div class="col-md-4"> -->
+    <h5> DESGLOSE DE DESCUENTOS POR PROVEEDOR  ( {{sucursal_nombre }} )</h5>  <h6> Entre el {% localize on %}
+                            {{fechainicial | date:'d/M/Y'}}
+             {% endlocalize %} y el
+             {% localize on %}
+                            {{fechafinal | date:'d/M/Y'}}
+             {% endlocalize %}
+    </h6><br><br>
+    
+
+    <h5>{{mensaje}} {% if TotalRegistros > 0 %} {{TotalRegistros}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+                    <th>Proveedor.</th>
+                	<th>Dscto </th>
+                    <th>Integracion respecto al total </th>
+                
+               
+            	</tr>
+            	{% for item in registros_venta %}
+                    {% if item.dscto != 0 %}
+            		<tr>
+                        <td> {{ item.razonsocial }}</td>
+                        <td>{{ item.dscto | intcomma }}</td>
+                        <td>{% widthratio item.dscto Totaldscto 100 %} %</td>
+                                                                                         
+                	</tr>
+                    {% endif %}
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div><br>
+        <div>
+            <p> Descuento total: {{ Totaldscto | intcomma }}
+        </div>        
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/consultadsctos" role="button">Regresar</a>
+        </p>
+        
+            
+
+
+
+   
+<!-- </div> -->
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+    
+{% load staticfiles %}
+<style>
+.button {
+  background-color: #4CAF50;
+  border: 12px;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  ​
+}
+
+</style>
+
+
+<!-- El siguiente div es para probar que trabaja javascript, va amarrado con el script msgid al principio de pedidos.js
+
+<div id="msgid">
+</div> -->
+{% block content %}
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-md-12 solid">
+            
+
+            <div class="a" align="center">
+                    <img src="{% static 'pedidos/logomultimarcaslaredo.jpg' %}" alt="logo" height="400" width="400">
+            </div> 
+            
+            <h1 align="Center" style="color:#d4ab01;">" Todo en un solo lugar ! "</h1><br>
+
+
+
+            <div  align="Center">
+                
+                <div class="row">
+                    <a class="button"  href= '{% url 'pedidos:acceso' %}' role="button" >Pedidos</a>
+                    <!--<a class="btn btn-success" href="{% url 'pedidos:logout_view' %}">Salir</a>-->
+                </div>
+            </div>
+
+               
+       </div>
+        
+
+</div>
+{% endblock content %}
+ 

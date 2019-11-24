@@ -1,0 +1,82 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+
+<div class="row">
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-8">
+    <div class="panel panel-success">
+        <div class='panel-heading'><h4 align='left'>Reporte de cotejo, selección del cierre a reportar<h4></div>
+        <div class='panel-body'>
+              
+            {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
+
+          
+            <form action="{% url 'pedidos:seleccion_cierre_rpte_cotejo' %}" method="POST">
+               <div class="alert alert-danger" role="alert">
+              
+                    {{form.non_field_errors}}
+                </div>
+               
+                <div class="form-inline" >
+                    {% csrf_token %}
+
+                  
+                    <div class="form-group" >
+                        <label>Proveedor:            </label>
+                        {{form.proveedor_rpte_cotejo  }}
+                    </div>
+                    <div class="form-group">
+                      <label>Cierre:                </label>
+                      {{form.cierre_rpte_cotejo }}
+                    </div>
+                    
+                
+                    <input  id='btn_genera_rpte_cotejo' class="btn btn-default"  type="submit" value="Enviar" />
+                
+
+                    
+                </div>
+             
+            </form>
+
+        </div><br>
+ 
+  </div>
+        <h4>Lista de Cierres: </h4>
+        <div class="table-responsive">
+                  
+                            <table  class="table table-condensed  thead-default table-hover table-bordered table-inverse ">
+                              <tr>
+                                <th>id</th>
+                                <th> Referencia</th>
+                                <th> Fecha Cierre </th>
+                                <th> Hora Cierre </th>
+                                <th> Fecha llegada </th> 
+                                <th> Tot. Articulos</th>
+                                <th> Importe </th>
+                                <th> Nombre </th>
+                                  
+                              </tr>
+
+                            
+                            </table>
+                    </div>
+        </div>
+
+
+
+
+  <div class="col-md-4"></div>
+  </div>
+
+  <script>
+    var is_staff = "{{ is_staff }}";
+  </script>  
+
+
+{% endblock content %}

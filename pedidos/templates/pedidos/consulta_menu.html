@@ -1,0 +1,87 @@
+{% extends 'pedidos/base.html' %}
+    
+{% load staticfiles %}
+
+
+
+
+<!-- El siguiente div es para probar que trabaja javascript, va amarrado con el script msgid al principio de pedidos.js
+
+<div id="msgid">
+</div> -->
+{% block content %}
+<div class="container">
+   
+<rule>
+    <h1 align="Center" style="font-family:times new,roman;font-size:64px;font-style:italic;" color="green">Sistema de pedidos</h1>
+<!--
+    <div class="row" >
+        <div class="col-md-4">
+            <h2 align="Center" style="color:green;">Consultas</h2>
+
+                <h4> {{ sucursal_actual }}            
+                <h3 align="Center"></h3>
+                <h2></h2>
+
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:calzadollego_gral' %}' role="button" >Calzado que llego (Global)</a>
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:calzadoquellego_detalle' %}' role="button" >Calzado que llego (detallado)</a>
+
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:con_pedidos_por_socio_status' %}' role="button" >Pedidos por socio y status</a>
+
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consultacolocaciones' %}' role="button" >Colocaciones</a>
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consultaventas' %}' role="button" >Ventas General</a>
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:consultacomisiones' %}' role="button" >Ingresos por Comisiones</a>
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:buscapedidosposfecha' %}' role="button" >Pedidos por Socio</a>
+                </div><br>
+                <div class="row">
+                    <a class="btn btn-success btn-lg btn-block" href= '{% url 'pedidos:pedidosgeneral' %}' role="button" >Pedidos</a>
+                </div><br>
+
+                <div class="row"> 
+                    <a class="btn btn-default btn-lg " href="{% url 'pedidos:entrada_sistema' %}"><span class="glyphicon glyphicon-arrow-left"></span> Regresar</a>
+                 </div>
+            
+
+               
+       </div>
+        
+        
+    </div><br>
+    
+
+
+    <div class="row">
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-1"></div>  
+        
+        
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        
+
+    </div>
+-->
+</div>
+{% endblock content %}
+ 
