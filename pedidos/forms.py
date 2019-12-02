@@ -1396,16 +1396,16 @@ class CreaDocumentoForm(forms.Form):
 
 	lista_temporadas = ((0,'Seleccione'),(1,'Primavera/Verano'),(2,'Otono/Invierno')) # Estos valores que toma la lista, son solamente default; los valores reales de este campo son dinamicos y se crean via jquery
 
-	tipodedocumento = forms.ChoiceField(label="Tipo",widget=forms.Select(),choices=lista_tipos_movimiento,initial='Remision',required=True)
-	ventadecatalogo = forms.ChoiceField(label="Venta de catalogo",widget=forms.Select(),choices=bloquear_opt, initial='0',required=False)
-	proveedor = forms.ChoiceField(widget=forms.Select(),label='Proveedor',initial=0,required=False)
-	anio =  forms.IntegerField(label='Año',initial=2018,required=False)
-	temporada = forms.ChoiceField(widget=forms.Select(),label='Temporada',choices = lista_temporadas,initial=0,required=False)
+	doc_tipodedocumento = forms.ChoiceField(label="Tipo",widget=forms.Select(),choices=lista_tipos_movimiento,initial='Remision',required=True)
+	doc_ventadecatalogo = forms.ChoiceField(label="Venta de catalogo",widget=forms.Select(),choices=bloquear_opt, initial='0',required=False)
+	doc_proveedor = forms.ChoiceField(widget=forms.Select(),label='Proveedor',initial=0,required=False)
+	doc_anio =  forms.IntegerField(label='Año',initial=2018,required=False)
+	doc_temporada = forms.ChoiceField(widget=forms.Select(),label='Temporada',choices = lista_temporadas,initial=0,required=False)
 
 
-	asociado= forms.IntegerField(label='Socio',initial=0,required=True)
-	concepto = forms.CharField(label="Concepto",initial='',required=True)
-	monto = forms.FloatField(label='Monto',initial=0,required=True)
+	doc_asociado= forms.IntegerField(label='Socio',initial=0,required=True)
+	doc_concepto = forms.CharField(label="Concepto",initial='',required=True)
+	doc_monto = forms.FloatField(label='Monto',initial=0,required=True)
 
 
 	error_messages = {'asociado_inv':'El numero de socio ingresado debe ser mayor a 0 !',\
@@ -1421,7 +1421,7 @@ class CreaDocumentoForm(forms.Form):
 		lprov = lista_Proveedores() # genera una lista de proveedores para ser asignada al combo.
 		super(CreaDocumentoForm, self).__init__(*args,**kwargs)
 
-		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+		self.fields['doc_proveedor'] = forms.ChoiceField(widget=forms.Select(),
 			label='Proveedor',choices = lprov,initial=0,required='True' )
 
 		return
@@ -1432,11 +1432,11 @@ class CreaDocumentoForm(forms.Form):
 		cleaned_data = super(CreaDocumentoForm, self).clean()
 
 		
-		tipodedocumento = cleaned_data.get('tipodedocumento')
-		ventadecatalogo = cleaned_data.get('ventadecatalogo')
-		asociado = cleaned_data.get('asociado')
-		concepto =  cleaned_data.get('concepto')
-		monto =  cleaned_data.get('monto')
+		tipodedocumento = cleaned_data.get('doc_tipodedocumento')
+		ventadecatalogo = cleaned_data.get('doc_ventadecatalogo')
+		asociado = cleaned_data.get('doc_asociado')
+		concepto =  cleaned_data.get('doc_concepto')
+		monto =  cleaned_data.get('doc_monto')
 
 		if asociado < 1:
 			raise forms.ValidationError(self.error_messages['asociado_inv'],code='asociado_inv')
@@ -1570,5 +1570,96 @@ class Crea_devolucionForm(forms.Form):
 		if tipoconsulta < '1':
 
 			raise forms.ValidationError(self.error_messages['error_tipoconsulta'],code='error_tipoconsulta')
+
+		return self.cleaned_data
+
+
+class Genera_BaseBonoForm(forms.Form):
+
+	proveedores = {}
+
+	
+
+	
+	def __init__(self,*args,**kwargs):
+
+		
+		super(Genera_BaseBonoForm, self).__init__(*args,**kwargs)
+		
+
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+
+		self.fields['porcentaje'] =forms.IntegerField(label='Porcentaje sobre Vta Bruta',required=True)
+		self.fields['venta_minima'] = forms.DecimalField(label='Venta minima para bono')
+
+
+
+		'''error_messages = {
+		
+		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+		'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+		}'''
+
+
+
+
+
+
+
+
+		t = datetime.now
+		#t.strftime('%m/%d/%Y')
+
+		'''tipoconsulta  = forms.ChoiceField(widget=forms.Select(),
+				label='Tipo de Consulta',choices = opcion_consulta,initial='1',required='True' )
+		# Prepara el campo para utilizar datepicker
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		
+		fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)'''
+		
+	error_messages = {
+	
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+	'error_sucursal': 'Seleccione un proveedor..!',
+	'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
+	}
+
+	def clean(self):
+
+		
+		cleaned_data = super(Genera_BaseBonoForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		porcentaje = cleaned_data.get('porcentaje')
+		venta_minima = cleaned_data.get('venta_minima')
+
+
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		'''if proveedor < '1':
+
+			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
+
+		if porcentaje<=0:
+				raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
 
 		return self.cleaned_data

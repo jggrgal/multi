@@ -39,14 +39,14 @@
                 <th>Suc.</th>
                 <th>Socio</th>
                 <th>Fecha Pedido</th>
-                <th>Marca</th>
+                <th>Marca_______</th>
                 <th>Estilo</th>
                 <th>Color</th>
                 <th>Talla</th>
                 <th>Precio</th>
                 <th>Fecha-SC</th>
-                <th>O. compra</th>
-                <th>Encontrado</th>
+                <th>Opcion</th>
+                <th>Enco</th>
                 <th>2</th>
                 <th>3</th>
                 <th>4</th>
@@ -55,8 +55,7 @@
                 <th>7</th>
                 <th>8</th>
                 <th>9</th>
-                <th>Nombre_Socio</th>
-                <th>Notas</th>
+                <th>Nombre_Socio
 
         	</tr>
         </thead>
@@ -84,16 +83,16 @@
                     <td {% if item.encon_obser == 'Cancelado' %}  bgcolor="#f3c82a" {% endif %} >{{ item.idSucursal }}</td>
                     <td>{{ item.AsociadoNo }}</td>
                     {% localize on %}
-                        <td>{{item.FechaPedido | date:'d/M/Y'}}</td>
+                        <td>{{item.FechaPedido | date:'d/m/y'|slice:":8"}}</td>
                     {% endlocalize %}
-                    <td>{{ item.idmarca }}</td>
-        			<td>{{ item.idestilo }}</td>
-            		<td>{{ item.idcolor }}</td>
+                    <td>{{ item.idmarca|slice:":10" }}</td>
+        			<td>{{ item.idestilo|slice:":18" }}</td>
+            		<td>{{ item.idcolor|slice:":6" }}</td>
             		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
             		<td>{{item.precio}}</td>
             		{% localize on %}
                         <td>{% if "1901" in item.FechaMaximaEntrega %} NO ESP.{% endif %}
-                            {{item.FechaMaximaEntrega | date:'d/M/Y'  }}</td>
+                            {{item.FechaMaximaEntrega | date:'d/m/y'  }}</td>
                     {% endlocalize %}
                     <td>{{item.OpcionCompra}}</td>
                     <td name="encontrado">
@@ -122,8 +121,8 @@
 					<td>{{ item.7 }}</td>	
 					<td>{{ item.8 }}</td>
 					<td>{{ item.9 }}</td>
-                    <td>{{item.nombre}} {{item.ApPaterno}} {{item.ApMaterno}}</td>
-					<td name="notas"><input type="text" id="notas" rows="2" columns="50" value="{{ item.notas }}" ></td>
+                    <td>{{item.nombre_socio|slice:":16"}}</td>
+					<td name="notas"><input type="text" id="notas" style="width:100px" value="{{ item.notas }}" ></td>
                     
             	</tr>
                     

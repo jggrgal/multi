@@ -30,6 +30,13 @@
        $("#procesar_ventas").prop('disabled', true);
 
 
+        // deshabilita botones de creacion de documentos
+
+       $("#id_doc_temporada").prop('disabled', true);
+       $("#id_doc_anio").prop('disabled', true);
+       $("#id_doc_proveedor").prop('disabled', true);
+
+
       $('#busca_socio_javascr tbody').on('click', function() {
       var $row = $(this).closest('tr');  
       var x = $(".campo").eq(1).text();
@@ -3028,6 +3035,29 @@ $('#procesar_ventas').click(function(e){
              
           }
       });
+
+     $('#id_doc_ventadecatalogo').change(function(){ //1
+
+
+                        if ($('#id_doc_ventadecatalogo').val() != '0') { 
+
+
+                            $("#id_doc_temporada").prop('disabled', false);
+                            $("#id_doc_anio").prop('disabled', false);
+                            $("#id_doc_proveedor").prop('disabled', false);
+                          
+                          }
+                        else {
+                            $("#id_doc_temporada").prop('disabled', true);
+                            $("#id_doc_anio").prop('disabled', true);
+                            $("#id_doc_proveedor").prop('disabled', true);
+                          
+                                  // alert("Devolucion grabada con éxito !.");
+                          }; 
+
+
+
+     });
 
 
                             
