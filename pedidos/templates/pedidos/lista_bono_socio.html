@@ -6,7 +6,7 @@
 {% load l10n %}
 <div class="row">
 <!--<div class="col-md-4"> -->
-    <h5> RESUMEN DE VENTAS POR SOCIO </h5>  <h6> Entre el {% localize on %}
+    <h5>BONOS DE CONSTANCIA  </h5>  <h6> Del {% localize on %}
                             {{fechainicial | date:'d/M/Y'}}
              {% endlocalize %} y el
              {% localize on %}
@@ -22,7 +22,8 @@
         	<table class='table table-hover table-bordered table-condensed'>
                 <thead>
             	<tr class='success'>
-                    <th>Socio.</th>
+                    <th>Socio num.</th>
+                    <th>Nombre</th>
                 	<th>Venta Bruta</th>
                     <th>Descuentos</th>
                     <th>Devoluciones</th>
@@ -39,6 +40,7 @@
                     {% if  vta.ventas != 0 or vta.venta_FD != 0   or vta.venta_bruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.venta_neta != 0  %}
             		<tr>
                         <td><a href="/pedidos/detallevtaxproveedor/{{ vta.idproveedor }}/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/{{ sucursalinicial }}/{{ sucursalfinal }}"> {{ vta.asociadono }} </a></td>
+                        <td> {{vta.nombre }}</td>
                         <td>{{ vta.ventas | intcomma }}</td>
                         <td>{{ vta.descuento | intcomma }}</td>
                         <td>{{ vta.devoluciones | intcomma }}</td>
@@ -52,13 +54,16 @@
                     <!-- El siguiente renglon se usa para los totales
                          por eso va fuera del for  -->
                     <tr>
-                        <td><h4> TOTALES: </h4></td>
+                        <td><h4> </h4></td>
+                        <td><h4> TOTALES:</h4> </td>
                         <td><h4>{{  tot_vtas | intcomma }}</h4></td>
                         <td><h4>{{ tot_descuento | intcomma }}</h4></td>
                         <td><h4>{{ tot_devoluciones | intcomma }}</h4></td>
                         <td><h4>{{ tot_ventaneta | intcomma }}</h4> </td>
+                        <td><h4>{{ tot_bono | intcomma }}</h4> </td>
 
                     </tr>
+<!--
                     <tr>
                         <td>Comisiones: </td>
                         <td></td>
@@ -74,7 +79,7 @@
                         <td></td>
                         <td>{{ TotalVtaCatalogos | intcomma }} </td>
 
-                    </tr>
+                    </tr>-->
 
 
              </tbody>                   

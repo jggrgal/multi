@@ -128,7 +128,7 @@ USE_TZ = False
 
 DATE_INPUT_FORMATS = ['%d/%m/%Y',]
 
-
+USE_THOUSAND_SEPARATOR = True 
 
 
 # Static files (CSS, JavaScript, Images)

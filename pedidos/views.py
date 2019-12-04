@@ -5720,8 +5720,8 @@ def consultavtasxproveedor(request):
 	         and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
 	         INNER JOIN articulo as art\
 	         on (art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
-	         WHERE t3.status='Facturado' and t3.fechamvto>=%s and t3.fechamvto<=%s\
-	         GROUP BY art.idproveedor;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,fechainicial,fechafinal,))
+	         WHERE t3.status='Facturado'\
+	         GROUP BY art.idproveedor;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
 
 			registros_devgral = dictfetchall(cursor)
 
@@ -6691,6 +6691,7 @@ def calcula_bono(request):
 	TotalVtaCatalogos = 0.0
 
 	""" **************************************"""
+
 	tot_vtas = 0
 	tot_ventaFD = 0
 	tot_ventabruta = 0
@@ -6749,7 +6750,7 @@ def calcula_bono(request):
 				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
 				inner join ProvConfBono pcb on\
 				(pcb.empresano=1 and p.proveedorno=pcb.proveedorno)\
-				where f.fechamvto>=%s and f.fechamvto<=%s and pcb.porcentaje>0\
+				where f.fechamvto>=%s and f.fechamvto<=%s and pcb.BaseParaBono>0\
 				group by h.asociadono;",\
 				(fechainicial,fechafinal))
 
@@ -6799,8 +6800,8 @@ def calcula_bono(request):
 	         on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
 	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
 	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
-	         where t3.status='Facturado' and pcb.porcentaje>0 and t3.fechamvto>=%s and t3.fechamvto<=%s\
-	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,fechainicial,fechafinal,))
+	         where t3.status='Facturado' and pcb.BaseParaBono>0\
+	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))
 
 			registros_devgral = dictfetchall(cursor)
 
@@ -6818,20 +6819,16 @@ def calcula_bono(request):
 				j=1
 				for registro in registros_venta:
 
-					
-					print " empieza el show:"
-					print j,registro['venta'],registro['dscto']
-					j=+1
 
-					cursor.execute("UPDATE vtas_socio_tmp SET\
-						ventas= %s,\
-						venta_FD=0,\
-						venta_bruta=0,\
-						descuento=%s,\
-						devoluciones=0,\
-						venta_neta=0,\
-						bono=0\
-						where asociadono=%s;",\
+					cursor.execute("UPDATE vtas_socio_tmp vst inner join asociado s on (s.empresano=1 and s.asociadono=vst.asociadono) SET\
+						vst.ventas= %s,\
+						vst.venta_FD=0,\
+						vst.venta_bruta=0,\
+						vst.descuento=%s,\
+						vst.devoluciones=0,\
+						vst.venta_neta=0,\
+						vst.bono=0\
+						where vst.asociadono=%s and s.EsSocio=1;",\
 					 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
 					 		registro['asociadono']))					 
                         										
@@ -6869,7 +6866,7 @@ def calcula_bono(request):
 				return render(request,'pedidos/lista_vtasxproveedor.html',{'mensaje':mensaje,})
 
 
-			else:			
+			else:			cursorcursor
 
 				for registro in registros_VtasDevMismodia:
 
@@ -6886,17 +6883,18 @@ def calcula_bono(request):
 						TotalRegVtaDevMD = TotalRegVtaDevMD + 1 """
 			#pdb.set_trace()
 			#cursor.execute("UPDATE vtas_socio_tmp as t INNER JOIN asociado as p on t.asociadono=p.asociadono SET t.nombreprov=p.razonsocial;")
-			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  ventas = 0 and  descuento =0 and devoluciones = 0 and venta_neta = 0;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_bruta = ventas + venta_FD;")
-			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = if(venta_neta>=%s,venta_neta*%s/100,bono=0);",(venta_minima,porcentaje))
-			
+			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = if(venta_neta>=%s,venta_neta*%s/100,0);",(venta_minima,porcentaje))
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
+
 			mensaje =" "
 
-			cursor.execute("SELECT * FROM vtas_socio_tmp;")
+			cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre FROM vtas_socio_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) WHERE vst.bono>0;")
 			vtasresult =  dictfetchall(cursor)
 
-			'''
-			cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(ventabruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(ventaneta) as tot_ventaneta FROM vtas_pro_tmp;")	
+			
+			cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(venta_bruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(venta_neta) as tot_ventaneta,SUM(bono) as tot_bono FROM vtas_socio_tmp WHERE bono>0;")	
 			totales = dictfetchall(cursor)
 			for tot in totales:
 				tot_vtas = tot['tot_vtas']
@@ -6905,8 +6903,8 @@ def calcula_bono(request):
 				tot_descuento = tot['tot_descuento']
 				tot_devoluciones = tot['tot_devoluciones']
 				tot_ventaneta = tot['tot_ventaneta']
-
-
+			tot_bono = tot_ventaneta*porcentaje/100
+			'''
 			cursor.execute("SELECT d.Monto,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.Concepto FROM documentos d  WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
 			
 			
@@ -6945,7 +6943,7 @@ def calcula_bono(request):
 
 			
 
-			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
+			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_bono':float(tot_bono),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
 		
 			return render(request,'pedidos/lista_bono_socio.html',context)
 
@@ -6955,6 +6953,143 @@ def calcula_bono(request):
 		form = Genera_BaseBonoForm()
 	return render(request,'pedidos/generabonoforma.html',{'form':form,})
 
+
+def proveedores(request):
+	cursor=connection.cursor()
+	cursor.execute("SELECT proveedorno,razonsocial from proveedor")
+	proveedores = dictfetchall(cursor)
+
+	context = {'proveedores':proveedores,}	
+		
+	return render(request,'pedidos/proveedores.html',context)
+
+
+def edita_proveedor(request,proveedorno):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	
+
+	msg = ''
+	if request.method == 'POST':
+		if form.is_valid():
+			proveedorno = request.POST.get('proveedorno')
+			RazonSocial = request.POST.get('razonsocial')
+			Direccion = request.POST.get['Direccion']
+			Colonia = request.POST.get['Colonia']
+			Ciudad = request.POST.get['Ciudad']
+			Estado = request.POST.get['Estado']
+			Pais = request.POST.get['Pais']
+			CodigoPostal = request.POST.get['CodigoPostal']
+			telefono1 = request.POST.get['telefono1']
+			telefono2 = request.POST.get['telefono2']
+			fax = request.POST.get['fax']
+			cel = request.POST.get['cel']
+			radio = request.POST.get['radio']
+			email = request.POST.get['email']
+			FechaAlta = request.POST.get['FechaAlta']
+			FechaBaja = request.POST.get['FechaBaja']
+			UsuarioQueDioAlta = request.POST.get['UsuarioQueDioAlta']
+			Usuaroi = request.POST.get['Usaurio']
+			manejar_desc = request.POST.get['manejar_desc']
+			BaseParaBono = request.POST.get['BaseParaBono']
+			
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('UPDATE proveedor SET proveedorno = %s,\
+				RazonSocial = %s,\
+				Direccion = %s,\
+				Colonia = %s,\
+				Ciudad = %s,\
+				Estado = %s,\
+				Pais = %s,\
+				CodigoPostal = %s,\
+				telefono1 = %s,\
+				telefono2 = %s,\
+				fax = %s,\
+				cel = %s,\
+				radio = %s,\
+				email = %s,\
+				FechaAlta = %s,\
+				FechaBaja = %s,\
+				UsuarioQueDioAlta = %s,\
+				Usuaroi = %s,\
+				manejar_desc = %s,\
+				WHERE proveedorno=%s;',(RazonSocial,Direccion,Colonia,Ciudad,Estado,Pais,CodigoPostal,telefono1,telefono2,fax,cel,radio,email,FechaBaja,UsuarioQueDioAlta,Usuaroi,manejar_desc,))
+			
+				cursor.execute("UPDATE ProvConfBono SET BaseParaBono=%s WHERE proveedorno=%s;",(BaseParaBono,proveedorno,))
+				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:proveedores'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+		
+			cursor=connection.cursor()
+			cursor.execute("SELECT 	RazonSocial,\
+									Direccion,\
+									Colonia,\
+									Ciudad,\
+									Estado,\
+									Pais,\
+									CodigoPostal,\
+									telefono1,\
+									telefono2,\
+									fax,\
+									cel,\
+									radio,\
+									email,\
+									FechaAlta,\
+									FechaBaja,\
+									UsuarioQueDioAlta,\
+									Usuaroi,\
+									manejar_desc,\
+									k.BaseParaBono\
+									from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+			proveedor = cursor.fetchone()
+
+			form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+					
+			return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
+
+	else:	
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT 	RazonSocial,\
+								Direccion,\
+								Colonia,\
+								Ciudad,\
+								Estado,\
+								Pais,\
+								CodigoPostal,\
+								telefono1,\
+								telefono2,\
+								fax,\
+								cel,\
+								radio,\
+								email,\
+								FechaAlta,\
+								FechaBaja,\
+								UsuarioQueDioAlta,\
+								Usuaroi,\
+								manejar_desc,\
+								k.BaseParaBono\
+								from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+		proveedor = cursor.fetchone()
+
+		form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+					
+		return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 
 
 
