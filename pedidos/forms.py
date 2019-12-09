@@ -1596,133 +1596,8 @@ class Genera_BaseBonoForm(forms.Form):
 
 		self.fields['porcentaje'] =forms.DecimalField(label='Porcentaje sobre Vta Bruta',required=True)
 		self.fields['venta_minima'] = forms.DecimalField(label='Venta minima para bono')
-		self.fields['generar_credito'] = forms.BooleanField(label='Generar el credito por bono',required=False)
 
-
-
-		t = datetime.now
-
-	error_messages = {
-	
-	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
-	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
-	'error_sucursal': 'Seleccione un proveedor..!',
-	'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
-	}
-
-	def clean(self):
-
-		
-		cleaned_data = super(Genera_BaseBonoForm, self).clean()
-		
-		fechainicial = cleaned_data.get('fechainicial')
-		fechafinal = cleaned_data.get('fechafinal')
-		porcentaje = cleaned_data.get('porcentaje')
-		venta_minima = cleaned_data.get('venta_minima')
-
-
-
-		print "fechas aqui:"
-		print fechainicial
-		print fechafinal
-
-		if fechainicial is not None and fechafinal is not None:
-			
-			if (fechainicial > fechafinal):
-				
-				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
-		else:
-				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
-		'''if proveedor < '1':
-
-			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
-
-		if porcentaje<=0:
-				raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
-
-		return self.cleaned_data
-
-
-
-"""
-
-class EditaProveedorForm(forms.Form):
-
-	
-	fields['RazonSocial']= forms.CharField(label='Razon Social',required=True)
-	fields['Direccion']= forms.CharField(label='Direccion',required=True)
-	fields['Colonia']= forms.CharField(label='Colonia',required=True)
-	fields['Ciudad']= forms.CharField(label='Ciudad',required=True)
-	fields['Estado']= forms.CharField(label='Estado',required=True)
-	fields['Pais']= forms.CharField(label='Pais',required=True)
-	fields['CodigoPostal']= forms.CharField(label='Codigo Postal',required=True)
-	fields['telefono1']= forms.CharField(label='Telefono 1',required=True)
-	fields['telefono2']= forms.CharField(label='Telefono 2',required=True)
-	fields['Fax']= forms.CharField(label='Fax',required=True)
-	fields['Cel']= forms.CharField(label='Cel',required=True)
-	fields['Radio']= forms.CharField(label='Radio',required=True)
-	fields['Email']= forms.EmailField(label='Email',required=True)
-	fields['manejar_desc']= forms.BooleanField(label='Maneja Descuentos',required=True)
-	fields['GenerarCredito']= forms.BooleanField(label='Generar Credito',required=True)
-	
-
-	def clean(self):
-
-		
-		cleaned_data = super(Genera_BaseBonoForm, self).clean()
-		
-		RazonSocial = cleaned_data.get('RazonSocial')
-		Direccion = cleaned_data.get('Direccion')
-		Colonia = cleaned_data.get('Colonia')
-		Ciudad = cleaned_data.get('Ciudad')
-		Estado = cleaned_data.get('Estado')
-		Pais = cleaned_data.get('Pais')
-		CodigoPostal = cleaned_data.get('CodigoPostal')
-		telefono1 = cleaned_data.get('telefono1')
-		telefono2 = cleaned_data.get('telefono2')
-		
-
-
-
-
-		print "fechas aqui:"
-		print fechainicial
-		print fechafinal
-
-		if fechainicial is not None and fechafinal is not None:
-			
-			if (fechainicial > fechafinal):
-				
-				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
-		else:
-				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
-		'''if proveedor < '1':
-
-			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
-
-		if porcentaje<=0:
-				raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
-
-		return self.cleaned_data
-
-
-def __init__(self,*args,**kwargs):
-
-		
-		super(EditaProveedorForm, self).__init__(*args,**kwargs)
-		
-
-		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
-
-		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
-		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
-	
-		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
-
-		self.fields['porcentaje'] =forms.IntegerField(label='Porcentaje sobre Vta Bruta',required=True)
-		self.fields['venta_minima'] = forms.DecimalField(label='Venta minima para bono')
-		self.fields['generar_credito'] = forms.BooleanField(label='Generar el credito por bono')
-
+		self.fields['generarcredito'] = forms.BooleanField(label='Generar el credito',required=False)
 
 		'''error_messages = {
 		
@@ -1749,46 +1624,42 @@ def __init__(self,*args,**kwargs):
 		fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
 		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)'''
 		
-		error_messages = {
-		
-		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
-		'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
-		'error_sucursal': 'Seleccione un proveedor..!',
-		'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
-		}
-
-def clean(self):
-
+	error_messages = {
 	
-	cleaned_data = super(Genera_BaseBonoForm, self).clean()
-	
-	fechainicial = cleaned_data.get('fechainicial')
-	fechafinal = cleaned_data.get('fechafinal')
-	porcentaje = cleaned_data.get('porcentaje')
-	venta_minima = cleaned_data.get('venta_minima')
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+	'error_sucursal': 'Seleccione un proveedor..!',
+	'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
+	}
 
+	def clean(self):
 
-
-	print "fechas aqui:"
-	print fechainicial
-	print fechafinal
-
-	if fechainicial is not None and fechafinal is not None:
 		
-		if (fechainicial > fechafinal):
+		cleaned_data = super(Genera_BaseBonoForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		porcentaje = cleaned_data.get('porcentaje')
+		venta_minima = cleaned_data.get('venta_minima')
+		generarcredito =cleaned_data.get('generarcredito')
+
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
 			
-			raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
-	else:
-			raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
-	'''if proveedor < '1':
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		'''if proveedor < '1':
 
-		raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
+			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
 
-	if porcentaje<=0:
-			raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
+		if porcentaje<=0:
+				raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
 
-	return self.cleaned_data
-
-''' """
-
-
+		return self.cleaned_data

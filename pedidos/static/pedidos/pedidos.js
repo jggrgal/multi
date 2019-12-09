@@ -26,17 +26,6 @@
                               // con con la FUNCION A (checa por existencia de empleado) 
        var num_usr_valido = 0 // Variable para probar si el usuario es valido
 
-       // deshabilita el boton procesar ventas al inicio de jquery
-       $("#procesar_ventas").prop('disabled', true);
-
-
-        // deshabilita botones de creacion de documentos
-
-       $("#id_doc_temporada").prop('disabled', true);
-       $("#id_doc_anio").prop('disabled', true);
-       $("#id_doc_proveedor").prop('disabled', true);
-
-
       $('#busca_socio_javascr tbody').on('click', function() {
       var $row = $(this).closest('tr');  
       var x = $(".campo").eq(1).text();
@@ -46,21 +35,11 @@
       alert(x);
       alert(y);
       });
-
-      $('#myCarouselCustom').carousel();
-
-// Go to the previous item
-$("#prevBtn").click(function(){
-    $("#myCarouselCustom").carousel("prev");
-});
-// Go to the previous item
-$("#nextBtn").click(function(){
-    $("#myCarouselCustom").carousel("next");
-});
-
       
 
-  
+
+
+
 
 
        // LA SIGUIENTE FUNCION VALIDA QUE EL CAMPO
@@ -214,202 +193,6 @@ $("#nextBtn").click(function(){
 
             });
 
-// F U N I C I O N   C 
-
-      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
-      // AL MOMENTO DE CERRAR PEDIDO EN COLOCACIONES
-      $("#usr_id_colocadosacerrar").blur(function() {
-
-                var usr_id = $(this).val()
-                $("#procesar_cierre_pedido").prop('disabled',true)
-
-            
-                $.ajax({
-                  url: '/pedidos/valida_usr/',
-                  type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':11},
-                  success: function(data){
-                            if (data.num_usr_valido == 0){
-                                         
-                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
-                              
-                              $("#procesar_cierre_pedido").prop('disabled',true)
-                            }
-
-                            else{
-
-                              num_usr_valido = data.num_usr_valido 
-
-                              $("#procesar_cierre_pedido").prop('disabled',false)
-
-                              if(data.tiene_derecho == 0){
-                                        
-                                      alert("Ud no tiene derechos como empleado para cerrar pedidos !")
-
-                                        $("#procesar_cierre_pedido").prop('disabled',true)
-
-                              }
-                              else {
-                                        tiene_derecho = 1
-                              };
-
-
-                            }
-                    
-                    ;
-                    
-                    console.log(data.num_usr_valido);
-                    console.log(data.tiene_derecho);
-
-                   
-                  },
-                  error: console.log("algo pasa con data")
-                });
-
-                
-
-
-
-
-
-            });
-
-
-// F U N I C I O N   D 
-
-      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
-      // AL MOMENTO DE RECEPCIONAR PEDIDOS
-
-$("#procesar_recepcion").prop('disabled',true)
-
-
-
-      $("#usr_id_pedidos_recepcionar").blur(function() {
-
-                var usr_id = $(this).val()
-                $("#procesar_recepcion").prop('disabled',true)
-
-            
-                $.ajax({
-                  url: '/pedidos/valida_usr/',
-                  type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':12},
-                  success: function(data){
-                            if (data.num_usr_valido == 0){
-                                         
-                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
-                              
-                              $("#procesar_recepcion").prop('disabled',true)
-                            }
-
-                            else{
-
-                              num_usr_valido = data.num_usr_valido 
-
-                              $("#procesar_recepcion").prop('disabled',false)
-
-                              if(data.tiene_derecho == 0){
-                                        
-                                      alert("Ud no tiene derechos como empleado para recepcionar pedidos !")
-
-                                        $("#procesar_recepcion").prop('disabled',true)
-
-                              }
-                              else {
-                                        tiene_derecho = 1
-                              };
-
-
-                            }
-                    
-                    ;
-                    
-                    console.log(data.num_usr_valido);
-                    console.log(data.tiene_derecho);
-
-                   
-                  },
-                  error: console.log("algo pasa con data")
-                });
-
-                
-
-
-
-
-
-            });
-
-// F U N I C I O N   E
-
-
-
-      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
-      // AL MOMENTO DE REGISTRAR UNA DEVOLUCION DE SOCIO
-
-$("#procesar_devolucion_socio").prop('disabled',true)
-
-
-
-      $("#usr_id_pedidos_recepcionar").blur(function() {
-
-                var usr_id = $(this).val()
-                $("#procesar_devolucion_socio").prop('disabled',true)
-
-            
-                $.ajax({
-                  url: '/pedidos/valida_usr/',
-                  type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':12},
-                  success: function(data){
-                            if (data.num_usr_valido == 0){
-                                         
-                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
-                              
-                              $("#procesar_devolucion_socio").prop('disabled',true)
-                            }
-
-                            else{
-
-                              num_usr_valido = data.num_usr_valido 
-
-                              $("#procesar_devolucion_socio").prop('disabled',false)
-
-                              if(data.tiene_derecho == 0){
-                                        
-                                      alert("Ud no tiene derechos como empleado para recepcionar pedidos !")
-
-                                        $("#procesar_devolucion_socio").prop('disabled',true)
-
-                              }
-                              else {
-                                        tiene_derecho = 1
-                              };
-
-
-                            }
-                    
-                    ;
-                    
-                    console.log(data.num_usr_valido);
-                    console.log(data.tiene_derecho);
-
-                   
-                  },
-                  error: console.log("algo pasa con data")
-                });
-
-                
-
-
-
-
-
-            });
-
-
-
-
 
 
           
@@ -494,7 +277,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
        $("#sucursal").prop('disabled', true);
        $("#idpedido").prop('disabled',true);
        $("#procesar_colocaciones").prop('disabled',true);
-       $("#procesar_cierre_pedido").prop('disabled',true);
        $("#id_nueva_fecha_llegada ").prop('disabled',true)
       // $('#btn_trae_colocaciones').prop('disabled',true);
 
@@ -585,7 +367,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
       // RUTINA PARA CUANDO SE SELECCIONA EL CAMPO 'DESCUENTO' EN LA VENTA
       // VA I CALCULA EL FACTOR DE DESCUENTO Y SE LO APLICA AL PRECIO.
-      /*  
+
       $('.checkbox_dscto').change(function(){ 
             
 
@@ -611,8 +393,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                     var dscto = precio*data.factor_descuento;
                     var nvo_precio = precio - dscto
-                    //nvo_precio = Math.round(parseInt(nvo_precio))
-
                     
                     $this_var.parents('tr').find('td:eq(12)').text(nvo_precio.toFixed(2)); // .
                     
@@ -620,7 +400,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                     console.log($this_var.parents('tr').find('td:eq(12)').text())
                                        
                   },
-
                   error: console.log("algo pasa con data")
                 });
 
@@ -635,7 +414,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
       }  
         
-      }); */
+      });
 
 
 
@@ -673,7 +452,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                             if (data.length==0){
                                 alert("No se encontraron coincidencias !")
                             };
-                            tableData += "<tr><th>id</th><th>Pedido Num</th><th>Referencia</th><th>Fecha Cierre</th><th>Hora Cierre</th><th>Fecha llegada</th><th>Tot. Articulos</th><th>Importe</th><th>Almacen</th></tr>"; // Dibuja encab
+                            tableData += "<tr><th>id</th><th>Referencia</th><th>Fecha Cierre</th><th>Hora Cierre</th><th>Fecha llegada</th><th>Tot. Articulos</th><th>Importe</th><th>Almacen</th></tr>"; // Dibuja encab
                             //Ajax nos retorna en data un arreglo de arreglos..asi
                             // que primeramente "each(data....)" hace referecia a 
                             // cada arreglo dentro del arreglo y "value" nos trae
@@ -682,10 +461,9 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                             $('tbody').append( //4
                                 $.each(data, function(key,value){ //5
-                                    //<td><a href="/pedidos/pedidosgeneraldetalle/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}"> {{ item.idestilo }} </a></td>                                   
+                                                                        
                                     tableData += '<tr>';
-                                    tableData += '<td>'+'<a href="/pedidos/modifica_cierre/'+value['id']+'">'+value['id']+'</a></td>'; // link id para modificar.
-                                     tableData += '<td>' +value['NumPedido']+'</td>';
+                                    tableData += '<td>' +value['id']+'</td>'; // link id para modificar.
                                      tableData += '<td>' + value['referencia'] + '</td>';
                                      tableData += '<td>' + value['FechaCierre'] + '</td>';
                                      tableData += '<td>' + value['HoraCierre'] + '</td>'; 
@@ -751,15 +529,8 @@ $("#procesar_devolucion_socio").prop('disabled',true)
          $('.checkbox_aplicar_venta').click(function() {
              // alert( "Handler for .click() called." );
 
-
-
             var precio = $(this).parents('tr').find('td:eq(12)').text();
             var precio_normal = $(this).parents('tr').find('td:eq(15)').text();
-
-            precio = Math.round(precio)
-            precio_normal = Math.round(precio_normal)
-
-
 
             // deshabilita el checkbox de descuento una vez que se selecciono el articulo.
             // Obsrevar que se tiene not(this) para que no deshabilite tambien el checkbox_aplicar_venta
@@ -768,9 +539,8 @@ $("#procesar_devolucion_socio").prop('disabled',true)
             
 
             if ($(this).prop('checked')){ // Dado que la clase checkbox_elegido se asocia a puros checkbox, solamente se revisa por su propiedad checked.
-                
+            
 
-                
              $("#art_elegidos").html(function(i, val) { return val*1+1 });
 
 
@@ -778,14 +548,9 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
              $("#totalventas").html(function(i, val) { return val*1 + parseInt(precio_normal) });
              $("#totaldsctos").html(function(i, val) { return val*1 + (parseInt(precio_normal)- parseInt(precio)) });
-             $("#totalgral").html(function(i, val) { return val*1 + parseInt(precio_normal) - (parseInt(precio_normal) - parseInt(precio)) });
+             $("#totalgral").html(function(i, val) { return val*1 + parseInt(precio_normal) - (parseInt(precio_normal)- parseInt(precio)) });
 
 
-             if( $("#totalgral").html()<0){
-                $("#totalgral").val(0);
-             }
-
-                         
           }
 
             else {
@@ -798,33 +563,10 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
               $("#totalventas").html(function(i, val) { return val*1 - parseInt(precio_normal) });
               $("#totaldsctos").html(function(i, val) { return val*1 - (parseInt(precio_normal) - parseInt(precio)) });
-              $("#totalgral").html(function(i, val) { return val*1 - parseInt(precio_normal) + (parseInt(precio_normal) - parseInt(precio)) });
-
-                if( $("#totalgral").html()< 0){
-                      $("#totalgral").val(0);
-                  }
+              $("#totalgral").html(function(i, val) { return val*1 - parseInt(precio_normal) + (parseInt(precio_normal)- parseInt(precio)) });
 
                 }
-
-              if($("#totalventas").html()>0){
-
-                      $("#procesar_ventas").prop('disabled', false);
-                 } else {
-                      $("#procesar_ventas").prop('disabled', true);
-               }
-
-
-
-
-
-
           });
-
-
-
-
-
-
 
 // ACTUALIZA CONTADOR DE REGISTROS SELECCIONADOS PARA CREDITOS
 
@@ -852,9 +594,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                 $("#totalcreditos").html(function(i, val) { return val*1 + (parseInt(monto)) });
                 $("#totalgral").html(function(i, val) { return val*1 - parseInt(monto) });
-                if( $("#totalgral").html()< 0){
-                    $("#totalgral").val(0);
-                  }
+
                 //if( monto > parseInt($("#totalgral").text(),10)) {
 
                 //      alert("El credito es mayor al total de la transaccion, no puede ser aplicado !");
@@ -879,13 +619,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
               $("#totalcreditos").html(function(i, val) { return val*1 - parseInt(monto) });
               $("#totalgral").html(function(i, val) { return val*1 + parseInt(monto) });
 
-
-              if( $("#totalgral").html()< 0){
-                $("#totalgral").val(0);
-              }
-
-
-
                 }
           });
 
@@ -909,9 +642,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
              $("#totalcargos").html(function(i, val) { return val*1 + (parseInt(monto)) });
              $("#totalgral").html(function(i, val) { return val*1 + parseInt(monto) });
 
-             if( $("#totalgral").html()< 0){
-                $("#totalgral").val(0);
-             }
+
 
 
 
@@ -938,13 +669,10 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
               // Decrementa total de creditos e incrementa total gral
 
+            
+
               $("#totalcargos").html(function(i, val) { return val*1 - parseInt(monto) });
               $("#totalgral").html(function(i, val) { return val*1 - parseInt(monto) });
-
-              if( $("#totalgral").html()< 0){
-                $("#totalgral").val(0);
-              }
-
 
                 }
           });
@@ -983,10 +711,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                     , "ver_ant_encontrado" : $(tr).find('td:eq(4)').text()
                     , "status" : $(tr).find('td:eq(5)').text()
                     , "encontrado": $(tr).find('td:eq(16)').find("select option:selected").attr('value') // Agrega "colocado", esta si es visible en tabla y se agrega el valor, no el texto
-                    //, "notas": $(tr).find('td:eq(26)').find('input').value()
-                    // Agrega "colocado", esta si es visible en tabla y se agrega el valor, no el texto
-                    , "notas": $(tr).find("td:eq(26) input[type='text']").val()
-                }     
+                }    
             }); 
             TableData.shift();  // first row will be empty - so remove
             return TableData;
@@ -1114,27 +839,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
         }
 
 
-//      MANEJO DE TABLA PARA DEVOLUCION DE SOCIO
-
-        function storeTblValues_dev_socio()
-        {
-            var TableData = new Array();
-
-            $('#coloc_detail_table tr').each(function(row, tr){
-                TableData[row]={
-                    "Pedido" : $(tr).find('td:eq(0)').text()  // Agrega el pedido ( columna no visible en tabla)
-                    , "ProductoNo" :$(tr).find('td:eq(1)').text() // Agrega el producto ( no visible en tabla)
-                    , "Catalogo" : $(tr).find('td:eq(2)').text() // Agrega el catalogo ( no visible en tabla)
-                    , "Nolinea" : $(tr).find('td:eq(3)').text() // Agrega el Nolinea (no visible en tabla)
-                    , "status" : $(tr).find('td:eq(4)').text()
-                    , "incidencia": $(tr).find('td:eq(13)').find("select option:selected").attr('value') // Agrega "colocado", esta si es visible en tabla y se agrega el valor, no el texto
-                }    
-            }); 
-            TableData.shift();  // first row will be empty - so remove
-            return TableData;
-        }    
-
-
 
 
 
@@ -1146,7 +850,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
        // funcion para activar el picker de fecha en consulta_pedidos
      $('.datepicker').datepicker({dateFormat: 'dd/mm/yy'});
       //$('.datepicker').datepicker();
-      
+
 
       // Valida que exista socion en base de datos, si no existe regresa el foco al cursor de numero de socio.
       $('#id_socio').blur(function(){
@@ -1226,16 +930,41 @@ $("#procesar_devolucion_socio").prop('disabled',true)
         };
 
 
+
              
 
+      // Esta funcion lo que hace es lanzar un click en el boton #submcltes
+      // del formulario en le template "listaclientes"
+
+      function elimina_clientes(){
+        $('#submcltes').trigger('click');
+      }
+        
+
+
+      //     Dialogo 
       
+        $("#eliminaclientes").click(function(event){
+          event.preventDefault();
+          $("#dialog-1").dialog({
+          modal: true,
+          autoOpen: true,
+          title: "Advertencia",
+          buttons: {CONFIRMAR: function(){ elimina_clientes();},
+                    CANCELAR : function() {
+                                  $(this).dialog("close");}
+                   }
+
+          });  
+        });
+
       // Funcion para inicializar combos
 
       function inicializa_combos(){
 
         $('id_proveedor').val(0);
-        //$('#id_temporada').val('0');
-        //$('#id_catalogo').val('SELECCIONE...'); 
+        $('#id_temporada').val('0');
+        $('#id_catalogo').val('SELECCIONE...'); 
         $('#id_pagina').val('0');
         $('#id_estilo').val('SELECCIONE...');
         $('#id_marca').val('SELECCIONE...');
@@ -1819,7 +1548,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
         plazoentrega = $('#id_plazoentrega').val();
         opcioncompra = $('#id_opcioncompra').val();
         fechamaximaentrega = $('#id_fechamaximaentrega').val();
-        precio_cliente = $('#id_precio').val();
 
 
                
@@ -1859,7 +1587,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                       
                       url: '/pedidos/grabar_pedidos/',
                       type: 'POST',
-                      data:{'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':id_talla,'id_tallaalt':id_tallaalt,'descontinuado':descontinuado,'opcioncompra':opcioncompra,'plazoentrega':plazoentrega,'fechamaximaentrega':fechamaximaentrega,'precio_cliente':precio_cliente},
+                      data:{'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':id_talla,'id_tallaalt':id_tallaalt,'descontinuado':descontinuado,'opcioncompra':opcioncompra,'plazoentrega':plazoentrega,'fechamaximaentrega':fechamaximaentrega,},
                       datatype:'application/json',
                       //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                       success: function(data){
@@ -2179,7 +1907,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                      url: '/pedidos/procesar_pedido/',
                       type: 'POST',
-                      data: {'lsuc':lsuc,'tiposervicio':tiposerv,'viasolicitud':viasolic,'anticipo':anticipo,'total':total,'usr_id':$("#usr_id").val()},
+                      data: {'lsuc':lsuc,'tiposerv':tiposerv,'viasolic':viasolic,'anticipo':anticipo,'total':total,'usr_id':$("#usr_id").val()},
                       datatype:'application/json',
                       //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                       success: function(data){
@@ -2203,7 +1931,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                           $("#anticipo_id").val(0)
                           $("#procesar").prop('disabled', true);
                           $("#idpedido").prop('disabled',false);
-
+                            
                           
 
 
@@ -2253,11 +1981,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
                   TableData = JSON.stringify(TableData);
                   console.log("EN FORMATO JSON:");
                   console.log(TableData);
-
-                  $("#id_marcartodo_nollego").val()
-                  $("#id_nueva_fecha_llegada").val()
-
-
                   $.ajax({
 
                     url: '/pedidos/procesar_recepcion/',
@@ -2287,8 +2010,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
              
           }
       });
-
-
 
 
 
@@ -2340,7 +2061,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                     url: '/pedidos/procesar_colocaciones/',
                     type: 'POST',
-                    data: {csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),'TableData':TableData,'almacen':almacen,'usr_id':$("#usr_id_colocaciones").val(),'fecha_probable':$("#id_fecha_probable").val()},
+                    data: {csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),'TableData':TableData,'almacen':almacen,},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -2398,7 +2119,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
         monto_pagar =  $('#id_monto_pagar').val();
         paqueteria = $('#id_paqueteria').val();
         no_de_guia = $('#id_no_de_guia').val();
-        usr_id = $("#usr_id_colocadosacerrar").val();
+
 
         // comienza validacion de campos antes de pasar al servidor
 
@@ -2474,7 +2195,7 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
                     url: '/pedidos/procesar_cierre_pedido/',
                     type: 'POST',
-                    data: {'TableData':TableData,'almacen':almacen,'referencia':referencia,'total_articulos':total_articulos,'colocado_via':colocado_via,'confirmado_por':confirmado_por,'tomado_por':tomado_por,'fecha_cierre':fecha_cierre,'hora_cierre':hora_cierre,'fecha_llegada':fecha_llegada,'pedido':pedido,'importe':importe,'importe_nc':importe_nc,'monto_pagar':monto_pagar,'paqueteria':paqueteria,'no_de_guia':no_de_guia,'proveedor':proveedor,'usr_id':usr_id,},
+                    data: {'TableData':TableData,'almacen':almacen,'referencia':referencia,'total_articulos':total_articulos,'colocado_via':colocado_via,'confirmado_por':confirmado_por,'tomado_por':tomado_por,'fecha_cierre':fecha_cierre,'hora_cierre':hora_cierre,'fecha_llegada':fecha_llegada,'pedido':pedido,'importe':importe,'importe_nc':importe_nc,'monto_pagar':monto_pagar,'paqueteria':paqueteria,'no_de_guia':no_de_guia,'proveedor':proveedor},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -2505,8 +2226,6 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
 
     // PROCESAR VENTAS //
-//$("#procesar_venta").prop('disabled',true);
-
 
 
 $('#procesar_ventas').click(function(e){
@@ -2516,140 +2235,81 @@ $('#procesar_ventas').click(function(e){
         // al menos aqui si hace la comparacion.
         
         continuar_procesando = 0;
-        var tot_gral = $('#totalgral').text();
-        var recibido = $('#input_recibido').val();// A este control el cual es un input
-                                                  // a diferencia del anterior que no es input
-                                                  // debe aplicarsele el metodo val() en lugar
-                                                  // del .text() o el .html(), de lo contrario
-                                                  // no se traera su valor y la variable "recibido"
-                                                  // queda en blanco.
-
-
-        console.log(tot_gral)
-        console.log(recibido)
-
-        //$("#").prop('disabled',true);
-        if (parseInt(recibido) < parseInt(tot_gral) && parseInt(tot_gral) > 0 ) {
-                alert("Lo recibido debe cubrir el total !")
-        } else {
-              if(parseInt($("#usr_id_colocadosacerrar").val())<=0){
-                    alert("Ingrese un codigo de empleado !");
-                    continuar_procesando = 0;
-              } else {
-                  continuar_procesando = 1
-                }
-
-          
-        }
-
-        if (parseInt(recibido) > parseInt(tot_gral) && parseInt(tot_gral) > 0 ){
-
-            alert("Vuelto: "+(parseInt(recibido) - parseInt(tot_gral)).toString())
-        }
-
-
-        //if($("#usr_id_colocadosacerrar").html() <= 0){
-        //        alert("Ingrese codigo de usuario ! ");
-                //$("#procesar_ventas").prop('disabled', true);
-        //        continuar_procesando = 0;
-        //} else{
-        //  continuar_procesando = 1;
-        //}
-
         
+        e.preventDefault();
+        var answer=confirm('Su venta va a ser procesada, Si está seguro acepte, caso contrario cancele y modifique.');
+          if(answer){
 
-
-        if (continuar_procesando == 1) {
-          e.preventDefault();
-          var answer=confirm('Su venta va a ser procesada, Si está seguro acepte, caso contrario cancele y modifique.');
-            if(answer){
-
-                    
-                  // Prepara la tabla de ventas a pasar via ajax
-                    var TableData_ventas;
-                    TableData_ventas = storeTblValues_ventas();
-                    console.log(TableData_ventas)
-                    //TableData = $.toJSON(TableData);
-                    TableData_ventas = JSON.stringify(TableData_ventas);
+                  
+                // Prepara la tabla de ventas a pasar via ajax
+                  var TableData_ventas;
+                  TableData_ventas = storeTblValues_ventas();
+                  console.log(TableData_ventas)
+                  //TableData = $.toJSON(TableData);
+                  TableData_ventas = JSON.stringify(TableData_ventas);
 
 
 
-                    console.log("EN FORMATO JSON:");
-                    console.log(TableData_ventas);
+                  console.log("EN FORMATO JSON:");
+                  console.log(TableData_ventas);
 
 
 
-                    // Prepara la tabla de creditos a pasar via ajax
-                    var TableData_creditos;
-                    TableData_creditos = storeTblValues_creditos();
-                    console.log(TableData_creditos)
-                    //TableData = $.toJSON(TableData);
-                    TableData_creditos = JSON.stringify(TableData_creditos);
-                    var totalcreditos = $("#totalcreditos").text()
-                    var totalventas = $("#totalventas").text()
-                    var totalcargos = $("#totalcargos").text()
-                    var totaldsctos = $("#totaldsctos").text()
-                    var totalgral = $("#totalgral").text()
-                    // LA SIGUIENTE LINEA SIRVE PARA CAPTURAR EL CODIGO DEL CAPTURISTA 
-                    // Y MANDARLO VIA AJAX A VIEWS, SE UTILIZA IGUAL QUE
-                    // EN CIERRE DE PEDIDOS PARA NO TIRAR TANTO CODIGO.
-
-                    var usr_id = $("#usr_id_colocadosacerrar").val();
+                  // Prepara la tabla de creditos a pasar via ajax
+                  var TableData_creditos;
+                  TableData_creditos = storeTblValues_creditos();
+                  console.log(TableData_creditos)
+                  //TableData = $.toJSON(TableData);
+                  TableData_creditos = JSON.stringify(TableData_creditos);
+                  var totalcreditos = $("#totalcreditos").text()
+                  var totalventas = $("#totalventas").text()
+                  var totalcargos = $("#totalcargos").text()
+                  var totaldsctos = $("#totaldsctos").text()
+                  var totalgral = $("#totalgral").text()
 
 
+                  // Prepara la tabla de cargos a pasar via ajax
+                  var TableData_cargos;
+                  TableData_cargos= storeTblValues_cargos();
+                  console.log(TableData_cargos)
+                  //TableData = $.toJSON(TableData);
+                  TableData_cargos = JSON.stringify(TableData_cargos);
 
-                    // Prepara la tabla de cargos a pasar via ajax
-                    var TableData_cargos;
-                    TableData_cargos= storeTblValues_cargos();
-                    console.log(TableData_cargos)
-                    //TableData = $.toJSON(TableData);
-                    TableData_cargos = JSON.stringify(TableData_cargos);
 
-                               
+                  
 
 
 
-                    $.ajax({
+                  $.ajax({
 
-                      url: '/pedidos/procesar_venta/',
-                      type: 'POST',
-                      data: {'TableData_ventas':TableData_ventas,'TableData_creditos':TableData_creditos,'TableData_cargos':TableData_cargos,'totalcreditos':totalcreditos,'totalventas':totalventas,'totalcargos':totalcargos,'totaldsctos':totaldsctos,'totalgral':totalgral,'id_socio':id_socio,'recibido':recibido,'usr_id':usr_id,},
-                      datatype:'application/json',
-                      //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                      success: function(data){
+                    url: '/pedidos/procesar_venta/',
+                    type: 'POST',
+                    data: {'TableData_ventas':TableData_ventas,'TableData_creditos':TableData_creditos,'TableData_cargos':TableData_cargos,'totalcreditos':totalcreditos,'totalventas':totalventas,'totalcargos':totalcargos,'totaldsctos':totaldsctos,'totalgral':totalgral,'id_socio':id_socio,},
+                    datatype:'application/json',
+                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    success: function(data){
 
-                                        
-                          console.log(data);
-
-                          if (data.status_operacion != 'ok') { 
-                            alert(data.error);
-                            }
-                          else {
-                            
-                            
-                            $("#idventa").html(data.nodocto);
-                            $("#idventa").val(data.nodocto);
-                            $("#id_credito_nuevo").html(data.nueva_nota_credito);
-                            $("#id_credito_nuevo").val(data.nueva_nota_credito);
-
-                            alert("venta grabada con éxito !.");
-                            $("#procesar_ventas").prop('disabled', true);
-
-                            }; 
-                          
-                      },
-                      error: function(){ 
+                                      
                         console.log(data);
-                        
-                      },
 
-                    });
-               
-            }
+                        if (data.status_operacion != 'ok') { 
+                          alert(data.error);
+                          }
+                        else {
+                          alert("venta grabada con éxito !.");
+                          }; 
+                        $("#procesar_venta").prop('disabled', true);
+                    },
+                    error: function(){ 
+                      console.log(data);
+                      
+                    },
 
-        }
-        });
-      
+                  });
+             
+          }
+      });
+
 
 
 
@@ -2917,150 +2577,8 @@ $('#procesar_ventas').click(function(e){
                 };
             };
     });  
-
-
-
-// RUTINA PARA CANCELAR UN PEDIDO
-
-
-
-        $('.btn_cancela_pedido').click(function(e){
-
-        // valida que el anticipo sea menor al monto del pedido.
-        // observar que se puede comparar un contenido html con un valor
-        // al menos aqui si hace la comparacion.
-        
-        continuar_procesando = 0;
-        
-        e.preventDefault();
-        var answer=confirm('Se procederá a cancelar el registro, si está seguro de clic en "aceptar", caso contrario de clic en "cancelar".');
-          if(answer){
-
-
-                 var motivo = prompt("Por favor ingrese el motivo de la cancelacion:", "Cancelacion");
-                
-                 pedido = $(this).parents('tr').find('td:eq(0)').text();
-                 productono = $(this).parents('tr').find('td:eq(1)').text();
-                 catalogo = $(this).parents('tr').find('td:eq(2)').text();
-                 nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
-                  //TableData = $.toJSON(TableData);
-                  //TableData = JSON.stringify(TableData);
-                  
-                  $.ajax({
-
-                    url: '/pedidos/cancelar_pedido/',
-                    type: 'POST',
-                    data: {'motivo':motivo,'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea },
-                    datatype:'application/json',
-                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                    success: function(data){
-
-                                      
-                        console.log(data);
-
-                        if (data.status_operacion != 'ok') { 
-                          alert(data.error);
-                          }
-                        else {
-                          alert("Cancelacion exitosa !.");
-                          
-
-                          }; 
-                        //$("#procesar_recepcion").prop('disabled', true);
-                    },
-                    error: function(){ 
-                      console.log(data);
-                      
-                    },
-
-                  });
-             
-          }
-      });
-
-
-     $('#procesar_devolucion_socio').click(function(e){
-
-        // valida que el anticipo sea menor al monto del pedido.
-        // observar que se puede comparar un contenido html con un valor
-        // al menos aqui si hace la comparacion.
-        
-        continuar_procesando = 0;
-        
-        e.preventDefault();
-        var answer=confirm('Su cambios van a ser procesados, Si está seguro acepte, caso contrario cancele.');
-          if(answer){
-
-                  var TableData;
-                  TableData = storeTblValues_dev_socio();
-                  console.log(TableData)
-                  //TableData = $.toJSON(TableData);
-                  TableData = JSON.stringify(TableData);
-                  console.log("EN FORMATO JSON:");
-                  console.log(TableData);
-
-                  $("#id_marcartodo_nollego").val()
-                  $("#id_nueva_fecha_llegada").val()
-                  var usr_id = $("#usr_id_pedidos_recepcionar").val();
-
-
-                  $.ajax({
-
-                    url: '/pedidos/procesar_devolucion_socio/',
-                    type: 'POST',
-                    data: {'TableData':TableData,'socio':socio,'usr_id':usr_id,'tipoconsulta':tipoconsulta},
-                    datatype:'application/json',
-                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                    success: function(data){
-
-                                      
-                        console.log(data);
-
-                        if (data.status_operacion != 'ok') { 
-                          alert(data.error);
-                          }
-                        else {
-                          $("#id_nuevo_credito").val(data.nuevo_credito);
-
-                          alert("Devolucion grabada con éxito !.");
-                          }; 
-                        $("#procesar_devolucion_socio").prop('disabled', true);
-                    },
-                    error: function(){ 
-                      console.log(data.error);
-                      
-                    },
-
-                  });
-             
-          }
-      });
-
-     $('#id_doc_ventadecatalogo').change(function(){ //1
-
-
-                        if ($('#id_doc_ventadecatalogo').val() != '0') { 
-
-
-                            $("#id_doc_temporada").prop('disabled', false);
-                            $("#id_doc_anio").prop('disabled', false);
-                            $("#id_doc_proveedor").prop('disabled', false);
-                          
-                          }
-                        else {
-                            $("#id_doc_temporada").prop('disabled', true);
-                            $("#id_doc_anio").prop('disabled', true);
-                            $("#id_doc_proveedor").prop('disabled', true);
-                          
-                                  // alert("Devolucion grabada con éxito !.");
-                          }; 
-
-
-
-     });
-
-
-                            
+      
+                             
 
  });
 

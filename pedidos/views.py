@@ -6702,6 +6702,13 @@ def calcula_bono(request):
 	sucursalinicial =1
 	sucursalfinal = 1
 
+	sucursal_activa = request.session['sucursal_activa']
+
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	hora_hoy = hoy.strftime("%H:%M:%S")
+	#fecha_hoy,hora_hoy =trae_fecha_hora_actual(,hora_hoy)
+
 
 	mensaje =''
 	if request.method == 'POST':
@@ -6714,6 +6721,8 @@ def calcula_bono(request):
 			fechafinal = form.cleaned_data['fechafinal']
 			porcentaje = form.cleaned_data['porcentaje']
 			venta_minima = form.cleaned_data['venta_minima']
+			generarcredito= form.cleaned_data['generarcredito']
+
 
 			cursor=connection.cursor()
 
@@ -6888,10 +6897,62 @@ def calcula_bono(request):
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = if(venta_neta>=%s,venta_neta*%s/100,0);",(venta_minima,porcentaje))
 			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
 
+
+
+
+
+
 			mensaje =" "
 
 			cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre FROM vtas_socio_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) WHERE vst.bono>0;")
 			vtasresult =  dictfetchall(cursor)
+
+
+			if generarcredito==True:
+
+				cursor.execute("START TRANSACTION ")
+
+				for venta in vtasresult:
+
+							# Trae el ultimo documento
+					cursor.execute("SELECT nodocto from documentos WHERE empresano=1 ORDER BY nodocto DESC LIMIT 1 FOR UPDATE;")
+					ultimo_docto = cursor.fetchone()
+					nuevo_docto = ultimo_docto[0]+1
+					nuevo_credito = nuevo_docto # se usa nueva_remision para retornala via ajax en diccionario.
+
+					# Trae el ultimo documento
+					cursor.execute("SELECT consecutivo from documentos WHERE empresano=1 and tipodedocumento=%s  ORDER BY consecutivo DESC LIMIT 1 FOR UPDATE;",('Credito',))
+					ultimo_consec = cursor.fetchone()
+					Nuevo_consec = ultimo_consec[0]+1	
+
+					# Genera el documento.
+					# Ojo: observar que el campo `UsuarioQueCreoDcto.` se coloco entre apostrofes inversos y el nombre del campo tal y como esta definido en la tabla (casesensitive) dado que si
+							# se pone sin apostrofes marca error!
+					cursor.execute("INSERT INTO documentos (`EmpresaNo`,`NoDocto`,\
+												`Consecutivo`,`TipoDeDocumento`,\
+												`TipoDeVenta`,`Asociado`,\
+												`FechaCreacion`,`HoraCreacion`,\
+												`UsuarioQueCreoDcto.`,`FechaUltimaModificacion`,\
+												`HoraUltimaModificacion`,`UsuarioModifico`,\
+												`Concepto`,`monto`,`saldo`,\
+												`DescuentoAplicado`,`VtaDeCatalogo`,\
+												`Cancelado`,`comisiones`,\
+												`PagoAplicadoARemisionNo`,`Lo_recibido`\
+												,`venta`,`idsucursal`,\
+												`BloquearNotaCredito`) VALUES(%s,%s,%s,%s,%s,%s\
+												,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
+												%s,%s,%s,%s,%s);",(1,nuevo_docto,Nuevo_consec,\
+													'Credito','Contado',venta['asociadono'],\
+													fecha_hoy,hora_hoy,99,\
+													fecha_hoy,hora_hoy,99,\
+													"Bono de constancia",Decimal(venta['bono'],2),Decimal(venta['bono'],2),\
+													0,False,False,\
+													0,0,0,0,\
+													sucursal_activa,False))
+				cursor.execute("COMMIT;")	
+
+
+
 
 			
 			cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(venta_bruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(venta_neta) as tot_ventaneta,SUM(bono) as tot_bono FROM vtas_socio_tmp WHERE bono>0;")	

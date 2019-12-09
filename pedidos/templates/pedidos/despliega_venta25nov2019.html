@@ -1,0 +1,355 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="col-md-12"><p> SOCIO: {{nombre_socio}}</p></div>
+
+<div class="col-md-9">
+
+	<h3>VENTAS</h3>
+	
+	<hr>
+<!--<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
+	<thead>
+		<tr>
+		<th>Pedido Num</th>
+        <th>Fecha Pedido</th>
+        <th>Fecha Llego</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			{% for venta in ventas %}
+			 <td>{{  venta.idmarca }}</td>
+        			<td>{{  venta.idestilo }}</td>
+            		<td>{% if venta.talla == 'NE' %} {{venta.observaciones}} {% else %} {{venta.talla}} {% endif %}</td>
+			
+			
+		</tr>
+			{% endfor %}
+	</tbody>
+
+
+
+</table>
+
+
+
+
+
+
+<h3>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h3>-->
+    <div class="table-responsive">
+    	<table id='productos_por_vender' class='display table table-hover table-bordered table-condensed'>
+	    	<thead>
+	        	<tr class='success'>
+
+	        		<th>Pedido Num</th>
+	                <th>Fecha Pedido</th>
+	                <th>Fecha Llego</th>
+	                <th>Marca</th>
+	                <th>Estilo</th>
+	                <!--<th>Color</th>-->
+	                <th>Talla</th>
+	                <th>Via Solicitud</th>
+	                <th>Precio</th>
+	                <th>Precio_dscto</th>
+	                <th>Facturar</th>
+	                <th>Color</th>
+	                <th> Dscto % </th>
+	        	</tr>
+	        </thead>
+	        <tbody>
+	        	{% for venta in ventas %}
+	                
+	        		<tr>
+	        			<td> {{ venta.pedido}}</td>
+	        			<td style="display: none"> {{ venta.productono}}</td>
+	        			<td style="display: none"> {{ venta.catalogo}}</td>
+	        			<td style="display: none"> {{ venta.nolinea}}</td>
+	    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
+	    				<td style="display: none"> {{  venta.status }}</td>
+	                    
+	                    {% localize on %}
+	                        <td>{{ venta.fechacreacion | date:'d/M/Y'}}</td>
+	                    {% endlocalize %}
+	                    {% localize on %}
+	                        <td>{{ venta.fechatentativallegada | date:'d/M/Y'}}</td>
+	                    {% endlocalize %}
+	                    <td>{{  venta.idmarca }}</td>
+	        			<td>{{  venta.idestilo }}</td>
+	        			
+	            		<td>{% if venta.talla == 'NE' %} {{venta.observaciones}} {% else %} {{venta.talla}} {% endif %}</td>
+	            		<td>{{ venta.descripcion }}</td>
+	            		
+	            		<td>
+			                 {{ venta.precio }}
+			                 					
+						</td>
+
+	            		<td>{{ venta.precio_dscto }}</td>
+	            		
+	                    <td name="aplicar_venta">
+			                 <input class ="checkbox_aplicar_venta" type="checkbox" name="aplicar_venta" id="id_aplicar_venta" value="" >
+			                 					
+						</td>
+						<td style="display: none"> {{ venta.idproveedor }}</td>
+						<td style="display: none"> {{ venta.precio }}</td>
+						<td>{{ venta.idcolor }}</td>
+						<td> {{ venta.porc_dscto }}</td>						
+	                    
+	            	</tr>
+	            {% endfor %}
+	         </tbody>  
+    	</table>
+    </div>
+
+    <h3>CREDITOS</h3>
+	<hr>
+<h3>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h3>
+    <div class="table-responsive">
+    	<table id="creditos_vta" class='display table table-hover table-bordered  table-condensed clase_tabla'>
+    	<thead>
+        	<tr class='success'>
+
+        		<th>Documento</th>
+                <th>Fecha </th>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Aplicar</th>
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for credito in creditos %}
+                
+        		<tr>
+        			<td> {{ credito.nodocto}}</td>
+        			
+                   
+                    {% localize on %}
+                        <td>{{ credito.fechacreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    
+                    <td>{{  credito.concepto }}</td>
+        			<td>{{  credito.monto }}</td>
+            		
+            		            		
+                    <td name="aplicar_credito">
+		                 <input class ="checkbox_aplicar_credito" type="checkbox" name="aplicar_credito" id="id_aplicar_credito" value="" >
+		                 					
+					</td>
+					
+						
+                    
+            	</tr>
+            {% endfor %}
+         </tbody>  
+    	</table>
+    </div>
+
+
+
+    <h3>CARGOS</h3>
+	<hr>
+<h3>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h3>
+    <div class="table-responsive">
+    	<table id="cargos_vta" class='display table table-hover table-bordered  table-condensed clase_tabla'>
+    	<thead>
+        	<tr class='success'>
+
+        		<th>Documento</th>
+                <th>Fecha </th>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Aplicar</th>
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for cargo in cargos %}
+                
+        		<tr>
+        			<td> {{ cargo.nodocto}}</td>
+        			
+                   
+                    {% localize on %}
+                        <td>{{ cargo.fechacreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    
+                    <td>{{  cargo.concepto }}</td>
+        			<td>{{  cargo.monto }}</td>
+            		
+            		            		
+                    <td name="aplicar_cargo">
+		                 <input class ="checkbox_aplicar_cargo" type="checkbox" name="aplicar_cargo" id="id_aplicar_cargo" value="" >
+		                 					
+					</td>
+					
+						
+                    
+            	</tr>
+            {% endfor %}
+         </tbody>  
+    	</table>
+    </div>
+
+<!-- EMPIEZA ZONA DE PIE -->
+<div class="row">
+	    <div class="col-md-6">
+	    	
+	    	<h4 style="text-align: left;">  Recibido:</h4><input id="input_recibido" name="lo_recibido" class="form-control" value="0">
+	    	
+	    	
+    	 	<button id="procesar_ventas" class="btn btn-default" href="#" role="button">Procesar</button>
+   
+	
+	
+	        <a id='btn_regresar' class="btn btn-default" href="{% url 'pedidos:nueva_venta' %}" role="button">Salir</a><br>
+        	
+        	
+			<br>
+		
+	    </div>
+	    <div class="col-md-3">
+	    	<br>
+	    	<label for="usr_id">Usuario_id:</label> 
+		            <input id="usr_id_colocadosacerrar" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>
+		            <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET" >
+				        <input id ='idventa' name ='p_num_venta' class="btn-success-btn" type="submit"  value="000000" />
+				        <input id ='id_credito_nuevo' name ='p_num_credito' type="hidden" value="000000" />
+
+					</form>
+
+	    	<!--
+		    <div ><h3>Elegidos: <span id="art_elegido" class="label label-primary">{{ reg_encontrados }}</span></h3>
+		    </div>-->
+	    </div>
+	    
+    </div>
+
+
+
+
+
+
+<!-- TERMINA ZONA DE PIE -->
+
+<hr>
+ <h2> Lista de pedidos por confirmar y confirmados:</h2> 
+<div class="table-responsive">
+    	<table id='productos_confirmados' class='display table table-hover table-bordered table-condensed'>
+	    	<thead>
+	        	<tr class='success'>
+
+	        		<th>Pedido Num</th>
+	        		<th style="display: none">productono</th>
+	        		<th style="display: none">catalogo</th>
+	        		<th style="display: none">nolinea</th>
+	                <th>Fecha Creacion</th>
+	                <th>Pagina</th>
+	                <th>Marca</th>
+	                <th>Estilo</th>
+	                <th>Color</th>
+	                <th>Talla</th>
+	                <th>Precio</th>
+	                <th>Status</th>
+	                <th>llega el</th>
+	                <th>Encontrado/Confirmado en:</th>
+	                <th>Cancelar</th>
+	        	</tr>
+	        </thead>
+	        <tbody>
+	        	{% for porconf_conf in porconfs_confs %}
+	                
+	        		<tr>
+	        			<td>{{ porconf_conf.pedido}}</td>
+	        			<td style="display: none">{{porconf_conf.productono}}</td>
+	        			<td style="display: none">{{porconf_conf.catalogo}}</td>
+	        			<td style="display: none">{{porconf_conf.nolinea}}</td>
+	    				
+	                    
+	                    {% localize on %}
+	                        <td>{{ porconf_conf.fechapedido | date:'d/M/Y'}}</td>
+	                    {% endlocalize %}
+	                    <td>{{  porconf_conf.pagina }}</td>
+	                    <td>{{  porconf_conf.idmarca }}</td>
+	        			<td>{{  porconf_conf.idestilo }}</td>
+	        			<td>{{ porconf_conf.idcolor }}</td>
+	            		<td>{% if porconf_conf.talla == 'NE' %} {{porconf_conf.Observaciones}} {% else %} {{porconf_conf.talla}} {% endif %}</td>
+	            			            		
+	            		<td>{{ porconf_conf.precio }}</td>
+	            		
+	                    
+						<td> {{  porconf_conf.status }}</td>
+						{% localize on %}
+	                        <td>{{ porconf_conf.fechatentativallegada | date:'d/M/Y'}}</td>
+	                    {% endlocalize %}
+	                    <td>{{ porconf_conf.razonsocial }}</td>
+	                    <td><p align="left">
+                          <button class="btn btn-danger btn-sm btn_cancela_pedido" href="#" role="button" {% if porconf_conf.status == 'Cancelado' or porconf_conf.status == 'Facturado' or porconf_conf.status == 'Aqui' or porconf_conf.status == 'Confirmado' or porconf_conf.status == 'Devuelto' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</button>
+                        </p></td>
+																		
+	                    
+	            	</tr>
+	            {% endfor %}
+	         </tbody>  
+    	</table>
+    </div>
+
+
+
+
+
+</div>
+<div class="col-md-3" align = 'left'>
+	<div id="cuadro-fijo">
+		<h2 > Totales:            </h2>
+		<hr>
+
+		<div  style="text-align: right;">
+			<h2>+ Ventas: $ <span  id="totalventas" class="label label-primary" value=0 >0</span></h2> 
+			<h2>+ Cargos: $ <span  id="totalcargos" class="label label-primary" value=0 >0</span></h2> 
+			<h2>- Creditos: $ <span id="totalcreditos" class="label label-primary" value=0 >0</span></h2> 
+			<h2>- Dsctos: $ <span id="totaldsctos" class="label label-primary" value=0 >0</span></h2> 
+			<hr>
+			<h1>  Total: $ <span id="totalgral" class="label label-primary" value=0 >0</span></h1> 
+			
+			<hr>
+			<h2>Articulos seleccionados: <span id="art_elegidos" class="label label-primary">{{ reg_encontrados }}</span></h2>
+		</div>
+		
+	</div>
+	    
+ 
+
+
+		   
+				
+
+	
+
+
+
+</div>
+
+
+
+
+    
+
+    <hr>
+
+
+		    
+
+
+
+	<!-- El siguiente script no se definio dentro de pedidos.js ya que este ultimo se carga primero que las variables de manejadas dentro del request de django, asi puest, el script asigna variables recibidas en request  a variables visibles por JQuery -->
+
+	<script>
+		var id_socio = {{ num_socio }}
+	</script>
+	
+
+
+{% endblock %}	

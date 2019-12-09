@@ -1,0 +1,113 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+        <a class="navbar-brand" href="#" ></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Operaciones <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/pedidos/nueva_venta">Ventas</a></li>
+            <li><a href="/pedidos/pedidosgeneral">Pedidos</a></li>
+            <li><a href="#">Devoluciones</a></li>
+             <li><a href="{% url 'pedidos:documentos' %}">Documentos</a></li>
+            <li><a href="/pedidos/entrada_sistema">Sucursal</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"></a></li>
+          </ul>
+        </li>
+              
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Colocaciones <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/pedidos/colocaciones">Colocar</a></li>
+            <li><a href="/pedidos/elegir_almacen_a_cerrar">Cerrar</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#"></a></li>
+          </ul>
+        </li>
+        <li><a href="/pedidos/seleccion_cierre_rpte_cotejo">Reporte de cotejo</a></li>
+        <li><a href="/pedidos/seleccion_cierre_recepcion">Recepcion</a></li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Consultas <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{% url 'pedidos:calzadollego_gral' %}">Calzado que llego (Global)</a></li>
+            <li><a href="{% url 'pedidos:calzadoquellego_detalle' %}">Calzado que llego (Detalle)</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'pedidos:con_pedidos_por_socio_status' %}">Pedidos por socio y status</a></li>
+            <li><a href="{% url 'pedidos:buscapedidosposfecha' %}">Pedidos por socio</a></li>
+            <li role="separator" class="divider"></li>
+
+            <li><a href="{% url 'pedidos:consultacolocaciones'%}">Colocaciones</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'pedidos:consultaventas'%}">Ventas General</a></li>
+            <li><a href="{% url 'pedidos:consultavtasxproveedor'%}">Resumen de ventas por proveedor</a></li>
+
+            <li><a href="{% url 'pedidos:consultacomisiones'%}">Ingresos por comisiones</a></li>
+            <li><a href="{% url 'pedidos:consultadsctos'%}">Desglose de descuentos aplicados a ventas por proveedor</a></li>
+
+
+
+
+
+            <li><a href="#"></a></li>
+          </ul>
+        </li>
+
+
+      </ul>
+      <!--
+      <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form> -->
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href=" {% url 'pedidos:entrada_sistema' %} ">Sucursal</a></li>
+        <li><a href="{% url 'pedidos:logout_view' %} ">Logout</a>
+          
+        </li>
+
+          <!--
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+    
+      <ul class="nav nav-pills">
+        <li role="presentation" class="active"><a href=" {% url 'pedidos:entrada_sistema' %} ">Empleados</a</li>
+        <li role="presentation"><a href="#">Profile</a></li>
+        <li role="presentation"><a href="#">Messages</a></li>
+      </ul>
+      -->
+
+
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+

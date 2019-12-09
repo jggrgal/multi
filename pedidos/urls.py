@@ -94,9 +94,7 @@ urlpatterns = [
 	url(r'^devolucion_socio/$',views.devolucion_socio,name='devolucion_socio'),
 	url(r'^procesar_devolucion_socio/$',views.procesar_devolucion_socio,name='procesar_devolucion_socio'),
 	url(r'^imprime_credito/$',views.imprime_credito,name='imprime_credito'),
-	url(r'^calcula_bono/$',views.calcula_bono,name='calcula_bono'),
-	url(r'^proveedores/$',views.proveedores,name='proveedores'),
-	url(r'^edita_proveedor/(?P<proveedorno>[0-9]{1,8})/$',views.edita_proveedor,name='edita_proveedor'),
+		url(r'^calcula_bono/$',views.calcula_bono,name='calcula_bono'),
 
 
 
