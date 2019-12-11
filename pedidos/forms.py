@@ -1663,3 +1663,95 @@ class Genera_BaseBonoForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['error_porcentaje'],code='error_porcentaje')
 
 		return self.cleaned_data
+
+
+''' FORMA PARA VETAS_NETAS_POR_SOCIO_POR MARCA '''
+
+
+
+class RpteVtaNetaSocioxMarcaForm(forms.Form):
+
+	proveedores = {}
+
+	
+
+	
+	def __init__(self,*args,**kwargs):
+
+		lprov =lista_Proveedores()
+
+		super(RpteVtaNetaSocioxMarcaForm, self).__init__(*args,**kwargs)
+		
+
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label='Proveedor',choices = lprov,initial=0,required='True' )
+
+		
+		'''error_messages = {
+		
+		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+		'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+		}'''
+
+
+
+
+
+
+
+
+		t = datetime.now
+		#t.strftime('%m/%d/%Y')
+
+		'''tipoconsulta  = forms.ChoiceField(widget=forms.Select(),
+				label='Tipo de Consulta',choices = opcion_consulta,initial='1',required='True' )
+		# Prepara el campo para utilizar datepicker
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		
+		fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)'''
+		
+	error_messages = {
+	
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+	'error_sucursal': 'Seleccione un proveedor..!',
+	'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
+	}
+
+	def clean(self):
+
+		
+		cleaned_data = super(RpteVtaNetaSocioxMarcaForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		proveedor = cleaned_data.get('proveedor')
+	
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		'''if proveedor < '1':
+
+			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
+
+		
+
+		return self.cleaned_data

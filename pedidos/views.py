@@ -36,7 +36,8 @@ from .forms import (AccesoForm,\
 					CreaDocumentoForm,\
 					CierresForm,\
 					Crea_devolucionForm,\
-					Genera_BaseBonoForm,)
+					Genera_BaseBonoForm,\
+					RpteVtaNetaSocioxMarcaForm)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -7153,5 +7154,305 @@ def edita_proveedor(request,proveedorno):
 		return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 
 
+'''REPORTE QUE CALCULA  LA VENTA NETA POR SOCIO Y POR PROVEEDOR '''
+
+def vtaneta_socio(request):
+	''' Inicializa Variables '''
+	#pdb.set_trace()
+
+	TotalRegVentas = 0
+	TotalRegVtaDevMD = 0
+	Totaldscto  = 0.0
+	TotalVta = 0.0
+	Totaldscto = 0.0
+	TotalRegistros = 0
+	TotalRegDev = 0
+	TotalVtaDevMD = 0.0
+	registros_devgral = 0.0
+	registros_VtasDevMismodia = 0.0
+	TotalDevGral = 0.0
+	TotalCargos = 0.0
+	TotalVtaCatalogos = 0.0
+
+	""" **************************************"""
+
+	tot_vtas = 0
+	tot_ventaFD = 0
+	tot_ventabruta = 0
+	tot_descuento = 0
+	tot_devoluciones = 0
+	tot_ventaneta = 0
+	sucursal_nombre = " NOMBRE SUCURSAL"
+	sucursalinicial =1
+	sucursalfinal = 1
+
+	sucursal_activa = request.session['sucursal_activa']
+
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	hora_hoy = hoy.strftime("%H:%M:%S")
+	#fecha_hoy,hora_hoy =trae_fecha_hora_actual(,hora_hoy)
 
 
+	mensaje =''
+	if request.method == 'POST':
+
+		form = RpteVtaNetaSocioxMarcaForm(request.POST)
+
+		if form.is_valid():
+
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			proveedor = form.cleaned_data['proveedor']
+
+			cursor=connection.cursor()
+
+
+			# CREA TABLA TEMPORAL
+			cursor.execute("DROP TEMPORARY TABLE IF EXISTS vtas_socio_tmp;")
+			cursor.execute("CREATE TEMPORARY TABLE vtas_socio_tmp SELECT * FROM ventas_socio_imagenbase;")
+
+			cursor.execute('SELECT RazonSocial FROM proveedor where proveedorno=%s',(proveedor))
+			nombre_proveedor = cursor.fetchone()
+
+
+
+
+			
+			# TRAE VENTA Y DESCUENTOS
+
+
+			cursor.execute("SELECT h.asociadono,\
+				TRUNCATE(sum(a.precio),2) as venta,\
+				TRUNCATE(sum(if (a.precio>l.precio,a.precio-l.precio,0)),2) as dscto\
+				from pedidoslines l inner join pedidosheader h\
+				on (h.empresano=1 and h.pedidono=l.pedido)\
+				inner join pedidos_status_fechas f\
+				on (f.empresano=1 and f.pedido=l.pedido\
+				and f.productono=l.productono\
+				and f.status='Facturado'\
+				and f.catalogo=l.catalogo and f.nolinea=l.nolinea)\
+				inner join articulo a\
+				on (a.empresano=1 and a.codigoarticulo=l.productono\
+				and a.catalogo=l.catalogo)\
+				inner join proveedor p\
+				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
+				inner join ProvConfBono pcb on\
+				(pcb.empresano=1 and p.proveedorno=pcb.proveedorno)\
+				where f.fechamvto>=%s and f.fechamvto<=%s and pcb.proveedorno=%s\
+				group by h.asociadono;",\
+				(fechainicial,fechafinal,proveedor))
+
+			
+			registros_venta = dictfetchall(cursor)
+			
+			
+			elementos = len(registros_venta)
+
+			# TRAE DEVOLUCIONES EN GENERAL
+			
+			cursor.execute("SELECT ph.asociadono,'',TRUNCATE(sum(l.precio),2) as devgral,0\
+			 from (SELECT psf.pedido,\
+			 psf.productono,\
+			 psf.nolinea,\
+			 psf.catalogo,\
+			 psf.fechamvto from\
+			 pedidos_status_fechas as psf USE INDEX (indice_2)\
+			 INNER JOIN pedidosheader as h\
+			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+			 INNER JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
+			 (t3.empresano=1 and t2.pedido=t3.pedido and t2.productono=t3.productono\
+			 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
+	         INNER JOIN pedidoslines as l\
+	         on (l.empresano=1 and l.pedido=t3.pedido and l.productono=t3.productono\
+	         and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
+	         INNER JOIN articulo as art\
+	         on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
+	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
+	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
+	         where t3.status='Facturado' and pcb.proveedorno=%s\
+	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,proveedor))
+
+			registros_devgral = dictfetchall(cursor)
+
+
+			if not registros_venta:
+
+				pass
+
+				
+			else:
+
+				cursor.execute("SELECT COUNT(*) as totrec FROM vtas_socio_tmp")
+				totrectmp=dictfetchall(cursor)
+
+				j=1
+				for registro in registros_venta:
+
+
+					cursor.execute("UPDATE vtas_socio_tmp vst inner join asociado s on (s.empresano=1 and s.asociadono=vst.asociadono) SET\
+						vst.ventas= %s,\
+						vst.venta_FD=0,\
+						vst.venta_bruta=0,\
+						vst.descuento=%s,\
+						vst.devoluciones=0,\
+						vst.venta_neta=0,\
+						vst.bono=0\
+						where vst.asociadono=%s and s.EsSocio=1;",\
+					 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
+					 		registro['asociadono']))					 
+                        										
+					TotalVta   = TotalVta + float(registro['venta'])
+					Totaldscto = Totaldscto + float(registro['dscto'])
+					
+					if (float(registro['venta']) != 0.0):
+						TotalRegVentas = TotalRegVentas + 1
+
+
+			if not registros_devgral:
+				
+				pass
+
+			else:				
+
+				for registro in registros_devgral:
+
+					cursor.execute("UPDATE vtas_socio_tmp\
+						SET devoluciones=%s WHERE asociadono=%s;",\
+					 			(registro['devgral'],registro['asociadono']))
+										
+					
+					TotalDevGral = TotalDevGral + float(registro['devgral'])
+					
+					if (float(registro['devgral']) != 0.0):
+						TotalRegDev = TotalRegDev + 1
+
+
+
+			#pdb.set_trace()
+			#cursor.execute("UPDATE vtas_socio_tmp as t INNER JOIN asociado as p on t.asociadono=p.asociadono SET t.nombreprov=p.razonsocial;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
+			cursor.execute("UPDATE vtas_socio_tmp SET venta_bruta = ventas + venta_FD;")
+			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = 0;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
+
+
+
+
+
+
+			mensaje =" "
+
+			cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre FROM vtas_socio_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) ORDER BY vst.venta_neta desc;")
+			vtasresult =  dictfetchall(cursor)
+
+
+			"""
+			if generarcredito==True:
+
+				cursor.execute("START TRANSACTION ")
+
+				for venta in vtasresult:
+
+							# Trae el ultimo documento
+					cursor.execute("SELECT nodocto from documentos WHERE empresano=1 ORDER BY nodocto DESC LIMIT 1 FOR UPDATE;")
+					ultimo_docto = cursor.fetchone()
+					nuevo_docto = ultimo_docto[0]+1
+					nuevo_credito = nuevo_docto # se usa nueva_remision para retornala via ajax en diccionario.
+
+					# Trae el ultimo documento
+					cursor.execute("SELECT consecutivo from documentos WHERE empresano=1 and tipodedocumento=%s  ORDER BY consecutivo DESC LIMIT 1 FOR UPDATE;",('Credito',))
+					ultimo_consec = cursor.fetchone()
+					Nuevo_consec = ultimo_consec[0]+1	
+
+					# Genera el documento.
+					# Ojo: observar que el campo `UsuarioQueCreoDcto.` se coloco entre apostrofes inversos y el nombre del campo tal y como esta definido en la tabla (casesensitive) dado que si
+							# se pone sin apostrofes marca error!
+					cursor.execute("INSERT INTO documentos (`EmpresaNo`,`NoDocto`,\
+												`Consecutivo`,`TipoDeDocumento`,\
+												`TipoDeVenta`,`Asociado`,\
+												`FechaCreacion`,`HoraCreacion`,\
+												`UsuarioQueCreoDcto.`,`FechaUltimaModificacion`,\
+												`HoraUltimaModificacion`,`UsuarioModifico`,\
+												`Concepto`,`monto`,`saldo`,\
+												`DescuentoAplicado`,`VtaDeCatalogo`,\
+												`Cancelado`,`comisiones`,\
+												`PagoAplicadoARemisionNo`,`Lo_recibido`\
+												,`venta`,`idsucursal`,\
+												`BloquearNotaCredito`) VALUES(%s,%s,%s,%s,%s,%s\
+												,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
+												%s,%s,%s,%s,%s);",(1,nuevo_docto,Nuevo_consec,\
+													'Credito','Contado',venta['asociadono'],\
+													fecha_hoy,hora_hoy,99,\
+													fecha_hoy,hora_hoy,99,\
+													"Bono de constancia",Decimal(venta['bono'],2),Decimal(venta['bono'],2),\
+													0,False,False,\
+													0,0,0,0,\
+													sucursal_activa,False))
+				cursor.execute("COMMIT;")	
+
+
+				"""
+
+			
+			cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(venta_bruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(venta_neta) as tot_ventaneta,SUM(bono) as tot_bono FROM vtas_socio_tmp;")	
+			totales = dictfetchall(cursor)
+			for tot in totales:
+				tot_vtas = tot['tot_vtas']
+				tot_ventaFD = tot['tot_ventaFD']
+				tot_ventabruta = tot['tot_ventabruta']
+				tot_descuento = tot['tot_descuento']
+				tot_devoluciones = tot['tot_devoluciones']
+				tot_ventaneta = tot['tot_ventaneta']
+
+
+			#pdb.set_trace()
+			
+			'''
+			cursor.execute("SELECT d.Monto,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.Concepto FROM documentos d  WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
+			
+			
+
+			registros_vtacomis_vtacatal = dictfetchall(cursor)
+
+
+			for docto in registros_vtacomis_vtacatal:
+										
+					if (docto['Cancelado'] == '\x00'):  # pregunta si cancelado es '0' en hex o bien falso
+						
+						esvta =docto['Concepto'].strip()
+						if esvta == 'Venta':
+														
+							TotalCargos = TotalCargos + float(docto['comisiones'])	
+											
+						if docto['VtaDeCatalogo'] == '\x01' :
+							TotalVtaCatalogos = TotalVtaCatalogos + float(docto['Monto'])
+
+
+			# SI TOTALES SON None, LES ASIGNA UN CERO YA QUE EN EL CONTEXT
+			# HABRIA PROBLEMAS CON LA FUNCION FLOAT(), DADO QUE NO ACEPTA UN None COMO PARAMETRO.
+			if tot_vtas is None:
+				tot_vtas = 0
+			if tot_ventabruta is None:
+				tot_ventabruta = 0
+			if tot_ventaFD is None:
+				tot_ventaFD = 0
+			if tot_ventaneta is None:
+				tot_ventaneta = 0
+			if tot_descuento is None:
+				tot_descuento = 0
+			if tot_devoluciones is None:
+				tot_devoluciones =0'''
+			
+
+			
+
+			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':nombre_proveedor[0]}	
+		
+			return render(request,'pedidos/lista_vtaneta_socio_xmarca.html',context)
+
+		
+	else:
+
+		form = RpteVtaNetaSocioxMarcaForm()
+	return render(request,'pedidos/vtaneta_socio_xproveedorform.html',{'form':form,})
