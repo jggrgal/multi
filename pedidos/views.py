@@ -37,7 +37,8 @@ from .forms import (AccesoForm,\
 					CierresForm,\
 					Crea_devolucionForm,\
 					Genera_BaseBonoForm,\
-					RpteVtaNetaSocioxMarcaForm)
+					RpteVtaNetaSocioxMarcaForm,\
+					CanceladocumentoForm)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -1182,7 +1183,6 @@ def genera_documento(cursor,
 
 	''' ********** DOCUMENTOS ****************'''
 def documentos(request):
-	#pdb.set_trace()
 	documentos = {}
 	tipo='D'
 	if request.method == 'POST':
@@ -1223,7 +1223,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado FROM documentos d
+									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1246,7 +1246,8 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado FROM documentos d
+	#pdb.set_trace()
+									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1268,7 +1269,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado FROM documentos d
+									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -2729,15 +2730,17 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 					return render(request,'pedidos/despliega_venta.html',context)
 					
 				else:
-					form = CreaDocumentoForm()
+					pass
+					#documentos(request)
+					"""form = CreaDocumentoForm()
 					context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':id_sucursal,'is_staff':is_staff,'tipo':tipo,}
-					return render(request,'pedidos/crea_documento.html',context,)	
+					return render(request,'pedidos/crea_documento.html',context,)"""
 			
 
 			cursor.close()
 	context={'existe_socio':existe_socio,'form':form,'is_staff':is_staff,'tipo':tipo,}	
 	return render(request,'pedidos/ingresa_socio.html',context,)		
-		
+																																																					
 
 		
 def imprime_ticket(request):
@@ -3238,6 +3241,11 @@ def muestra_colocaciones(request):
 		#reg_cancelados = 1
 
 		if tipo_consulta == 1: 
+
+			cursor.execute("SELECT count(*) as total_registros FROM pedidoslines l LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL);",(proveedor,))
+			total_registros =cursor.fetchone()
+			tot_reg = total_registros[0]
+
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 			if ordenado_por == 1:
 				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY a.idestilo;",(proveedor,))
@@ -3248,6 +3256,10 @@ def muestra_colocaciones(request):
 
 		
 		elif tipo_consulta == 2:
+
+			cursor.execute("SELECT count(*) as total_registros FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s;",(proveedor,fechainicial,fechafinal))
+			total_registros = cursor.fetchone()
+			tot_reg = total_registros[0]
 
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
@@ -3261,6 +3273,10 @@ def muestra_colocaciones(request):
 
 		elif tipo_consulta == 3:
 
+			cursor.execute("SELECT count(*) as total_registros FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY a.idestilo;",(proveedor,almacen))
+			total_registros =cursor.fetchone()
+			tot_reg = total_registros[0]
+
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
 			if ordenado_por == 1:
@@ -3271,6 +3287,11 @@ def muestra_colocaciones(request):
 				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.FechaPedido;",(proveedor,almacen))
 
 		elif tipo_consulta == 4:
+
+			cursor.execute("SELECT count(*) as total_registros FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal,almacen,))
+			total_registros = cursor.fetchone()
+			tot_reg = total_registros[0]
+
 
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
@@ -3285,6 +3306,9 @@ def muestra_colocaciones(request):
 
 		else:
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
+			cursor.execute("SELECT count(*) as total_registros FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
+			total_registros = cursor.fetchone()
+			tot_reg = total_registros[0]
 
 			if ordenado_por == 1:
 				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
@@ -3308,7 +3332,7 @@ def muestra_colocaciones(request):
 		registros ={}
 		mensaje = "Registros no encontrados para esta consulta !"
 	cursor.close()
-	return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,'prov_nombre':prov_nombre[0],'almacen_nombre':almacen_nombre[0],})
+	return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,'prov_nombre':prov_nombre[0],'almacen_nombre':almacen_nombre[0],'tot_reg':tot_reg,})
 	#return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,})
 
 	"""data = serializers.serialize('json', registros)
@@ -4750,7 +4774,6 @@ def crea_documento(request):
 				ultimoconsec = cursor.fetchone()
 
 
-
 				cursor.execute('''INSERT INTO documentos (
 					  `EmpresaNo`,
 					  `NoDocto`,
@@ -6127,7 +6150,7 @@ def imprime_venta(request):
 		cursor.execute("SELECT l.precio,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.RemisionNo = %s;",(datos_documento[0],datos_documento[6],p_num_venta))
 		pedido_detalle = dictfetchall(cursor)
 
-		cursor.execute("SELECT NoDocto,FechaCreacion,HoraCreacion,monto FROM documentos where PagoAplicadoARemisionNo=%s;",(p_num_venta,))
+		cursor.execute("SELECT NoDocto,FechaCreacion,HoraCreacion,monto,concepto FROM documentos where PagoAplicadoARemisionNo=%s;",(p_num_venta,))
 		creditos_aplicados = cursor.fetchall()	
 
 
@@ -6251,7 +6274,8 @@ def imprime_venta(request):
 			p.drawString(20,paso-90,"Notas de credito aplicadas:")
 			p.drawString(20,paso-100,"--------------------------------------------------")
 			linea -= 10
-			p.drawString(20,paso-110,"Num. Nota")
+			p.drawString(20,paso-110,"Num.")
+			p.drawString(55,paso-110,"Concepto")
 			p.drawString(130,paso-110,"Monto")
 			linea -= 10
 			p.drawString(20,paso-120,"--------------------------------------------------")
@@ -6259,6 +6283,7 @@ def imprime_venta(request):
 
 			for elemento in creditos_aplicados:
 				p.drawString(20,linea,str(elemento[0]))
+				p.drawString(55,linea,elemento[4][0:12])
 				p.drawString(130,linea,'$ '+str(elemento[3]))
 				linea -= 10 
 
@@ -7205,6 +7230,8 @@ def vtaneta_socio(request):
 			fechafinal = form.cleaned_data['fechafinal']
 			proveedor = form.cleaned_data['proveedor']
 
+			#pdb.set_trace()
+
 			cursor=connection.cursor()
 
 
@@ -7212,11 +7239,12 @@ def vtaneta_socio(request):
 			cursor.execute("DROP TEMPORARY TABLE IF EXISTS vtas_socio_tmp;")
 			cursor.execute("CREATE TEMPORARY TABLE vtas_socio_tmp SELECT * FROM ventas_socio_imagenbase;")
 
-			cursor.execute('SELECT RazonSocial FROM proveedor where proveedorno=%s',(proveedor))
+			cursor.execute('SELECT RazonSocial FROM proveedor where proveedorno=%s',(proveedor,))
 			nombre_proveedor = cursor.fetchone()
 
 
 
+			
 
 			
 			# TRAE VENTA Y DESCUENTOS
@@ -7346,6 +7374,9 @@ def vtaneta_socio(request):
 			cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre FROM vtas_socio_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) ORDER BY vst.venta_neta desc;")
 			vtasresult =  dictfetchall(cursor)
 
+			if not vtasresult:
+				return HttpResponse("<h2>No existe movimientos para esta consulta !</h2>")
+												
 
 			"""
 			if generarcredito==True:
@@ -7456,3 +7487,102 @@ def vtaneta_socio(request):
 
 		form = RpteVtaNetaSocioxMarcaForm()
 	return render(request,'pedidos/vtaneta_socio_xproveedorform.html',{'form':form,})
+
+
+
+
+""" CANCELA DOCUMENTO """
+
+
+
+
+#@permission_required('auth.add_user',login_url=None,raise_exception=True)
+def cancelardocumentoadvertencia(request,NoDocto):
+	#no esta en 
+	#pdb.set_trace()
+	nodocto=NoDocto
+	
+	status_operation='fail'
+
+	form=CanceladocumentoForm()
+	context={}
+	
+	print request.is_ajax()
+	if request.method == 'POST'  and not (request.is_ajax()):
+
+			form = CanceladocumentoForm(request.POST)
+			
+			if form.is_valid():
+				print " pasa por aqui"
+				cursor = connection.cursor()
+				# limpia datos 
+				motivo_cancelacion = form.cleaned_data['motivo_cancelacion']
+				status_operation,error = cancela_documento(request,nodocto,motivo_cancelacion)			
+				cursor.close()
+				
+	
+				return render(request,'pedidos/msj_cancelacion_resultado.html',{'status_operation':status_operation,})
+				
+			
+	elif request.method == 'POST'  and (request.is_ajax()):
+
+		status_operation = cancela_documento(request,nodocto,'CANCELACION')
+				
+				
+	else:			
+		
+		pass	
+	context={'nodocto':nodocto,'status_operation':status_operation,'form':form}
+	return render(request,'pedidos/cancelardocumentoadvertencia.html',context,)
+
+
+# RUTINA PARA CANCELAR UN DOCUMENTO
+
+def cancela_documento(request,nodocto,motivo_cancelacion):
+
+	#pdb.set_trace()
+	
+	cursor = connection.cursor()
+
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	hora_hoy = hoy.strftime("%H:%M:%S") 
+	error = ''
+	 
+	try:
+		cursor.execute("START TRANSACTION;")
+		cursor.execute("UPDATE documentos set cancelado=1 WHERE empresano=1 and  nodocto=%s;",(nodocto,))
+		cursor.execute("INSERT INTO documentoscancelados(EmpresaNo,NoDocto,FechaCancelacion,HoraCancelacion,Usuario,motivo) VALUES(%s,%s,%s,%s,%s,%s);",(1,nodocto,fecha_hoy,hora_hoy,99,motivo_cancelacion,))
+		status_operation='ok'
+		cursor.execute("COMMIT;")
+
+	except DatabaseError as err:
+		cursor.execute("ROLLBACK;")
+		status_operation='fail'
+		error=str(err)
+	cursor.close()
+	return status_operation,error
+
+
+"""ESTA RUTINA CANCELA UN PEDIDO, ES LLAMADA TANTO DE PEDIDOS GENERAL
+COMO DE LA PANTALLA DE VENTAS."""
+def cancelar_documento(request,NoDocto):
+	
+	#pdb.set_trace()
+	
+	nodocto = NoDocto
+	
+	#motivo = request.POST['motivo']
+	motivo = 'por prueba'
+
+	status_operation='fail'
+	error = ''
+	
+	context={}
+	
+	status_operacion,error = cancelardocumentoadvertencia(request,nodocto)
+				
+	data = {'status_operacion':status_operacion,'error':error}
+	return HttpResponse(json.dumps(data),content_type='application/json',)	
+
+

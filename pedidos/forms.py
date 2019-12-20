@@ -300,11 +300,15 @@ class PedidosForm(forms.Form):
 
 		self.fields['tallaalt'] = forms.CharField(label='',help_text='Si talla es "NE", ingrese una aqui')
 
-		# Si usuario no es del estaff no debe se mostrara ni periodo de entrega ni fechamaximaentrega.
-		if not request.session['is_staff']:
-	  		escondido = 'display: none;'
-	  	else:
-	  		escondido ='display: ;'
+
+
+		try:# Si usuario no es del estaff no debe se mostrara ni periodo de entrega ni fechamaximaentrega.
+			if not request.session['is_staff']:
+		  		escondido = 'display: none;'
+		  	else:
+		  		escondido ='display: ;'
+		except:
+			return HttpResponse("<H2> Problemas son su sesion !, suele ocurrir, inicie sesion nuevamente !")
 
 	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
 
@@ -1404,7 +1408,7 @@ class CreaDocumentoForm(forms.Form):
 
 
 	doc_asociado= forms.IntegerField(label='Socio',initial=0,required=True)
-	doc_concepto = forms.CharField(label="Concepto",initial='',required=True)
+	doc_concepto = forms.CharField(label="Concepto",initial=' ',required=True)
 	doc_monto = forms.FloatField(label='Monto',initial=0,required=True)
 
 
@@ -1420,31 +1424,39 @@ class CreaDocumentoForm(forms.Form):
 		
 		lprov = lista_Proveedores() # genera una lista de proveedores para ser asignada al combo.
 		super(CreaDocumentoForm, self).__init__(*args,**kwargs)
+		print 'argumetnosw:'
+		for x in args:
+			print x
 
 		self.fields['doc_proveedor'] = forms.ChoiceField(widget=forms.Select(),
-			label='Proveedor',choices = lprov,initial=0,required='True' )
+			label='Proveedor',choices = lprov,initial=0,required=False )
+		self.fields['doc_asociado'] = forms.IntegerField(label='Socio',initial=0,required=True)
 
 		return
 
 	def clean(self):
-
+		#pdb.set_trace()
 		
 		cleaned_data = super(CreaDocumentoForm, self).clean()
 
 		
-		tipodedocumento = cleaned_data.get('doc_tipodedocumento')
-		ventadecatalogo = cleaned_data.get('doc_ventadecatalogo')
-		asociado = cleaned_data.get('doc_asociado')
-		concepto =  cleaned_data.get('doc_concepto')
-		monto =  cleaned_data.get('doc_monto')
+		self.tipodedocumento = cleaned_data.get('doc_tipodedocumento')
+		self.ventadecatalogo = cleaned_data.get('doc_ventadecatalogo')
+		self.asociado = cleaned_data.get('doc_asociado')
+		self.concepto =  cleaned_data.get('doc_concepto')
+		self.monto =  cleaned_data.get('doc_monto')
+		try:
+			self.longitud_concepto = len(self.concepto.strip())
+		except:
+			self.longitud_concepto = 0
 
-		if asociado < 1:
+		if self.asociado < 1:
 			raise forms.ValidationError(self.error_messages['asociado_inv'],code='asociado_inv')
 
-		elif len(concepto.strip()) <3:
+		elif self.longitud_concepto <3:
 			raise forms.ValidationError(self.error_messages['con_invalido'],code='con_invalido')
 
-		elif not (monto>0):
+		elif not (self.monto>0):
 			raise forms.ValidationError(self.error_messages['err_monto'],code='err_monto')
 		else:
 			pass
@@ -1755,3 +1767,23 @@ class RpteVtaNetaSocioxMarcaForm(forms.Form):
 		
 
 		return self.cleaned_data
+
+
+
+
+class CanceladocumentoForm(forms.Form):
+
+	motivo_cancelacion = forms.CharField(label='Motivo de cancelacion:',initial=' ',required=True)
+
+	def clean_motivo_cancelacion(self):
+		
+		cleaned_data = super(CanceladocumentoForm,self).clean()
+		motivo_cancelacion = self.cleaned_data.get('motivo_cancelacion')
+
+		if not motivo_cancelacion: 	
+
+			raise forms.ValidationError('Escriba un motivo por el cual esta cancelado el documento !')
+		else:
+			if len(motivo_cancelacion)<10:
+				raise forms.ValidationError("La descripcion del motivo debe tener una longitud superior a 15 caracteres !")
+		return motivo_cancelacion

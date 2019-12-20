@@ -12,20 +12,20 @@
 
     {% if status_operation == "ok" %}
       <div class="alert alert-success" role="alert">
-         <strong>Listo ! </strong> Su pedido ha sido cancelado con éxito !
+         <strong>Listo ! </strong> Su cancelación ha sido exitosa !
  
       </div>
     {% else %}
       <div class="alert alert-warning" role="alert">
-        <strong>Operacion fallida !</strong>  Error al cancelar su pedido, la transacción no pudo ser completada, intente nuevamente !
+        <strong>Operacion fallida !</strong>  Error al cancelar, la transacción no pudo ser completada, intente nuevamente !
       </div>
 
     {% endif %}
-    <form action={% url 'pedidos:pedidosgeneral' %}>
+    <!--<form action={% url 'pedidos:pedidosgeneral' %}>
      
               <input  class="btn btn-lg btn-success " type="submit" value="Salir" />
 
-    </form> 
+    </form> --> 
           
   </div>
 

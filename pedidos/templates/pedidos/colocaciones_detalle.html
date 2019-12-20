@@ -46,7 +46,7 @@
                 <th>Precio</th>
                 <th>Fecha-SC</th>
                 <th>Opcion</th>
-                <th>Enco</th>
+                <th>Encontrado</th>
                 <th>2</th>
                 <th>3</th>
                 <th>4</th>
@@ -55,7 +55,7 @@
                 <th>7</th>
                 <th>8</th>
                 <th>9</th>
-                <th>Nombre_Socio
+                <th>Nombre_Socio</th>
 
         	</tr>
         </thead>
@@ -131,12 +131,19 @@
     	</table>
     </div>
     <div class="row">
-        <div class="col-md-6">
+
+        <div class="col-md-4">
+            <h3>Total registros: <span id="col_art_encont" class="label label-primary">{{tot_reg}}</span></h3>
+        </div>
+
+
+
+        <div class="col-md-4">
             <h3>Marcados previamente como encontrados: <span id="col_art_encont" class="label label-primary">{{reg_encontrados}}</span></h3>
         </div>
 
     
-        <div class="col-md-6" >
+        <div class="col-md-4" >
             <h3>Total encontrados: <span id="total_encontrados" class="label label-primary">{{reg_encontrados}}</span></h3>
         </div>
     </div>

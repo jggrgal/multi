@@ -9,10 +9,12 @@
 <div class="row">
 <!-- <div class="col-md-3"></div>-->
   <div class="col-md-4">
+
       
   </div>
   <div class="col-md-4">
     <div class="panel panel-success">
+
         <div class='panel-heading'><h4 align='left'>Creacion de documento<h4></div>
         <div class='panel-body'>
               
@@ -27,14 +29,21 @@
                     {% csrf_token %}
 
                    
-                       {{ form | crispy }}  
-
+                       {{ form.doc_tipodedocumento | as_crispy_field }}
+                       {{ form.doc_ventadecatalogo | as_crispy_field }}
+                       {{ form.doc_proveedor | as_crispy_field }}
+                       {{ form.doc_anio | as_crispy_field }}
+                       {{ form.doc_temporada | as_crispy_field }}  
+                       {{ form.doc_asociado | as_crispy_field }}
+                       <p id="muestra_nombre_socio"></p>
+                       {{ form.doc_concepto | as_crispy_field }}
+                       {{ form.doc_monto | as_crispy_field }}
 
                    <!-- {% if tipodedocumento == 'Credito' %}
                         {{ form.bloquearnotacredito | as_crispy_field }}
                     {% endif %}-->
                     
-                    
+                    <!--<input id='num_socio' value='{{num_socio}}' type='hidden' name='num_socio'>-->
                 
                     <input  id='btn_genera_rpte_cotejo' class="btn btn-default"  type="submit" value="Enviar" />
                 

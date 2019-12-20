@@ -38,7 +38,7 @@
                 <th>Cargos</th>
                 <th>Descuento</th>
                 
-                <th> Cancel ?</th>
+                <th> Cancelar</th>
                 <th> Imprimir </th>
         	</tr>
         </thead>
@@ -55,7 +55,7 @@
                     <td>{{item.nombre_socio}}</td>
                     
                    
-        			<td>{{ item.concepto }}</td>
+        			<td>{{ item.concepto }}</td> 
             		<td>{{ item.monto }}</td>
             		<td>{{item.venta}}</td>
                     <td>{{item.saldo}}</td>
@@ -63,7 +63,7 @@
                     <td>{{item.DescuentoAplicado}}</td>
                   
                     <td><p align="left">
-                          <a class="btn btn-danger btn-sm " href="/pedidos/cancelar_documento/{{ item.NoDocto }}" role="button" {% if  item.Cancelado  %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
+                          <a class="btn btn-danger btn-sm " href="/pedidos/cancelardocumentoadvertencia/{{ item.NoDocto }}" role="button" {% if  not item.cancelar %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
                         </p></td>
                     <td><p align="left">
                           <form id="imp_venta_form"  role="button" {% if  item.TipoDeDocumento == 'Remision'  %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  item.TipoDeDocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{item.NoDocto}} />
