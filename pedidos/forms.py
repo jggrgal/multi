@@ -1787,3 +1787,9 @@ class CanceladocumentoForm(forms.Form):
 			if len(motivo_cancelacion)<10:
 				raise forms.ValidationError("La descripcion del motivo debe tener una longitud superior a 15 caracteres !")
 		return motivo_cancelacion
+
+
+
+
+
+

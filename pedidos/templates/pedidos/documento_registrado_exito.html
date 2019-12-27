@@ -1,0 +1,64 @@
+{% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<div class="row">
+   
+  
+
+  <div class="col-md-12">  
+
+    <h3> Documento Procesado !</h3>
+    <div class="alert alert-success" role="alert">
+        <h3>
+        Su documento quedó registrado con el número {% if tipodedocumento == 'Remision' or tipodedocumento == 'Cargo' %} {{ p_num_venta }} {% else %} {{ p_num_credito }} {% endif %}
+
+        </h3><br><br>
+
+        <h4> Puede dar seguimiento de este y todos sus documentos en la sección de consulta de documentos </h4>
+
+
+
+
+    </div>
+    
+  </div><br><br>
+  <div class="col-md-3">
+      <form id="imp_venta_form"  role="button" {% if  tipodedocumento == 'Remision' or  tipodedocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  tipodedocumento == 'Remision' or  tipodedocumento == 'Cargo'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value = "{% if tipodedocumento == 'Remision' or tipodedocumento == 'Cargo' %} {{ p_num_venta }} {% else %} {{ p_num_credito }} {% endif %}" />
+      </form>
+
+
+  </div>
+    
+  <div class="col-md-3">
+
+    <form action={% url 'pedidos:documentos' %} >
+      <input class="btn btn-default " type="submit" value="Continuar..">
+    </form>
+  </div>
+  <div class="col-md-6">
+  </div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

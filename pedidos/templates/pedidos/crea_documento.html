@@ -28,20 +28,20 @@
                
                     {% csrf_token %}
 
-                   
+                       {{ form.doc_asociado | as_crispy_field }}
+                       <p id="muestra_nombre_socio"></p>
                        {{ form.doc_tipodedocumento | as_crispy_field }}
                        {{ form.doc_ventadecatalogo | as_crispy_field }}
                        {{ form.doc_proveedor | as_crispy_field }}
                        {{ form.doc_anio | as_crispy_field }}
                        {{ form.doc_temporada | as_crispy_field }}  
-                       {{ form.doc_asociado | as_crispy_field }}
-                       <p id="muestra_nombre_socio"></p>
+                       
                        {{ form.doc_concepto | as_crispy_field }}
                        {{ form.doc_monto | as_crispy_field }}
 
                    <!-- {% if tipodedocumento == 'Credito' %}
                         {{ form.bloquearnotacredito | as_crispy_field }}
-                    {% endif %}-->
+                    {% endif %}--> 
                     
                     <!--<input id='num_socio' value='{{num_socio}}' type='hidden' name='num_socio'>-->
                 
@@ -52,6 +52,14 @@
                 
              
             </form>
+
+          <!-- 
+          <form id="imp_venta_form"  method= 'GET' role="button" {% if  form.doc_tipodedocumento == 'Remision' or  form.doc_tipodedocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if form.doc_tipodedocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{ NoDocto }}>
+          </form> -->           
+
+
+
+
 
         </div><br>
  <div class="col-md-4">

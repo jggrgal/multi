@@ -66,7 +66,7 @@
                           <a class="btn btn-danger btn-sm " href="/pedidos/cancelardocumentoadvertencia/{{ item.NoDocto }}" role="button" {% if  not item.cancelar %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
                         </p></td>
                     <td><p align="left">
-                          <form id="imp_venta_form"  role="button" {% if  item.TipoDeDocumento == 'Remision'  %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  item.TipoDeDocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{item.NoDocto}} />
+                          <form id="imp_venta_form"  role="button" {% if  item.TipoDeDocumento == 'Remision' or  item.TipoDeDocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  item.TipoDeDocumento == 'Remision' or  item.TipoDeDocumento == 'Cargo'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{item.NoDocto}} />
                             </form>
                           <!--
                           <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET">class="btn btn-success btn-sm" 
