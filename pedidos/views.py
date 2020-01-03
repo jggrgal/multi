@@ -38,7 +38,8 @@ from .forms import (AccesoForm,\
 					Crea_devolucionForm,\
 					Genera_BaseBonoForm,\
 					RpteVtaNetaSocioxMarcaForm,\
-					CanceladocumentoForm,)
+					CanceladocumentoForm,\
+					RpteCreditosForm,)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -1910,6 +1911,8 @@ def picklist_estilopagina(request):
 def calzadollego_gral(request):
 
 	mensaje =''
+
+	total_art_recibidos = 0
 	if request.method == 'POST':
 
 		form = Calzadollego_gralForm(request.POST)
@@ -1923,7 +1926,7 @@ def calzadollego_gral(request):
 			cursor=connection.cursor()
 
 			
-			cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada AS FTL,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) left join almacen j on (j.proveedorno=c.prov_id and j.empresano=1 ) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))
+			cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada AS FTL,c.prov_id,c.almacen,c.TotArtRecibidos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) left join almacen j on (j.proveedorno=c.prov_id and j.empresano=1 ) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))
 
 			'''cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) inner join almacen j on (j.proveedorno=c.prov_id and j.empresano=1) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by psf.fechatentativallegada;",(fechainicial,fechafinal))'''
 
@@ -1944,15 +1947,16 @@ def calzadollego_gral(request):
 
 			else:
 				print "lo que hay en pedidos"
+
 				for ped in pedidos:
-					print ped
+					total_art_recibidos += ped['TotArtRecibidos']
 				prov_a_buscar = ped["prov_id"]
 
 				print "proveedor buscado"
 				print prov_a_buscar
 				mensaje ="Registros encontrados == > "
 
-				context = {'form':form,'mensaje':mensaje,'pedidos':pedidos,'elementos':elementos,}	
+				context = {'form':form,'mensaje':mensaje,'pedidos':pedidos,'elementos':elementos,'total_art_recibidos':total_art_recibidos,}	
 			
 				return render(request,'pedidos/lista_calzadollego_gral.html',context)
 
@@ -4270,6 +4274,10 @@ def procesar_recepcion(request):
 
 						contador_productos_recibidos += 1
 
+
+
+
+
 					# Si el pedido No llego
 
 					elif incidencia == '2' and marcartodo_nollego != 'on':
@@ -4290,7 +4298,7 @@ def procesar_recepcion(request):
 
 						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,HoraModicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(f_convertida,pedido,productono,catalogo,nolinea))
-						cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(contador_productos_recibidos,f_convertida,cierre))
+						cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
 
 					elif incidencia > '2':
 						# Si el producto llego pero no pasa el control de calidad
@@ -4518,7 +4526,7 @@ def procesar_recepcion(request):
 				else:
 				# De otra manera solo incremeta el contador de recepcionados
 
-					cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=TotArtRecibidos+%s WHERE id=%s;",(contador_productos_recibidos,cierre))
+					cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s WHERE id=%s;",(contador_productos_recibidos,cierre))
 
 				cursor.execute("COMMIT;")
 
@@ -6471,6 +6479,8 @@ def procesar_devolucion_socio(request):
 
 
 
+
+
 	if request.is_ajax()  and request.method == 'POST':
 		# Pasa a una variable la tabla  recibida en json string
 		TableData = request.POST.get('TableData')
@@ -6479,6 +6489,7 @@ def procesar_devolucion_socio(request):
 		datos = json.loads(TableData)
 
 		capturista = request.session['socio_zapcat']
+		sucursal = request.session['sucursal_activa']
 		
 		socio = request.POST.get('socio')
 
@@ -6522,9 +6533,9 @@ def procesar_devolucion_socio(request):
 
 
 
-		cursor.execute("SELECT sucursalno from asociado WHERE EmpresaNo=1 and asociadono=%s;",(socio,) )
+		"""cursor.execute("SELECT sucursalno from asociado WHERE EmpresaNo=1 and asociadono=%s;",(socio,) )
 		registro = cursor.fetchone()
-		sucursal = registro[0]
+		sucursal = registro[0]"""
 
 
 		# Se trae datos para revisar si procede el cobro de comision por no recoger calazado en tiempo.
@@ -7641,3 +7652,332 @@ def cancelar_documento(request,NoDocto):
 	return HttpResponse(json.dumps(data),content_type='application/json',)	
 
 
+def rptedecreditos(request):
+
+
+	#pdb.set_trace()
+	if request.method == 'POST':
+			
+		form = RpteCreditosForm(request.POST)
+		
+		if form.is_valid():
+
+			sucursal_inicial = form.cleaned_data['sucursal_inicial']
+			sucursal_final = form.cleaned_data['sucursal_final']
+
+			tipo_credito = form.cleaned_data['tipo_credito'].encode('latin_1')
+			status_credito = form.cleaned_data['status_credito'].encode('latin_1')
+
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			
+			salida_a = form.cleaned_data['salida_a']			
+
+
+			if tipo_credito == 'Todos' and status_credito=='Aplicado':
+				
+			
+				
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo=0 and d.cancelado=0;"""
+		
+				
+			elif tipo_credito == 'Todos' and status_credito=='Sin aplicar':
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo >0 and d.cancelado=0;"""
+
+			elif tipo_credito == 'Ajuste' and status_credito == 'Aplicado':
+				
+				busca = 'credito sobrante%'	
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo=0 and d.cancelado=0
+									and d.concepto like %s ;"""		
+			
+			elif tipo_credito == 'Ajuste' and status_credito == 'Sin aplicar': 
+
+
+				busca = 'credito sobrante%'	
+
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo>0 and d.cancelado=0
+									and d.concepto like %s;"""
+
+			elif tipo_credito == 'Devolucion' and status_credito == 'Aplicado':	
+
+				busca = 'credito generado%'	
+
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo=0 and d.cancelado=0
+									and d.concepto like %s;"""
+			
+
+			elif tipo_credito == 'Devolucion' and status_credito == 'Sin aplicar':
+
+
+				busca = 'credito generado%'	
+
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo>0 and d.cancelado=0
+									and d.concepto like %s;"""
+			
+
+
+			elif tipo_credito == 'Anticipo' and status_credito == 'Aplicado':
+
+			
+				busca = 'anticipo%'	
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo=0 and d.cancelado=0
+									and d.concepto like %s;"""
+			
+
+
+			elif tipo_credito == 'Anticipo' and status_credito == 'Sin aplicar':
+
+				busca = 'anticipo%'
+
+				consulta = '''SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo>0 and d.cancelado=0
+									and d.concepto like %s;'''
+			
+
+
+
+			elif tipo_credito == 'Capturado' and status_credito == 'Aplicado':
+
+				busca = 'c:%'
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo=0 and d.cancelado=0
+									and d.concepto like %s;"""
+			
+
+
+			elif tipo_credito == 'Capturado' and status_credito == 'Sin aplicar':
+
+
+				busca = 'c:%'
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.saldo FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s
+									and d.saldo>0 and d.cancelado=0
+									and d.concepto like %s;"""
+			
+			else:
+
+				consulta = """SELECT d.idsucursal,d.NoDocto,\
+									d.FechaCreacion,\
+									d.asociado,\
+									CONCAT(trim(s.nombre),' ',\
+									trim(s.appaterno),' ',\
+									trim(s.apmaterno)) as nombre_socio,\
+									d.concepto,\
+									d.monto,\
+									d.saldo FROM documentos d\
+									INNER JOIN asociado s\
+									on d.empresano=s.empresano\
+									and d.asociado=s.asociadono\
+									WHERE d.empresano=1 and d.idsucursal>=%s and d.idsucursal<=%s and d.tipodedocumento='Credito'\
+									and d.FechaCreacion>=%s and d.FechaCreacion<=%s\
+									and d.saldo>0 and d.cancelado=0;"""
+			
+			if tipo_credito != 'Todos':
+				parms = [sucursal_inicial,sucursal_final,fechainicial,fechafinal,busca]
+			else:
+				parms = [sucursal_inicial,sucursal_final,fechainicial,fechafinal]
+
+			try:
+				cursor = connection.cursor()
+		
+				cursor.execute(consulta,parms) # observar que se uso parms como parte de una lista en lugar de una tupla, si se usa una tupla marca error
+
+				documentos = dictfetchall(cursor)
+
+				tot_monto,tot_saldo = 0,0
+				for docu in documentos:
+					tot_monto += docu['monto']
+					tot_saldo += docu['saldo']
+
+				if salida_a == 'Pantalla':
+
+				#   ***** MANDA A PANTALLA IMPRESION ***			
+					if not documentos:
+						e = "No se encontraron registros !"
+					else:
+						e = ''
+					context = {'documentos':documentos,'mensaje':e,'tot_monto':tot_monto,'tot_saldo':tot_saldo,'tipo_credito':tipo_credito,'status_credito':status_credito,}
+					return render (request,'pedidos/rpte_creditos.html',context)
+			
+				else:
+
+				# *** ***  MANDA A ARCHIVO IMPRESION *****
+					if not documentos:
+						e = "No se encontraron registros !"
+						context = {'documentos':documentos,'mensaje':e,'tot_monto':tot_monto,'tot_saldo':tot_saldo,'tipo_credito':tipo_credito,'status_credito':status_credito,}
+						return render (request,'pedidos/rpte_creditos.html',context)
+					else:
+
+						response = HttpResponse(content_type='text/csv')
+						response['Content-Disposition'] = 'attachment; filename="RPTE_CREDITOS.csv"'
+
+						writer = csv.writer(response)
+						writer.writerow(['SUCURSAL', 'NO_DOCTO', 'FECHA', 'NUM_SOCIO','NOMBRE_SOCIO','CONCEPTO','MONTO','SALDO',])
+					
+						for documento in documentos:
+					
+					
+							# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+							llaves_a_mostrar = ['idsucursal','NoDocto','FechaCreacion','asociado','nombre_socio','concepto','monto','saldo',] 
+							# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+							lista = [documento[x] for x in llaves_a_mostrar]
+				
+							writer.writerow(lista)
+						cursor.close()
+						return response			
+
+			except DatabaseError as e:
+				print e
+
+			
+			cursor.close()
+		
+	else:
+		form = RpteCreditosForm()
+
+	return render (request,'pedidos/rpte_creditos_filtro.html',{'form':form,})
+			

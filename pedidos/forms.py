@@ -1790,6 +1790,129 @@ class CanceladocumentoForm(forms.Form):
 
 
 
+''' ***********   FORMA DOCUMENTOS   *************'''
+
+class RpteCreditosForm(forms.Form):
+
+	#pdb.set_trace()
+	
+	lista_status = (('Todos','Todos'),('Aplicado','Aplicado'),('Sin aplicar','Sin aplicar'),)
+	lista_tipos_credito = (('Todos','Todos'),('Ajuste','Ajuste'),('Devolucion','Devolucion'),('Anticipo','Anticipo'),('Capturado','Capturado'),)
+	lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
+
+
+	sucursales = {}
+
+	sucursal_inicial = forms.ChoiceField(widget=forms.Select(),	label='Sucursal_inicial',initial=1,required='True')
+	sucursal_final = forms.ChoiceField(widget=forms.Select(),label='Sucursal_final',initial=1,required='True')
+ 
+	
+	tipo_credito = forms.ChoiceField(label="Tipo",widget=forms.Select(),choices=lista_tipos_credito,required=True)
+	status_credito = forms.ChoiceField(label="Status",widget=forms.Select(),choices=lista_status,required=True)
+
+
+
+	hoy =  date.today()	
+	#t = datetime.now
+	f_inicial_init =  date.today()
+
+	f_final_init = f_inicial_init + timedelta(days=30)
+
+
+
+
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+	#fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),initial=f_inicial_init.strftime('%d/%m/%Y'),required=False)
+	#fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),initial=f_final_init.strftime('%d/%m/%Y'),required=False)
+
+	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
+	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
+
+	salida_a = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
+ 
+
+	error_messages = {'DctoSocio':'Ingrese un numero de documento o bien un numero de socio !',
+					'FechaInicial':'Ingrese una fecha inicial !',
+					'FechaFinal':'Ingrese una fecha final !',
+					'FechIniMayor':'La fecha final debe ser mayor o igual a la fecha inicial !',
+					'ConsultaFueraRango':'Solo se permite la consulta de hasta 90 dias !',
+					'nohaysocio':'Socio no registrado !',
+					'nohaydocto':'Documento no registrado !',
+					'SucursalFinal':'La sucursal final debe ser mayor o igual a la sucursal inicial !',
+					'CombinacionInvalida':'Combinacion de tipo de credito con status del mismo invalida !',
+					'CombinacionSucursalInvalida': 'Sucursal inicial y final no pueden ser "General"'}
+
+
+		
+	def __init__(self,*args,**kwargs):
+
+		
+		
+		lprov = lista_Sucursales()
+
+		super(RpteCreditosForm, self).__init__(*args,**kwargs)
+		self.fields['sucursal_inicial'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal_inicial',choices = lprov,initial=1,required='True' )
+		
+		self.fields['sucursal_final'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal_final',choices = lprov,initial=1,required='True' )
+		
+
+
+
+	"""def clean_sucursal(self):
+
+		cleaned_data = super(Entrada_sistemaForm, self).clean()
+		sucursal = self.cleaned_data.get('sucursal')
+
+		if sucursal=='0':
+			raise forms.ValidationError("Seleccione una sucursal en particular !")
+		
+		return sucursal"""
+
+
+
+	def clean(self):
+		
+		cleaned_data = super(RpteCreditosForm, self).clean()
+
+		sucursal_inicial = self.cleaned_data.get('sucursal_inicial')
+		sucursal_final = self.cleaned_data.get('sucursal_final')
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		tipo_credito = cleaned_data.get('tipo_credito')
+		status_credito = cleaned_data.get('status_credito')
+
+
+		if sucursal_final<sucursal_inicial:
+			raise forms.ValidationError(self.error_messages['SucursalFinal'],code='SucursalFinal')
+
+
+		if sucursal_final=='0' and sucursal_inicial=='0':
+			raise  forms.ValidationError(self.error_messages['CombinacionSucursalInvalida'],code='CombinacionSucursalInvalida')
+
+		if tipo_credito != 'Todos' and status_credito == 'Todos':
+			raise  forms.ValidationError(self.error_messages['CombinacionInvalida'],code='CombinacionInvalida')
+	
+
+		if not(fechainicial and fechafinal):
+
+			if not fechainicial:
+				raise  forms.ValidationError(self.error_messages['FechaInicial'],code='FechaInicial')
+			if not fechafinal:
+				raise forms.ValidationError(self.error_messages['FechaFinal'],code='FechaFinal')
+			
+		else:
+			if fechainicial > fechafinal:
+				raise forms.ValidationError(self.error_messages['FechIniMayor'],code='FechIniMayor')
+			
+		# De otra manera, quiere decir que el socio es cero y quien tiene un valor es
+		# el numero de documento, siendo este el caso no hay ya validacion.
+
+		return self.cleaned_data
 
 
 

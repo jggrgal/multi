@@ -1,0 +1,91 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class=row>
+    <div class='col-md-4'>
+         <h4 class='success'>REPORTE DE CREDITOS</h4>  
+
+       
+    </div>
+    <div class='col-md-4'>
+    </div>
+    <div class='col-md-4'>
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4> <br>  
+        <h4 align="left">
+            Tipo: {{ tipo_credito}}<br>
+            Status: {{status_credito}}
+        </h4>
+
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+    	<!--<table id="lista_documentos" class='display table table-hover table-bordered table-condensed'>-->
+        <table id="lista_documentos" class='table'>
+        
+            <thead>
+        	<tr class='success'>
+        		<th>Documento Num</th>
+                <th>Fecha</th>
+                <th>Socio Num</th>
+                <th>Nombre</th>
+               	<th>Concepto</th>
+            	<th>Monto</th>
+                <th>Saldo</th>
+          	</tr>
+        </thead>
+        <tbody>
+        	{% for item in documentos %}
+                
+        		<tr>
+                    <td> {{item.NoDocto}} </td>
+                    {% localize on %}
+                        <td>{{item.FechaCreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{item.asociado}}</td>
+                    <td>{{item.nombre_socio}}</td>
+                    
+                   
+        			<td>{{ item.concepto }}</td> 
+            		<td>{{ item.monto }}</td>
+            		<td>{{item.saldo}}</td>
+                    
+                                       
+                          <!--
+                          <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET">class="btn btn-success btn-sm" 
+                                <input id ='idventa' name ='p_num_venta' class=btn-success-btn-lg" type="submit"  value="000000" />
+                
+
+                            </form><br>-->
+        
+
+
+
+                        </p></td>
+                    
+            	</tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>TOTALES: </td>
+              <td>{{ tot_monto }} </td>
+              <td> {{ tot_saldo }}</td>
+            </tr>
+        </tfoot>
+    	</table>
+    </div>
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/documentos" role="button">Salir</a>
+    </p>
+
+
+{% endblock %}

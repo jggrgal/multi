@@ -11,9 +11,10 @@
 
   <div class="col-md-12">  
 
-    <h3> Documento Procesado !</h3>
+    
     <div class="alert alert-success" role="alert">
         <h3>
+        Documento Procesado !<br><br>
         Su documento quedó registrado con el número {% if tipodedocumento == 'Remision' or tipodedocumento == 'Cargo' %} {{ p_num_venta }} {% else %} {{ p_num_credito }} {% endif %}
 
         </h3><br><br>
