@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from functools import partial
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError
+from django.http import HttpResponse
 import pdb 
 
 # FUNCION PARA GENERAR LISTA DE PROVEEDORES
@@ -1602,7 +1603,7 @@ class Genera_BaseBonoForm(forms.Form):
 		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 
 		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
-		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+		#	fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
 	
 		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
 
@@ -1610,6 +1611,9 @@ class Genera_BaseBonoForm(forms.Form):
 		self.fields['venta_minima'] = forms.DecimalField(label='Venta minima para bono')
 
 		self.fields['generarcredito'] = forms.BooleanField(label='Generar el credito',required=False)
+
+		self.fields['salida'] = forms.ChoiceField(widget=forms.Select(),label='Enviar a:',choices = (('Pantalla','Pantalla'),('Archivo','Archivo')),initial='Pantalla',required='True')
+
 
 		'''error_messages = {
 		
@@ -1654,7 +1658,7 @@ class Genera_BaseBonoForm(forms.Form):
 		porcentaje = cleaned_data.get('porcentaje')
 		venta_minima = cleaned_data.get('venta_minima')
 		generarcredito =cleaned_data.get('generarcredito')
-
+		salida = cleaned_data.get('salida')
 
 		print "fechas aqui:"
 		print fechainicial

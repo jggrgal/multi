@@ -6814,7 +6814,7 @@ def calcula_bono(request):
 			porcentaje = form.cleaned_data['porcentaje']
 			venta_minima = form.cleaned_data['venta_minima']
 			generarcredito= form.cleaned_data['generarcredito']
-
+			salida = form.cleaned_data['salida']
 
 			cursor=connection.cursor()
 
@@ -7095,11 +7095,29 @@ def calcula_bono(request):
 			
 
 			
+			if salida=='Pantalla':	
+				context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_bono':float(tot_bono),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
+			
+				return render(request,'pedidos/lista_bono_socio.html',context)
+			else:
 
-			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_bono':float(tot_bono),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="BONO_CONSTANCIA.csv"'
+
+				writer = csv.writer(response)
+				writer.writerow(['NUM_SOCIO','NOMBRE_SOCIO','VENTA_BRUTA','DESCUENTOS','DEVOLUCIONES','VENTA_NETA','BONO'])
+			
+				for vta in vtasresult:
+			
+					if  vta['ventas'] != 0 or vta['venta_FD'] != 0   or vta['venta_bruta'] != 0 or vta['descuento'] != 0 or vta['devoluciones'] != 0 or vta['venta_neta'] != 0:
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['asociadono','nombre','ventas','descuento','devoluciones','venta_neta','bono',] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [vta[x] for x in llaves_a_mostrar]
+						writer.writerow(lista)
 		
-			return render(request,'pedidos/lista_bono_socio.html',context)
-
+				cursor.close()
+				return response			
 		
 	else:
 
