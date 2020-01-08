@@ -1912,7 +1912,7 @@ def calzadollego_gral(request):
 
 	mensaje =''
 
-	total_art_recibidos = 0
+	total_articulos = 0
 	if request.method == 'POST':
 
 		form = Calzadollego_gralForm(request.POST)
@@ -1926,7 +1926,7 @@ def calzadollego_gral(request):
 			cursor=connection.cursor()
 
 			
-			cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada AS FTL,c.prov_id,c.almacen,c.TotArtRecibidos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) left join almacen j on (j.proveedorno=c.prov_id and j.empresano=1 ) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))
+			cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada AS FTL,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) left join almacen j on (j.proveedorno=c.prov_id and j.empresano=1 ) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))
 
 			'''cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia,k.razonsocial as provnombre FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre) inner join proveedor k on (k.proveedorno=c.prov_id and k.empresano=1) inner join almacen j on (j.proveedorno=c.prov_id and j.empresano=1) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by psf.fechatentativallegada;",(fechainicial,fechafinal))'''
 
@@ -1949,14 +1949,14 @@ def calzadollego_gral(request):
 				print "lo que hay en pedidos"
 
 				for ped in pedidos:
-					total_art_recibidos += ped['TotArtRecibidos']
+					total_articulos += ped['total_articulos']
 				prov_a_buscar = ped["prov_id"]
 
 				print "proveedor buscado"
 				print prov_a_buscar
 				mensaje ="Registros encontrados == > "
 
-				context = {'form':form,'mensaje':mensaje,'pedidos':pedidos,'elementos':elementos,'total_art_recibidos':total_art_recibidos,}	
+				context = {'form':form,'mensaje':mensaje,'pedidos':pedidos,'elementos':elementos,'total_articulos':total_articulos,}	
 			
 				return render(request,'pedidos/lista_calzadollego_gral.html',context)
 
@@ -4522,7 +4522,7 @@ def procesar_recepcion(request):
 				# Si ya se recepcionaron todos, marca el cierre como recepcionado
 				if reg_sin_recepcionar[0] == 0:
 
-					cursor.execute("UPDATE prov_ped_cierre set recepcionado=1 WHERE id=%s;",(cierre,))
+					cursor.execute("UPDATE prov_ped_cierre set recepcionado=1,TotArtRecibidos=%s WHERE id=%s;",(contador_productos_recibidos,cierre,))
 				else:
 				# De otra manera solo incremeta el contador de recepcionados
 

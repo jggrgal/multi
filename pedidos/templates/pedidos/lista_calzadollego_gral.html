@@ -17,7 +17,7 @@
                 	<th>Proveedor</th>
                 	<th>Almacen</th>
                     <th>No_pedido</th>
-                    <th>Piezas_recibidas</th>
+                    <th>total_articulos</th>
                     <th>Paqueteria</th>
                     <th>No_guia</th>
             	</tr>
@@ -34,7 +34,7 @@
                         <td>{{ item.provnombre }}</td>
             			<td>{{ item.almacen }}</td>
                 		<td>{{ item.numpedido }}</td>
-                		<td>{{item.TotArtRecibidos}}</td>
+                		<td>{{item.total_articulos}}</td>
                 		<td>{{item.paqueteria}}</td>
                         <td>{{item.NoGuia}}</td>
                        
@@ -48,7 +48,7 @@
                         <td></td>
                         <td></td>
                         <td>Total recibidas:</td>
-                        <td>{{ total_art_recibidos }}</td>
+                        <td>{{ total_articulos }}</td>
                         <td></td>
                         <td></td>
                     </tfoot>
