@@ -411,6 +411,78 @@ $("#procesar_devolucion_socio").prop('disabled',true)
 
 
 
+// F U N I C I O N   F
+
+
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE RECEPCIONAR UNA DEVOLUCION DE SOCIO.
+
+$("#procesar_recepcion_dev_prov").prop('disabled',true)
+
+
+
+      $("#usr_id_recepcion_dev_prov").blur(function() {
+
+                var usr_id = $(this).val()
+                $("#procesar_recepcion_dev_prov").prop('disabled',true)
+
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'usr_id':usr_id,'usr_derecho':12},
+                  success: function(data){
+                            if (data.num_usr_valido == 0){
+                                         
+                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
+                              
+                              $("#procesar_recepcion_dev_prov").prop('disabled',true)
+                            }
+
+                            else{
+
+                              num_usr_valido = data.num_usr_valido 
+
+                              $("#procesar_recepcion_dev_prov").prop('disabled',false)
+
+                              if(data.tiene_derecho == 0){
+                                        
+                                      alert("Ud no tiene derechos como empleado para recepcionar devoluciones a proveedor !")
+
+                                        $("#procesar_recepcion_dev_prov").prop('disabled',true)
+
+                              }
+                              else {
+                                        tiene_derecho = 1
+                              };
+
+
+                            }
+                    
+                    ;
+                    
+                    console.log(data.num_usr_valido);
+                    console.log(data.tiene_derecho);
+
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+                
+
+
+
+
+
+            });
+
+
+
+
+
+
 
           
 
@@ -1132,7 +1204,36 @@ $("#procesar_devolucion_socio").prop('disabled',true)
             }); 
             TableData.shift();  // first row will be empty - so remove
             return TableData;
-        }    
+        }   
+
+
+        // MANEJO DE TABLA EN PROCESAR RECEPCION DEVOLUCIONES A PROVEEDOR
+
+// La siguiente funcion es casi igual a la anterior y hace lo mismo solo que para los pedidos que se van a cerrar, es invocada 
+// desde la rutina 'procesar_cierre_pedidos'
+        function storeTblValues_rec_dev_prov()
+        {
+            var TableData = new Array();
+
+            $('#coloc_detail_table tr').each(function(row, tr){
+                if ($(tr).find('td:eq(13)').find('input').prop('checked')){
+
+
+                  TableData[row]={
+                      "Pedido" : $(tr).find('td:eq(0)').text()  // Agrega el pedido ( columna no visible en tabla)
+                      , "ProductoNo" :$(tr).find('td:eq(1)').text() // Agrega el producto ( no visible en tabla)
+                      , "Catalogo" : $(tr).find('td:eq(2)').text() // Agrega el catalogo ( no visible en tabla)
+                      , "Nolinea" : $(tr).find('td:eq(3)').text() // Agrega el Nolinea (no visible en tabla)
+                      , "elegido": $(tr).find('td:eq(13)').find('input').prop('checked') // Agrega "elegido", como es un checkbox usamos la funcion prop('checked') para traernos el va 
+                  }
+                }    
+            }); 
+            TableData.shift();  // first row will be empty - so remove
+            return TableData;
+        }
+
+
+
 
 
 
@@ -3112,6 +3213,89 @@ $('#procesar_ventas').click(function(e){
       });
 
 
+
+ // PROCESAMIENTO DE RECEPCION DE DEVOLUCIONES A PROVEEDOR
+
+      $('#procesar_recepcion_dev_prov').click(function(e){
+
+        
+        // observar que se puede comparar un contenido html con un valor
+        // al menos aqui si hace la comparacion.
+        
+        continuar_procesando = 0;
+
+
+        var var_totreg_a_procesar = parseInt($("#art_elegidos").html());
+
+        if (var_totreg_a_procesar > 0){
+
+          continuar_procesando = 1;
+
+          } 
+        else {
+
+           alert(" Elija al menos un articulo para devolver !")
+           
+           continuar_procesando = 0
+
+           $("#procesar_recepcion_dev_prov").prop('disabled', true);
+
+          }
+
+
+
+        
+        usr_id = $("#usr_id_recepcion_dev_prov").val();
+
+        // comienza validacion de campos antes de pasar al servidor
+
+        
+        if(continuar_procesando == 1){
+
+        
+        e.preventDefault();
+        var answer=confirm('Se procederá a grabar los articulos recepcionados, si está seguro que todo es correcto acepte, caso contrario cancele y modifique.');
+          if(answer){
+
+                  var TableData;
+                  TableData = storeTblValues_rec_dev_prov();
+                  console.log(TableData)
+                  //TableData = $.toJSON(TableData);
+                  TableData = JSON.stringify(TableData);
+                  console.log("EN FORMATO JSON:");
+                  console.log(TableData);
+                  $.ajax({
+
+                    url: '/pedidos/procesar_recepcion_devolucion_proveedor/',
+                    type: 'POST',
+                    data: {'TableData':TableData,'usr_id':usr_id,},
+                    datatype:'application/json',
+                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    success: function(data){
+
+                                      
+                        console.log(data);
+
+                        if (data.status_operacion != 'ok') { 
+
+                          alert(data.error);
+                          }
+                        else {
+                          alert("Recepcion exitosa !.");
+                          $("#procesar_recepcion_dev_prov").prop('disabled', true);
+                          }; 
+                        
+                    },
+                    error: function(){ 
+                      console.log(data);
+                      
+                    },
+
+                  });
+             
+          }
+        }
+      });
 
 
 

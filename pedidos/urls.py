@@ -98,6 +98,9 @@ urlpatterns = [
 	url(r'^vtaneta_socio/$',views.vtaneta_socio,name='vtaneta_socio'),
 	url(r'^cancelardocumentoadvertencia/(?P<NoDocto>[0-9]{1,8})/$',views.cancelardocumentoadvertencia,name='cancelardocumentoadvertencia'),	
 	url(r'^rptedecreditos/$',views.rptedecreditos,name='rptedecreditos'),
+	url(r'^recepcion_dev_prov/$',views.recepcion_dev_prov,name='recepcion_dev_prov'),
+	url(r'^procesar_recepcion_devolucion_proveedor/$',views.procesar_recepcion_devolucion_proveedor,name='procesar_recepcion_devolucion_proveedor'),
+
 
 	#url(r'^crea_devolucion/$',views.crea_devolucion,name='crea_devolucion'),
 

@@ -90,6 +90,48 @@ def lista_Sucursales():
 			
 			
 			return (lprov)
+
+# FUNCION PARA TRAER LISTA DE STATUS
+
+
+def lista_status():
+			cursor=connection.cursor()
+			cursor.execute('SELECT status from catalogostatuspedidos;')
+	
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (u'Todos') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lprov)
+
+
+
+
 f_inicial_init =  date.today()
 
 f_final_init = f_inicial_init + timedelta(days=30)
@@ -147,7 +189,7 @@ class BuscapedidosForm(forms.Form):
 	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 	numpedido = forms.IntegerField(label='Número',initial=0,validators=[MinValueValidator(0)])
 	'''opciones_status = (('1','Pedido',),('2','Por Confirmar',),('3','Aqui',),('4','Cancelado',),('5','Todos',),)'''
-	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
+	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('RecepEnDevol','RecepEnDevol',),('Dev a Prov','Dev a Prov',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
 	status = forms.ChoiceField(label='Status',initial='Confirmado',choices=opciones_status)
 	#fecha = forms.DateField(label='Fecha en que hizo (dd/mm/yyyy)',initial= datetime.now,input_formats=['%d/%m/%Y',],)
 	fecha = forms.DateField(label='Fecha en que hizo (dd/mm/yyyy)',widget=DateInput())
@@ -416,7 +458,7 @@ class BuscapedidosporsocioForm(forms.Form):
 	
 	
 	'''opciones_status = (('1','Pedido',),('2','Por Confirmar',),('3','Aqui',),('4','Cancelado',),('5','Todos',),)'''
-	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
+	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('RecepEnDevol','RecepEnDevol',),('Dev a Prov','Dev a Prov',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
 	status = forms.ChoiceField(label='Status',initial='Confirmado',choices=opciones_status,required=False)
 	#fecha = forms.DateField(label='Fecha en que hizo (dd/mm/yyyy)',initial= datetime.now,input_formats=['%d/%m/%Y',],)
 	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
@@ -828,7 +870,7 @@ class PedidosgeneralForm(forms.Form):
 	
 	
 	'''opciones_status = (('1','Pedido',),('2','Por Confirmar',),('3','Aqui',),('4','Cancelado',),('5','Todos',),)'''
-	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
+	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('RecepEnDevol','RecepEnDevol',),('Dev a Prov','Dev a Prov',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
 	status = forms.ChoiceField(label='Status',initial='Confirmado',choices=opciones_status,required=False)
 	#fecha = forms.DateField(label='Fecha en que hizo (dd/mm/yyyy)',initial= datetime.now,input_formats=['%d/%m/%Y',],)
 	estiloalt =  forms.CharField(label='Estilo',required=False)
@@ -1920,3 +1962,17 @@ class RpteCreditosForm(forms.Form):
 
 
 
+class Recepcion_dev_provForm(forms.Form):
+
+
+
+	def __init__(self,*args,**kwargs):
+
+		
+		
+		lprov = lista_Sucursales()
+
+		super(Recepcion_dev_provForm, self).__init__(*args,**kwargs)
+		self.fields['sucursal'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal',choices = lprov,initial=1,required='True' )
+		

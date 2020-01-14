@@ -39,7 +39,8 @@ from .forms import (AccesoForm,\
 					Genera_BaseBonoForm,\
 					RpteVtaNetaSocioxMarcaForm,\
 					CanceladocumentoForm,\
-					RpteCreditosForm,)
+					RpteCreditosForm,
+					Recepcion_dev_provForm,)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -4720,7 +4721,7 @@ def crea_documento(request):
 		form = CreaDocumentoForm(request.POST)
 		if form.is_valid():
 			tipodedocumento =request.POST.get('doc_tipodedocumento')
-			vtadecatalogo = request.POST.get('doc_vtadecatalogo')
+			vtadecatalogo = request.POST.get('doc_ventadecatalogo')
 			proveedor = request.POST.get('doc_proveedor')
 			anio = request.POST.get('doc_anio')
 			temporada = request.POST.get('doc_temporada')
@@ -4746,14 +4747,14 @@ def crea_documento(request):
 			los campos boleanos 'vtadecatalogo' y 'bloquearnotacredito' 
 			dado que el templeate los regresa con valores 'None' y 'on'
 			esto hay que investigar porque lo hace, mientras
-			se actualizan con calores correctos dependiendo de lo que 
+			se actualizan con valores correctos dependiendo de lo que 
 			traigan '''
 
 			
 			if vtadecatalogo is None:
-				vtadecatalogo = False
-			if vtadecatalogo == 'on':
-				vtadecatalogo = True
+				vtadecatalogo = u'0'
+			
+			vtadecatalogo = int(vtadecatalogo.encode('latin_1'))
 
 
 			cursor =  connection.cursor()
@@ -4802,7 +4803,7 @@ def crea_documento(request):
 				
 
 				
-				cursor.execute("COMMIT;")
+				
 
 
 				
@@ -4821,8 +4822,29 @@ def crea_documento(request):
 					p_num_credito = ultimodocto[0]+1
 					p_num_venta = 0
 
+				
+				if vtadecatalogo == 1:
 					
+					cursor.execute("SELECT ProveedorNo,Periodo,anio,ClaseArticulo\
+					 FROM catalogostemporada\
+					 WHERE ProveedorNo=%s\
+					 and Periodo=%s and Anio=%s\
+					 and Activo=1;",(proveedor,anio,temporada))
+
+					reg_catalogos = dictfetchall(cursor)	
+
+					for reg_catalogo in reg_catalogos:
+
+						cursor.execute("INSERT INTO sociocatalogostemporada\
+						                   (proveedorno,periodo,anio,\
+						                   clasearticulo,asociadono,activo,nodocto)\
+						                   VALUES(%s,%s,%s,%s,%s,%s,%s);"\
+						                   ,(proveedor,anio,temporada,reg_catalogo['ClaseArticulo'],asociado,1,ultimodocto[0]+1))
+
 				context ={'p_num_credito':p_num_credito,'p_num_venta':p_num_venta,'tipodedocumento':tipodedocumento,}
+
+				cursor.execute("COMMIT;")
+
 
 				return render(request,'pedidos/documento_registrado_exito.html',context,)	
 
@@ -7999,3 +8021,184 @@ def rptedecreditos(request):
 
 	return render (request,'pedidos/rpte_creditos_filtro.html',{'form':form,})
 			
+
+def recepcion_dev_prov(request):
+
+	#pdb.set_trace()
+
+	error = ''
+	if request.method == 'POST':
+
+		form = Recepcion_dev_provForm(request.POST)
+
+		if form.is_valid():
+
+			sucursal = form.cleaned_data['sucursal']
+
+			
+			try:
+
+				consulta = """SELECT l.Pedido,l.ProductoNo,
+									l.Catalogo,l.NoLinea,l.precio,
+									l.status,h.AsociadoNo,
+									h.FechaPedido,h.fechaultimamodificacion,
+									a.codigoarticulo,a.catalogo,a.idmarca,
+									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial
+									from pedidoslines l
+									 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
+									 inner join articulo a on
+									(a.empresano=1 and 
+									 l.productono=a.codigoarticulo
+									and l.catalogo=a.catalogo)
+									inner join pedidos_status_fechas psf
+									on (l.empresano=psf.empresano and l.pedido=psf.pedido
+									and l.productono=psf.productono
+									and l.catalogo=psf.catalogo
+									and l.nolinea=psf.nolinea and psf.status='Aqui')
+									inner join pedidos_encontrados pe
+									on (l.empresano=pe.empresano
+									and l.pedido=pe.pedido
+									and l.productono=pe.productono
+									and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
+									inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+									where h.idsucursal=%s and l.status='Devuelto'
+									and h.fechapedido>'20191201';"""
+				parms =(sucursal)
+
+
+				cursor = connection.cursor()
+		
+				cursor.execute(consulta,parms) # observar que se uso parms como parte de una lista en lugar de una tupla, si se usa una tupla marca error
+
+				registros = dictfetchall(cursor)
+				
+				reg_encontrados = len(registros)
+
+				return render(request,'pedidos/muestra_devueltos_aRecepcionar.html',{'registros':registros,'reg_encontrados':reg_encontrados})
+
+
+
+			except DatabaseError as e:
+
+				error = str(e)
+
+	form = Recepcion_dev_provForm()
+	return render(request,'pedidos/recepcion_devoluciones_proveedor.html',{'form':form,'error':error})
+	
+
+
+# PROCESAMIENTO DE RECEPCION DE DEVOLUCIONES A PROVEEDOR
+
+
+
+
+def procesar_recepcion_devolucion_proveedor(request):
+	
+	#pdb.set_trace()
+	if request.is_ajax()  and request.method == 'POST':
+		# Pasa a una variable la tabla  recibida en json string
+		TableData = request.POST.get('TableData')
+		
+		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
+		datos = json.loads(TableData)
+
+		if request.POST.get('usr_id') is not None:
+			capturista = request.POST.get('usr_id')
+		else:
+			capturista = 99
+		
+		
+		cursor = connection.cursor()
+
+		''' INICIALIZACION DE VARIABLES '''
+
+		error = False
+		nuevo_status_pedido = 'RecepEnDevol'
+
+		''' FIN DE INCIALIZACION DE VARIABLES '''
+
+
+		# Se convierte la fecha de hoy a formatos manejables para insertarlos en el registro.
+		hoy = datetime.now()
+		fecha_hoy = hoy.strftime("%Y-%m-%d")
+		hora_hoy = hoy.strftime("%H:%M:%S") 
+
+
+		try:
+
+			cursor.execute("START TRANSACTION")
+			
+
+
+	        # Recupera cada diccionario y extrae los valores de la llave a buscar.
+			for j in datos:
+				
+				if j is not None: # Procesa solo los registros con contenido
+			
+				
+					print "elegido:", j.get('elegido')
+					pedido = j.get("Pedido").encode('latin_1')
+
+					productono = j.get('ProductoNo').strip()
+					catalogo =j.get('Catalogo').strip()
+					nolinea = j.get('Nolinea').encode('latin_1')
+					elegido = j.get('elegido')
+				# Comienza acceso a BD.
+
+
+					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,HoraModicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+					cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
+
+
+					# Crea o bien actualiza pedidos_status_fechas
+
+					cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,pedido,productono,nuevo_status_pedido,catalogo,nolinea,fecha_hoy,hora_hoy,capturista])
+
+
+
+
+			cursor.execute("COMMIT;")
+			data = {'status_operacion':'ok','error':'',}
+
+
+		except DatabaseError as error_msg:
+		
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			
+			error = True
+		except IntegrityError as error_msg:
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except OperationalError as error_msg:
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except NotSupportedError as error_msg:
+	
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except ProgrammingError as error_msg:
+
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except (RuntimeError, TypeError, NameError) as error_msg:
+			cursor.execute("ROLLBACK;")
+			#error_msg = 'Error no relativo a base de datos'
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except:
+			cursor.execute("ROLLBACK;")
+			error_msg = "Error desconocido"
+			data = {'status_operacion':'fail','error':error_msg,}
+			error = True
+
+		cursor.close()
+
+		# Si no hay error, nos devolvera la lista de pedidos cambiados
+		# o bien un 'ok' y si hay error nos devolvera el mensaje de error.
+		
+		return HttpResponse(json.dumps(data),content_type='application/json',)

@@ -19,8 +19,12 @@
           <ul class="dropdown-menu">
             <li><a href="/pedidos/nueva_venta">Ventas</a></li>
             <li><a href="/pedidos/pedidosgeneral">Pedidos</a></li>
-            <li><a href="/pedidos/devolucion_socio">Devoluciones</a></li>
-             <li><a href="{% url 'pedidos:documentos' %}">Documentos</a></li>
+            <li><a href="/pedidos/devolucion_socio">Devoluciones del socio</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/pedidos/recepcion_dev_prov">Recepcion devoluciones a proveedor</a></li>
+            <li><a href="#">Procesar devoluciones a proveedor</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'pedidos:documentos' %}">Documentos</a></li>
             <li><a href="/pedidos/entrada_sistema">Sucursal</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="#"></a></li>
