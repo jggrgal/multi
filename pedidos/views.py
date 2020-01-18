@@ -4728,6 +4728,8 @@ def crea_documento(request):
 			asociado = request.POST.get('doc_asociado')
 			concepto = request.POST.get('doc_concepto')
 			monto = request.POST.get('doc_monto')
+			usr_crear_documento =request.POST.get('usr_crear_documento')
+
 
 			fecha_hoy = ''
 			hora_hoy =''
@@ -4736,7 +4738,16 @@ def crea_documento(request):
 
 			if tipodedocumento == 'Credito':
 				concepto = "C: " + concepto
+				saldo = monto
+				venta = 0
+			elif tipodedocumento =='Remision':
+				venta = monto
+				saldo = monto
+			else:
+				venta=0
+				saldo=monto
 
+				
 			fecha_hoy,hora_hoy = trae_fecha_hora_actual(fecha_hoy,hora_hoy)
 			print fecha_hoy
 			print hora_hoy
@@ -4797,9 +4808,9 @@ def crea_documento(request):
 					  VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
 					  %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
 					  %s,%s,%s,%s);''',[1,ultimodocto[0]+1,ultimoconsec[0]+1,tipodedocumento,'Contado',
-					  	asociado,fecha_hoy,hora_hoy,capturista,\
-					  	fecha_hoy,hora_hoy,capturista,\
-					  	concepto,monto,monto,0,vtadecatalogo,0,0,0,0,0,id_sucursal,0])
+					  	asociado,fecha_hoy,hora_hoy,usr_crear_documento,\
+					  	fecha_hoy,hora_hoy,usr_crear_documento,\
+					  	concepto,monto,saldo,0,vtadecatalogo,0,0,0,0,venta,id_sucursal,0])
 				
 
 				
@@ -4872,12 +4883,53 @@ def crea_documento(request):
 				
 				#return render(request,'pedidos/crea_documento.html',{'form':form,'NoDocto':ultimodocto[0]+1,'tipodedocumento':tipodedocumento})
 
-			except DatabaseError as e:
-				print e
+
+			except DatabaseError as error_msg:
 				
-				cursor.execute('ROLLBACK;')
-				msg = 'Error en base de datos !'
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+				error_msg = str(error_msg)
+				if 'Duplicate' in (error_msg):
+					error_msg =" Este catálogo ya se habia registrado previamente para este socio, su documento no fué grabado !"
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+			except IntegrityError as error_msg:
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+			except OperationalError as error_msg:
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+			except NotSupportedError as error_msg:
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+		
+
+			except ProgrammingError as error_msg:
+
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+			except (RuntimeError, TypeError, NameError) as error_msg:
+
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+			except:
+				cursor.execute("ROLLBACK;")
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+
+
+			cursor.close()
+	
+
+
+
+
 
 		
 	else:	
@@ -5473,11 +5525,6 @@ def procesar_venta(request):
 				
 
 
-
-
-
-
-
 			# PROCESA CREDITOS
 
 			for k in datos_credito:
@@ -6040,9 +6087,9 @@ def verifica_existencia_usr(usr_id):
 
 	if num is None:
 		
-		return(0) # Si no existe retorna un 0
+		return 0 # Si no existe retorna un 0
 	else:
-		return(1) # Si existe retorna un 1
+		return num[0] # Si existe retorna el numero de empleado
 
 # VERIFICA QUE EL USUARIO TENGA DERECHOS
 
@@ -6070,7 +6117,7 @@ def valida_usr(request):
 	socio_zapcat = request.session['socio_zapcat']	
 	tiene_derecho = 0 # asume que no tiene derecho
 	usr_id = request.GET.get('usr_id')
-	usr_derecho = request.GET.get('usr_derecho')
+	usr_derecho = int(request.GET.get('usr_derecho').encode('latin_1'))
 
 
 	num_usr_valido = verifica_existencia_usr(usr_id) # verifica si existe
@@ -8021,7 +8068,7 @@ def rptedecreditos(request):
 
 	return render (request,'pedidos/rpte_creditos_filtro.html',{'form':form,})
 			
-
+#@permission_required('auth.add_viasolicitud',login_url=None,raise_exception=True)
 def recepcion_dev_prov(request):
 
 	#pdb.set_trace()
@@ -8035,35 +8082,67 @@ def recepcion_dev_prov(request):
 
 			sucursal = form.cleaned_data['sucursal']
 
+			ordenarpor = form.cleaned_data['ordenarpor'].encode('latin_1')
 			
 			try:
 
-				consulta = """SELECT l.Pedido,l.ProductoNo,
-									l.Catalogo,l.NoLinea,l.precio,
-									l.status,h.AsociadoNo,
-									h.FechaPedido,h.fechaultimamodificacion,
-									a.codigoarticulo,a.catalogo,a.idmarca,
-									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial
-									from pedidoslines l
-									 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
-									 inner join articulo a on
-									(a.empresano=1 and 
-									 l.productono=a.codigoarticulo
-									and l.catalogo=a.catalogo)
-									inner join pedidos_status_fechas psf
-									on (l.empresano=psf.empresano and l.pedido=psf.pedido
-									and l.productono=psf.productono
-									and l.catalogo=psf.catalogo
-									and l.nolinea=psf.nolinea and psf.status='Aqui')
-									inner join pedidos_encontrados pe
-									on (l.empresano=pe.empresano
-									and l.pedido=pe.pedido
-									and l.productono=pe.productono
-									and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
-									inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
-									where h.idsucursal=%s and l.status='Devuelto'
-									and h.fechapedido>'20191201';"""
-				parms =(sucursal)
+				if sucursal != u'0':
+
+					consulta = """SELECT l.Pedido,l.ProductoNo,
+										l.Catalogo,l.NoLinea,l.precio,
+										l.status,h.AsociadoNo,
+										h.FechaPedido,h.fechaultimamodificacion,
+										a.codigoarticulo,a.catalogo,a.idmarca,
+										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial
+										from pedidoslines l
+										 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
+										 inner join articulo a on
+										(a.empresano=1 and 
+										 l.productono=a.codigoarticulo
+										and l.catalogo=a.catalogo)
+										inner join pedidos_status_fechas psf
+										on (l.empresano=psf.empresano and l.pedido=psf.pedido
+										and l.productono=psf.productono
+										and l.catalogo=psf.catalogo
+										and l.nolinea=psf.nolinea and psf.status='Aqui')
+										inner join pedidos_encontrados pe
+										on (l.empresano=pe.empresano
+										and l.pedido=pe.pedido
+										and l.productono=pe.productono
+										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
+										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+										where h.idsucursal=%s and l.status='Devuelto'
+										and h.fechapedido>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+					parms =(sucursal,ordenarpor)
+
+				else:
+
+					consulta = """SELECT l.Pedido,l.ProductoNo,
+										l.Catalogo,l.NoLinea,l.precio,
+										l.status,h.AsociadoNo,
+										h.FechaPedido,h.fechaultimamodificacion,
+										a.codigoarticulo,a.catalogo,a.idmarca,
+										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial
+										from pedidoslines l
+										 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
+										 inner join articulo a on
+										(a.empresano=1 and 
+										 l.productono=a.codigoarticulo
+										and l.catalogo=a.catalogo)
+										inner join pedidos_status_fechas psf
+										on (l.empresano=psf.empresano and l.pedido=psf.pedido
+										and l.productono=psf.productono
+										and l.catalogo=psf.catalogo
+										and l.nolinea=psf.nolinea and psf.status='Aqui')
+										inner join pedidos_encontrados pe
+										on (l.empresano=pe.empresano
+										and l.pedido=pe.pedido
+										and l.productono=pe.productono
+										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
+										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+										where l.status='Devuelto' and h.idsucursal>=1 and h.idsucursal<=999
+										and h.fechapedido>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+					parms =(ordenarpor,)
 
 
 				cursor = connection.cursor()

@@ -1453,6 +1453,7 @@ class CreaDocumentoForm(forms.Form):
 	doc_asociado= forms.IntegerField(label='Socio',initial=0,required=True)
 	doc_concepto = forms.CharField(label="Concepto",initial=' ',required=True)
 	doc_monto = forms.FloatField(label='Monto',initial=0,required=True)
+	usr_crear_documento = forms.IntegerField(label='usr_id',initial=0,required=True)
 
 
 	error_messages = {'asociado_inv':'El numero de socio ingresado debe ser mayor a 0 !',\
@@ -1488,6 +1489,8 @@ class CreaDocumentoForm(forms.Form):
 		self.asociado = cleaned_data.get('doc_asociado')
 		self.concepto =  cleaned_data.get('doc_concepto')
 		self.monto =  cleaned_data.get('doc_monto')
+		self.usr_crear_documento = cleaned_data.get('usr_crear_documento')
+
 		try:
 			self.longitud_concepto = len(self.concepto.strip())
 		except:
@@ -1964,11 +1967,11 @@ class RpteCreditosForm(forms.Form):
 
 class Recepcion_dev_provForm(forms.Form):
 
-
+	
 
 	def __init__(self,*args,**kwargs):
 
-		
+		opciones = (('Estilo','Estilo'),('Marca','Marca'))
 		
 		lprov = lista_Sucursales()
 
@@ -1976,3 +1979,5 @@ class Recepcion_dev_provForm(forms.Form):
 		self.fields['sucursal'] = forms.ChoiceField(widget=forms.Select(),
 			label='Sucursal',choices = lprov,initial=1,required='True' )
 		
+		self.fields['ordenarpor']= forms.ChoiceField(widget=forms.Select(),
+			label= 'Ordenar por',choices = opciones,initial='Estilo')

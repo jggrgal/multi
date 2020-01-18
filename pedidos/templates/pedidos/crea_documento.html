@@ -44,6 +44,8 @@
                        
                        {{ form.doc_concepto | as_crispy_field }}
                        {{ form.doc_monto | as_crispy_field }}
+                       {{ form.usr_crear_documento | as_crispy_field }}
+
 
                    <!-- {% if tipodedocumento == 'Credito' %}
                         {{ form.bloquearnotacredito | as_crispy_field }}
@@ -51,7 +53,7 @@
                     
                     <!--<input id='num_socio' value='{{num_socio}}' type='hidden' name='num_socio'>-->
                 
-                    <input  id='btn_genera_rpte_cotejo' class="btn btn-default"  type="submit" value="Enviar" />
+                    <input  id='btn_crea_documento' class="btn btn-default"  type="submit" value="Enviar" />
                 
 
                     

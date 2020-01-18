@@ -431,7 +431,7 @@ $("#procesar_recepcion_dev_prov").prop('disabled',true)
                 $.ajax({
                   url: '/pedidos/valida_usr/',
                   type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':12},
+                  data:{'usr_id':usr_id,'usr_derecho':32},
                   success: function(data){
                             if (data.num_usr_valido == 0){
                                          
@@ -478,6 +478,73 @@ $("#procesar_recepcion_dev_prov").prop('disabled',true)
 
             });
 
+
+// F U N I C I O N   G
+
+
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE CREAR UN DOCUMENTO.
+
+$("#btn_crea_documento").prop('disabled',true)
+
+
+
+      $("#id_usr_crear_documento").blur(function() {
+
+                var usr_id = $(this).val()
+                $("#btn_crea_documento").prop('disabled',true)
+
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'usr_id':usr_id,'usr_derecho':23},
+                  success: function(data){
+                            if (data.num_usr_valido == 0){
+                                         
+                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
+                              
+                              $("#btn_crea_documento").prop('disabled',true)
+                            }
+
+                            else{
+
+                              num_usr_valido = data.num_usr_valido 
+
+                              $("#btn_crea_documento").prop('disabled',false)
+
+                              if(data.tiene_derecho == 0){
+                                        
+                                      alert("Ud no tiene derechos como empleado para crear documentos !")
+
+                                        $("#btn_crea_documento").prop('disabled',true)
+
+                              }
+                              else {
+                                        tiene_derecho = 1
+                              };
+
+
+                            }
+                    
+                    ;
+                    
+                    console.log(data.num_usr_valido);
+                    console.log(data.tiene_derecho);
+
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+                
+
+
+
+
+
+            });
 
 
 
@@ -564,7 +631,7 @@ $("#procesar_recepcion_dev_prov").prop('disabled',true)
        
        $("#procesar").prop('disabled', true);
        $("#sucursal").prop('disabled', true);
-       $("#idpedido").prop('disabled',true);
+       $("#idpedido").prop('disabled',false);
        $("#procesar_colocaciones").prop('disabled',true);
        $("#procesar_cierre_pedido").prop('disabled',true);
        $("#id_nueva_fecha_llegada ").prop('disabled',true)
