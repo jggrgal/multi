@@ -697,7 +697,7 @@ class Proveedor(models.Model):
     fechabaja = models.DateField(db_column='FechaBaja')  # Field name made lowercase.
     usuarioquedioalta = models.SmallIntegerField(db_column='UsuarioQueDioAlta')  # Field name made lowercase.
     usuaroi = models.SmallIntegerField(db_column='Usuaroi')  # Field name made lowercase.
-
+    manejar_desc = models.BooleanField(db_column='manejar_desc')
     class Meta:
         managed = False
         db_table = 'proveedor'

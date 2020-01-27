@@ -1,0 +1,137 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+
+<h2> Articulos a Devolver </h2>
+<h3>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h3>
+
+
+
+
+    <div class="table-responsive">
+    	<table id="coloc_detail_table" class='display table table-hover table-bordered  table-condensed clase_tabla'>
+    	<thead>
+        	<tr class='success'>
+        		<th style="display: none">Pedido</th>
+        		<th style="display: none">ProductoNo</th>
+                <th style="display: none">Catalogo</th>
+                <th style="display: none">NoLinea</th>
+                <th>Suc.</th>
+                <th>Socio</th>
+                <th>LLegó a suc el</th>
+                <th>Se devolvió el</th>
+                <th>Marca</th>
+                <th>Estilo</th>
+                <th>Color</th>
+                <th>Talla</th>
+                <th>Precio</th>
+                <th>Elegir</th>
+                <th>Bodega</th>
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for item in registros %}
+                
+        		<tr>
+        			<td style="display: none"> {{item.Pedido}}</td>
+        			<td style="display: none"> {{item.ProductoNo}}</td>
+        			<td style="display: none"> {{item.Catalogo}}</td>
+        			<td style="display: none"> {{item.NoLinea}}</td>
+    				    				
+                    <td>{{ item.idSucursal }}</td>
+                    <td>{{ item.AsociadoNo }}</td>
+                    {% localize on %}
+                        <td>{{item.fechamvto | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    {% localize on %}
+                        <td> {{item.fechaultimamodificacion | date:'d/M/Y'  }}</td>
+                    {% endlocalize %}
+                    <td>{{ item.idmarca }}</td>
+        			<td>{{ item.idestilo }}</td>
+            		<td>{{ item.idcolor }}</td>
+            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+            		<td>{{item.precio}}</td>
+            		
+                    <td name="elegido">
+		                 <input class ="checkbox_elegido" type="checkbox" name="elegido" id="id_elegido" value="">
+		                 					
+					</td>
+					<td> {{ item.razonsocial }}</td>
+					
+						
+                    
+            	</tr>
+            {% endfor %}
+         </tbody>  
+    	</table>
+    </div>
+    <div class="row">
+	    <div class="col-md-6">
+		    <div ><h3> Total registros: <span id="tot_art" class="label label-primary">{{reg_encontrados}}</span></h3>
+
+		    </div>
+	    </div>
+	    <div class="col-md-6">
+		    <div ><h3>Elegidos: <span id="art_elegidos" class="label label-primary">0</span></h3>
+		    </div>
+	    </div>
+	    
+    </div>
+
+    <hr>
+    <div class="row">
+
+    	<div class='col-md-6'>
+
+            <label for="guia_id">Num_guia_id:</label> 
+            <input id="id_numero_guia" name="guia" class="form-control"  value=0>
+   
+        </div>
+        <div class='col-md-6'>
+
+            <label for="observ_id">Observaciones:</label> 
+            <input id="id_observaciones" name="observaciones" class="form-control" value=" ">
+   
+        </div>
+
+
+    </div>
+
+    <hr>
+    <div class="row">
+    	
+			
+		<div class='col-md-4'>
+
+            <label for="usr_id">Usuario_id:</label> 
+            <input id="usr_id_proc_dev_prov" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>
+   
+        </div>
+		        
+		   
+		 <div class="col-md-4">
+				    <p align='right'>
+				        <button id='procesar_dev_prov' class="btn btn-default" href="#" role="button">procesar</button>
+				    </p>
+		</div>
+		<div class="col-md-4">
+				<p align='right'>
+				        <a class="btn btn-default" href="/pedidos/devolucion_a_proveedor" role="button">Regresar</a>
+				    </p>
+				    
+		</div>
+		   
+	</div>
+	<!-- El siguiente script no se definio dentro de pedidos.js ya que este ultimo se carga primero que las variables de manejadas dentro del request de django, asi puest, el script asigna variables recibidas en request  a variables visibles por JQuery -->
+	
+	<script>
+	var reg_encontrados = "{{ reg_encontrados }}";
+	var almacen = "{{ almacen }}";
+	var tipo_consulta = "{{ tipo_consulta }}";
+	var proveedor = "{{ proveedor }}";
+    </script>
+
+
+{% endblock %}	

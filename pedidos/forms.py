@@ -132,6 +132,45 @@ def lista_status():
 
 
 
+
+# FUNCION PARA TRAER LISTA DE ALMACENES DE PROVEEDOR
+
+
+def lista_almacenes(proveedor):
+			cursor=connection.cursor()
+			cursor.execute('SELECT almacen,razonsocial from almacen where empresano=1 and proveedorno=%s;',(proveedor,))
+	
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'TODOS ') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lprov)
+
+
+
 f_inicial_init =  date.today()
 
 f_final_init = f_inicial_init + timedelta(days=30)
@@ -1981,3 +2020,93 @@ class Recepcion_dev_provForm(forms.Form):
 		
 		self.fields['ordenarpor']= forms.ChoiceField(widget=forms.Select(),
 			label= 'Ordenar por',choices = opciones,initial='Estilo')
+
+
+class Dev_proveedorForm(forms.Form):
+
+	
+
+	def __init__(self,*args,**kwargs):
+
+		lprov = lista_Proveedores()
+		opciones = (('Estilo','Estilo'),('Marca','Marca'))
+		lista_almacenes = ((0,'Seleccione'),(1,'Seleccione'),(2,'Seleccione'),(3,'Seleccione'),(4,'Seleccione'),(5,'Seleccione'),(6,'Seleccione'),(7,'Seleccione'),(8,'Seleccione'),(9,'Seleccione'))
+
+		
+		super(Dev_proveedorForm, self).__init__(*args,**kwargs)
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label = 'Proveedor',choices =lprov, initial=0,required='True')
+
+		self.fields['almacen'] = forms.ChoiceField(widget=forms.Select(),
+			label='Almacén',initial=0,choices=lista_almacenes,required=False)
+
+		self.fields['ordenarpor']= forms.ChoiceField(widget=forms.Select(),
+			label= 'Ordenar por',choices = opciones,initial='Estilo')
+
+
+
+class FiltroDevProvForm(forms.Form):
+
+
+	hoy =  date.today()	
+	#t = datetime.now
+	f_inicial_init =  date.today()
+
+	f_final_init = f_inicial_init + timedelta(days=30)
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+	#fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),initial=f_inicial_init.strftime('%d/%m/%Y'),required=False)
+	#fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),initial=f_final_init.strftime('%d/%m/%Y'),required=False)
+
+	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
+	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
+
+	error_messages = {'FechaInicial':'Ingrese una fecha inicial !',
+					'FechaFinal':'Ingrese una fecha final !',
+					'FechIniMayor':'La fecha final debe ser mayor o igual a la fecha inicial !',}
+
+
+
+
+
+	def __init__(self,*args,**kwargs):
+
+		lprov = lista_Proveedores()
+		opciones = (('Estilo','Estilo'),('Marca','Marca'))
+		lista_almacenes = ((0,'Seleccione'),(1,'Seleccione'),(2,'Seleccione'),(3,'Seleccione'),(4,'Seleccione'),(5,'Seleccione'),(6,'Seleccione'),(7,'Seleccione'),(8,'Seleccione'),(9,'Seleccione'))
+
+		
+		super(FiltroDevProvForm, self).__init__(*args,**kwargs)
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label = 'Proveedor',choices =lprov, initial=0,required='True')
+
+		self.fields['almacen'] = forms.ChoiceField(widget=forms.Select(),
+			label='Almacén',initial=0,choices=lista_almacenes,required=False)
+
+
+	def clean(self):
+
+	
+		cleaned_data = super(FiltroDevProvForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+
+		return self.cleaned_data

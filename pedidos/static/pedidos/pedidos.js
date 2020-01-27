@@ -547,6 +547,72 @@ $("#btn_crea_documento").prop('disabled',true)
             });
 
 
+// F U N I C I O N   H
+
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE  DEVOLUCION A PROVEEDOR (ENVIO).
+
+$("#procesar_dev_prov").prop('disabled',true)
+
+
+
+      $("#usr_id_proc_dev_prov").blur(function() {
+
+                var usr_id = $(this).val()
+                $("#procesar_dev_prov").prop('disabled',true)
+
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'usr_id':usr_id,'usr_derecho':32},
+                  success: function(data){
+                            if (data.num_usr_valido == 0){
+                                         
+                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
+                              
+                              $("#procesar_dev_prov").prop('disabled',true)
+                            }
+
+                            else{
+
+                              num_usr_valido = data.num_usr_valido 
+
+                              $("#procesar_dev_prov").prop('disabled',false)
+
+                              if(data.tiene_derecho == 0){
+                                        
+                                      alert("Ud no tiene derechos como empleado para procesar devoluciones a proveedor !")
+
+                                        $("#procesar_dev_prov").prop('disabled',true)
+
+                              }
+                              else {
+                                        tiene_derecho = 1
+                              };
+
+
+                            }
+                    
+                    ;
+                    
+                    console.log(data.num_usr_valido);
+                    console.log(data.tiene_derecho);
+
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+                
+
+
+
+
+
+            });
+
 
 
 
@@ -3350,6 +3416,94 @@ $('#procesar_ventas').click(function(e){
                         else {
                           alert("Recepcion exitosa !.");
                           $("#procesar_recepcion_dev_prov").prop('disabled', true);
+                          }; 
+                        
+                    },
+                    error: function(){ 
+                      console.log(data);
+                      
+                    },
+
+                  });
+             
+          }
+        }
+      });
+
+
+
+
+// PROCESAMIENTO DE DEVOLUCIONES A PROVEEDOR (ENVIO DE LA DEVULUCION A BODEGA)
+
+      $('#procesar_dev_prov').click(function(e){
+
+        
+        // observar que se puede comparar un contenido html con un valor
+        // al menos aqui si hace la comparacion.
+        
+        continuar_procesando = 0;
+
+
+        var var_totreg_a_procesar = parseInt($("#art_elegidos").html());
+
+        if (var_totreg_a_procesar > 0){
+
+          continuar_procesando = 1;
+
+          } 
+        else {
+
+           alert(" Elija al menos un articulo para devolver !")
+           
+           continuar_procesando = 0
+
+           $("#procesar_dev_prov").prop('disabled', true);
+
+          }
+
+
+
+        
+        usr_id = $("#usr_id_recepcion_dev_prov").val();
+        guia = $("#id_numero_guia").val();
+        observaciones = $("#id_observaciones").val();
+
+        // comienza validacion de campos antes de pasar al servidor
+
+        
+        if(continuar_procesando == 1){
+
+        
+        e.preventDefault();
+        var answer=confirm('Se procederá a grabar los articulos recepcionados, si está seguro que todo es correcto acepte, caso contrario cancele y modifique.');
+          if(answer){
+
+                  var TableData;
+                  TableData = storeTblValues_rec_dev_prov();
+                  console.log(TableData)
+                  //TableData = $.toJSON(TableData);
+                  TableData = JSON.stringify(TableData);
+                  console.log("EN FORMATO JSON:");
+                  console.log(TableData);
+                  $.ajax({
+
+                    url: '/pedidos/procesar_devolucion_proveedor/',
+                    type: 'POST',
+                    data: {'TableData':TableData,'usr_id':usr_id,'guia':guia,'observaciones':observaciones,'proveedor':proveedor,'almacen':almacen},
+                    datatype:'application/json',
+                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    success: function(data){
+
+                                      
+                        console.log(data);
+
+                        if (data.status_operacion != 'ok') { 
+
+                          alert(data.error);
+                          }
+                        else {
+                          alert("Devolución exitosa !.");
+                          $("#procesar_dev_prov").prop('disabled', true);
                           }; 
                         
                     },

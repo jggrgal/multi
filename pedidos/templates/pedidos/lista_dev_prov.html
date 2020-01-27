@@ -11,21 +11,17 @@
     	<table id="coloc_detail_table" class='display table table-hover table-bordered  table-condensed clase_tabla'>
         <thead>
         	<tr class='success'>
-                <th style="display: none">Pedido</th>
-                <th style="display: none">ProductoNo</th>
-                <th style="display: none">Catalogo</th>
-                <th style="display: none">NoLinea</th>
-                <th style="display: none">Status</th>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Proveedor</th>
+                <th>Almacén</th>
 
-        		<th>Suc.</th>
-                <th style="display: none">Socio</th>
-                <th>Fecha llegada</th>
-                <th>Marca</th>
-                <th>Estilo</th>
-                <th>Color</th>
-                <th>Talla</th>
-                <th>Precio</th>
-                <th>Causa devolucion</th>
+        		<th>Guia</th>
+                <th>Observaciones</th>
+                <th>Fecha recepción</th>
+                <th>Recibió</th>
+                
                 
         	</tr>
         </thead>
@@ -33,38 +29,21 @@
         	{% for item in registros %}
                 
         		<tr>
-        			<td style="display: none"> {{item.Pedido}}</td>
-        			<td style="display: none"> {{item.ProductoNo}}</td>
-        			<td style="display: none"> {{item.Catalogo}}</td>
-        			<td style="display: none"> {{item.NoLinea}}</td>
-    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
-    				<td style="display: none"> {{ item.status }}</td>
-                    <td>{{ item.nombre }}</td>
-                    <td style="display: none">{{ item.AsociadoNo }}</td>
+        			<td> {{item.id}}</td>
                     {% localize on %}
-                        <td>{{item.fechamvto | date:'d/M/Y'}}</td>
+                        <td>{{item.fecha | date:'d/M/Y'}}</td>
                     {% endlocalize %}
-                    <td>{{ item.idmarca }}</td>
-        			<td>{{ item.idestilo }}</td>
-            		<td>{{ item.idcolor }}</td>
-            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
-            		<td>{{item.precio}}</td>
-            		<td name="incidencia">
-		                 <select class="select form-control sel_incidencia" id="id_incidencia" {% if marcartodo_nollego %} disabled {%endif%} >
-                            <option value = "Seleccionar" selected="selected">Seleccionar</option>
-		                 	<option value='ERROR TIENDA'>ERROR TIENDA</option>
-                            <option value='INCOMODOS'>INCOMODOS</option>
-                            <option value='MALA CALIDAD'>MALA CALIDAD</option>
-                            <option value='TALLA'>TALLA</option>
-                            <option value='POR GARANTIA'>POR GARANTIA</option>
-                            <option value='OTRA'>OTRA</option>
-                            
-
-		                 	
-						</select> 
-					</td>
-						
-                    
+        			<td> {{item.hora}}</td>
+        			<td> {{item.proveedor}}</td>
+        			<td> {{item.almacen}}</td>
+    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
+    				<td> {{ item.guia }}</td>
+                    <td>{{ item.observaciones }}</td>
+                    {% localize on %}
+                        <td>{{item.fecharecepcion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{ item.recibio }}</td>
+                                                          
             	</tr>
             {% endfor %}
         </tbody>    

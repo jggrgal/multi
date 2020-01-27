@@ -40,7 +40,9 @@ from .forms import (AccesoForm,\
 					RpteVtaNetaSocioxMarcaForm,\
 					CanceladocumentoForm,\
 					RpteCreditosForm,
-					Recepcion_dev_provForm,)
+					Recepcion_dev_provForm,\
+					Dev_proveedorForm,\
+					FiltroDevProvForm,)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -2876,7 +2878,9 @@ def imprime_ticket(request):
 			paso -= 30
 		p.drawString(20,paso-10,"Total ==>")
 		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
-		linea = paso-40
+		p.drawString(20,paso-40,"Para sugerencias o quejas")
+		p.drawString(20,paso-50,"llame al 867 132 9697")
+		linea = paso-110
 	#pdb.set_trace()	
 	if NotaCredito != 0:
 		imprime_documento(NotaCredito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
@@ -3094,7 +3098,14 @@ def imprime_documento(p_num_documento=0,
 		p.drawString(20,paso,"Valido hasta el "+ fechaFinVigenciaCredito.strftime('%d-%m-%Y'))
 		paso -=10
 		p.drawString(20,paso,"es INDISPENSABLE presentarlo en su compra.")
-		paso -= 10
+		paso -= 20
+
+		p.drawString(20,paso,"Para sugerencias o quejas llame")
+		paso-=10
+		p.drawString(20,paso,"al 867 132 9697")
+
+		paso -=10
+
 		p.setFont("Helvetica",8)
 		#p.drawString(20,paso-10,"Total ==>")
 		#p.drawString(130,paso-10,str(pedido_header[6]))
@@ -6400,18 +6411,19 @@ def imprime_venta(request):
 
 		
 		p.drawString(20,paso-70,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
-		
+		p.drawString(20,paso-90,"Para sugerencias o quejas")
+		p.drawString(20,paso-100,"llame al 867 132 9697")		
 
 		if creditos_aplicados:
-			p.drawString(20,paso-90,"Notas de credito aplicadas:")
-			p.drawString(20,paso-100,"--------------------------------------------------")
+			p.drawString(20,paso-120,"Notas de credito aplicadas:")
+			p.drawString(20,paso-1300,"--------------------------------------------------")
 			linea -= 10
-			p.drawString(20,paso-110,"Num.")
-			p.drawString(55,paso-110,"Concepto")
-			p.drawString(130,paso-110,"Monto")
+			p.drawString(20,paso-140,"Num.")
+			p.drawString(55,paso-140,"Concepto")
+			p.drawString(130,paso-140,"Monto")
 			linea -= 10
-			p.drawString(20,paso-120,"--------------------------------------------------")
-			linea = paso-130	
+			p.drawString(20,paso-150,"--------------------------------------------------")
+			linea = paso-160	
 
 			for elemento in creditos_aplicados:
 				p.drawString(20,linea,str(elemento[0]))
@@ -8281,3 +8293,400 @@ def procesar_recepcion_devolucion_proveedor(request):
 		# o bien un 'ok' y si hay error nos devolvera el mensaje de error.
 		
 		return HttpResponse(json.dumps(data),content_type='application/json',)
+
+
+
+
+# DEVOLUCIONES A PROVEEDOR
+
+
+
+def devolucion_a_proveedor(request):
+
+	#pdb.set_trace()
+
+	error = ''
+	if request.method == 'POST':
+
+		form = Dev_proveedorForm(request.POST)
+
+		if form.is_valid():
+
+			proveedor = form.cleaned_data['proveedor']
+
+			almacen = form.cleaned_data['almacen']
+
+			ordenarpor = form.cleaned_data['ordenarpor'].encode('latin_1')
+			
+			try:
+
+				
+
+				consulta = """SELECT l.Pedido,l.ProductoNo,
+									l.Catalogo,l.NoLinea,l.precio,
+									l.status,h.AsociadoNo,
+									h.FechaPedido,h.fechaultimamodificacion,
+									a.codigoarticulo,a.catalogo,a.idmarca,
+									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial
+									from pedidoslines l
+									 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
+									 inner join articulo a on
+									(a.empresano=1 and 
+									 l.productono=a.codigoarticulo
+									and l.catalogo=a.catalogo)
+									inner join pedidos_status_fechas psf
+									on (l.empresano=psf.empresano and l.pedido=psf.pedido
+									and l.productono=psf.productono
+									and l.catalogo=psf.catalogo
+									and l.nolinea=psf.nolinea and psf.status='Aqui')
+									inner join pedidos_encontrados pe
+									on (l.empresano=pe.empresano
+									and l.pedido=pe.pedido
+									and l.productono=pe.productono
+									and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
+									inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+									where al.proveedorno=%s and al.almacen=%s and l.status='RecepEnDevol'
+									and h.fechapedido>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+				parms =(proveedor,almacen,ordenarpor)
+
+				
+
+				cursor = connection.cursor()
+		
+				cursor.execute(consulta,parms) # observar que se uso parms como parte de una lista en lugar de una tupla, si se usa una tupla marca error
+
+				registros = dictfetchall(cursor)
+				
+				reg_encontrados = len(registros)
+
+				return render(request,'pedidos/muestra_devueltos_aEnviar.html',{'registros':registros,'reg_encontrados':reg_encontrados,'proveedor':proveedor,'almacen':almacen,})
+
+
+
+			except DatabaseError as e:
+
+				error = str(e)
+
+	form = Dev_proveedorForm()
+	return render(request,'pedidos/devoluciones_proveedor.html',{'form':form,'error':error})
+
+
+
+def procesar_devolucion_proveedor(request):
+	
+	#pdb.set_trace()
+	if request.is_ajax()  and request.method == 'POST':
+		# Pasa a una variable la tabla  recibida en json string
+		TableData = request.POST.get('TableData')
+		
+		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
+		datos = json.loads(TableData)
+
+		if request.POST.get('usr_id') is not None:
+			capturista = request.POST.get('usr_id')
+		else:
+			capturista = 99
+		
+		guia = request.POST.get('guia')
+		guia = guia.encode('latin_1')
+
+		observaciones = request.POST.get('observaciones')
+		observaciones = observaciones.encode('latin_1')
+
+		proveedor = request.POST.get('proveedor')
+		almacen = request.POST.get('almacen')
+
+	
+		cursor = connection.cursor()
+
+		''' INICIALIZACION DE VARIABLES '''
+
+		error = False
+		nuevo_status_pedido = 'Dev a Prov'
+
+		''' FIN DE INCIALIZACION DE VARIABLES '''
+
+
+		# Se convierte la fecha de hoy a formatos manejables para insertarlos en el registro.
+		hoy = datetime.now()
+		fecha_hoy = hoy.strftime("%Y-%m-%d")
+		hora_hoy = hoy.strftime("%H:%M:%S") 
+
+
+		try:
+
+			cursor.execute("START TRANSACTION")
+
+			# Crea el registro padre de devoluciones
+			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,'19010101',''))
+
+			cursor.execute("SELECT id from devprov ORDER BY id DESC LIMIT 1;")
+			id_devprov = cursor.fetchone()
+
+
+
+	        # Recupera cada diccionario y extrae los valores de la llave a buscar.
+			for j in datos:
+				
+				if j is not None: # Procesa solo los registros con contenido
+				
+					print "elegido:", j.get('elegido')
+					pedido = j.get("Pedido").encode('latin_1')
+
+					productono = j.get('ProductoNo').strip()
+					catalogo =j.get('Catalogo').strip()
+					nolinea = j.get('Nolinea').encode('latin_1')
+					elegido = j.get('elegido')
+				# Comienza acceso a BD.
+
+
+					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,HoraModicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+					cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
+
+
+					# Crea o bien actualiza pedidos_status_fechas
+
+					cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,pedido,productono,nuevo_status_pedido,catalogo,nolinea,fecha_hoy,hora_hoy,capturista])
+
+
+					# Crea el registro hijo de devoluciones
+
+					cursor.execute("INSERT INTO devprovlines (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,id_devprov) VALUES(%s,%s,%s,%s,%s,%s);",(1,pedido,productono,catalogo,nolinea,id_devprov[0]))
+
+
+
+			cursor.execute("COMMIT;")
+			data = {'status_operacion':'ok','error':'',}
+
+
+		except DatabaseError as error_msg:
+		
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			
+			error = True
+		except IntegrityError as error_msg:
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except OperationalError as error_msg:
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except NotSupportedError as error_msg:
+	
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except ProgrammingError as error_msg:
+
+			cursor.execute("ROLLBACK;")
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except (RuntimeError, TypeError, NameError,ValueError) as error_msg:
+			cursor.execute("ROLLBACK;")
+			#error_msg = 'Error no relativo a base de datos'
+			data = {'status_operacion':'fail','error':str(error_msg),}
+			error = True
+		except:
+			cursor.execute("ROLLBACK;")
+			error_msg = "Error desconocido"
+			data = {'status_operacion':'fail','error':error_msg,}
+			error = True
+
+		cursor.close()
+
+		# Si no hay error, nos devolvera la lista de pedidos cambiados
+		# o bien un 'ok' y si hay error nos devolvera el mensaje de error.
+		
+		return HttpResponse(json.dumps(data),content_type='application/json',)
+
+
+def filtro_dev_prov(request):
+	pdb.set_trace()
+	if  request.method =='POST':
+
+		form = FiltroDevProvForm(request.POST)
+
+		if form.is_valid():
+
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			proveedor = form.cleaned_data['proveedor']
+			almacen = form.cleaned_data['almacen']
+
+			cursor = connection.cursor()
+			cursor.execute('SELECT dp.id,dp.fecha,dp.hora,p.razonsocial as proveedor,al.razonsocial as almacen,dp.id_proveedor,dp.id_almacen,dp.guia,dp.observaciones,dp.fecharecepcion,dp.recibio from devprov dp inner join proveedor p on (p.empresano=1 and p.proveedorno=dp.id_proveedor) inner join almacen al on (al.empresano=1 and al.proveedorno=dp.id_proveedor and al.almacen=dp.id_almacen) where fecha>=%s and fecha<=%s  and dp.id_proveedor=%s and dp.id_almacen=%s order by id desc;',(fechainicial,fechafinal,proveedor,almacen))
+			registros = dictfetchall(cursor)
+			return render(request,'pedidos/lista_dev_prov.html',{'registros':registros,})
+
+
+	form = FiltroDevProvForm()
+	return render (request,'pedidos/filtro_dev_prov.html',{'form':form,})		
+
+
+
+
+ # IMPRESION DE HOJA DE DEVOLUCION A PROVEEDOR
+
+def imprime_hoja_devolucion(request):
+	#pdb.set_trace()
+	
+	is_staff = request.session['is_staff']
+
+	id = request.GET.get('id')
+	
+	# se encodifica como 'latin_1' ya que viene como unicode.
+
+	id = id.encode('latin_1')
+	
+	
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
+
+	#Trae informacion del pedido.
+	cursor =  connection.cursor()
+	#pdb.set_trace()
+
+	pedido_header,pedido_detalle,usuario,NotaCredito = None,None,None,0
+
+	try:
+			
+		cursor.execute("SELECT PedidoNo,FechaPedido,HoraPedido,UsuarioCrea,idSucursal,AsociadoNo,vtatotal FROM pedidosheader where EmpresaNo=1 and PedidoNo = %s;",[p_num_pedido])
+		pedido_header = cursor.fetchone()
+		
+		cursor.execute("SELECT appaterno,apmaterno,nombre FROM asociado where asociadono=%s;",(pedido_header[5],))
+		datos_socio = cursor.fetchone()
+
+		
+		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,a.precio FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
+		pedido_detalle = dictfetchall(cursor)
+		# la siguiente variable  se asigna para ser pasada a la rutina que 
+		# imprimira la nota de credito ( en caso de que exista )
+		if pedido_detalle is not(None):
+
+			for elem in  pedido_detalle:
+				NotaCredito = elem['NoNotaCreditoPorPedido']
+				if elem['talla'] != 'NE':
+					talla = elem['talla']
+				else:
+					talla = elem['Observaciones']
+		
+		cursor.execute("SELECT usuario from usuarios where usuariono=%s;",[pedido_header[3]])
+		
+		usuario = cursor.fetchone()
+
+		mensaje=""
+		
+		if usuario is None:
+			usuario=['ninguno']
+		if (not pedido_header or not pedido_detalle):
+			mensaje = "No se encontro informacion del pedido !"
+
+	except DatabaseError as e:
+		print "Ocurrio de base datos"
+		print e
+		
+		mensaje = "Ocurrio un error de acceso a la bd. Inf. tecnica: "
+	except Exception as e:
+		mensaje = "Ocurrio un error desconocido. Inf. tecnica: "
+		print "error desconocido: "
+		print e
+		
+	cursor.close()
+
+	linea = 800
+	
+	
+    # Create a file-like buffer to receive PDF data.
+	buffer = io.BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+	p = canvas.Canvas(buffer)
+	#p.setPageSize("inch")
+
+	p.setFont("Helvetica",10)
+	#p.drawString(1,linea,inicializa_imp)
+	
+
+    # Draw things on the PDF. Here's where the PDF generation happens.
+    # See the ReportLab documentation for the full list of functionality.
+	#p.drawString(20,810,mensaje)
+
+	if (pedido_header and pedido_detalle and usuario):
+		p.drawString(50,linea, request.session['cnf_razon_social'])
+		linea -=20
+		p.drawString(60,linea, 'SUC. '+request.session['sucursal_nombre'])
+		linea -=20
+		p.setFont("Helvetica",12)
+		p.drawString(20,linea, "*** PEDIDO NUM."+p_num_pedido+" ***")
+		linea -=20
+		p.setFont("Helvetica",10)
+		p.drawString(20,linea,request.session['sucursal_direccion'])
+		linea -= 10
+		p.drawString(20,linea,"COL. "+request.session['sucursal_colonia'])
+		linea -= 10
+		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+		linea -= 20
+		p.drawString(20,linea,pedido_header[1].strftime("%d-%m-%Y"))
+		p.drawString(100,linea,pedido_header[2].strftime("%H:%M:%S"))
+		linea -= 10
+		p.drawString(20,linea,"CREADO POR: ")
+		#p.drawString(100,linea,request.user.username)
+		p.drawString(100,linea,usuario[0])
+		linea -= 20
+		p.drawString(20,linea,"SOCIO NUM: ")
+		type(pedido_header[5])
+		p.drawString(100,linea,str(pedido_header[5]))
+		linea -= 10
+		
+		var_socio = datos_socio[0]+" "+datos_socio[1]+" "+datos_socio[2]
+
+		p.drawString(20,linea,var_socio[0:28])
+		linea -= 10
+
+		p.drawString(20,linea,"--------------------------------------------------")
+		
+		linea -= 10
+		p.drawString(20,linea,"Descrpcion")
+		p.drawString(130,linea,"Precio")
+		linea -= 10
+		p.drawString(20,linea,"--------------------------------------------------")
+		linea -= 10
+		#p.setFont("Helvetica",8)
+		i,paso=1,linea-10
+		for elemento in pedido_detalle:
+
+			if elemento['talla'] != 'NE':
+				talla = elemento['talla']
+			else:
+				talla = elemento['Observaciones']
+			
+			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
+			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
+			p.drawString(130,paso-10,'$ '+str(elemento['precio']))
+			paso -= 30
+		p.drawString(20,paso-10,"Total ==>")
+		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
+		p.drawString(20,paso-40,"Para sugerencias o quejas")
+		p.drawString(20,paso-50,"llame al 867 132 9697")
+		linea = paso-110
+	#pdb.set_trace()	
+	if NotaCredito != 0:
+		imprime_documento(NotaCredito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
+	else:
+
+	# Close the PDF object cleanly, and we're done.
+		p.showPage()
+		p.save()
+
+
+		pdf = buffer.getvalue()
+		buffer.close()
+
+		response.write(pdf)
+
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
+	return response

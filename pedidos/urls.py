@@ -100,8 +100,12 @@ urlpatterns = [
 	url(r'^rptedecreditos/$',views.rptedecreditos,name='rptedecreditos'),
 	url(r'^recepcion_dev_prov/$',views.recepcion_dev_prov,name='recepcion_dev_prov'),
 	url(r'^procesar_recepcion_devolucion_proveedor/$',views.procesar_recepcion_devolucion_proveedor,name='procesar_recepcion_devolucion_proveedor'),
+	url(r'^devolucion_a_proveedor/$',views.devolucion_a_proveedor,name='devolucion_a_proveedor'),
+	url(r'^procesar_devolucion_proveedor/$',views.procesar_devolucion_proveedor,name='procesar_devolucion_proveedor'),
+	url(r'^filtro_dev_prov/$',views.filtro_dev_prov,name='filtro_dev_prov'),
 
 
-	#url(r'^crea_devolucion/$',views.crea_devolucion,name='crea_devolucion'),
+
+
 
 	]

@@ -12,12 +12,12 @@
 
   <div class="col-md-4">
     <div class="panel panel-success">
-        <div class='panel-heading'><h4 align='left'>Devoluciones a proveedor<h4></div>
+        <div class='panel-heading'><h4 align='left'>Filtra devoluciones enviadas<h4></div>
         <div class='panel-body'>
             
            
              
-            <form id="documentos_form" action="{% url 'pedidos:devolucion_a_proveedor' %}" method="POST">
+            <form id="documentos_form" action="{% url 'pedidos:filtro_dev_prov' %}" method="POST">
               <!--  <div class="alert alert-danger" role="alert">
               
             {{form.non_field_errors}}
