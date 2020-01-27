@@ -8418,7 +8418,7 @@ def procesar_devolucion_proveedor(request):
 			cursor.execute("START TRANSACTION")
 
 			# Crea el registro padre de devoluciones
-			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,'19010101',''))
+			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio,num_socio,nombre_socio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,'19010101','',0,''))
 
 			cursor.execute("SELECT id from devprov ORDER BY id DESC LIMIT 1;")
 			id_devprov = cursor.fetchone()
@@ -8525,7 +8525,7 @@ def filtro_dev_prov(request):
 	return render (request,'pedidos/filtro_dev_prov.html',{'form':form,})		
 
 
-
+'''
 
  # IMPRESION DE HOJA DE DEVOLUCION A PROVEEDOR
 
@@ -8690,3 +8690,4 @@ def imprime_hoja_devolucion(request):
     # present the option to save the file.
     #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
 	return response
+'''
