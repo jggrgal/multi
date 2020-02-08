@@ -103,9 +103,10 @@ urlpatterns = [
 	url(r'^devolucion_a_proveedor/$',views.devolucion_a_proveedor,name='devolucion_a_proveedor'),
 	url(r'^procesar_devolucion_proveedor/$',views.procesar_devolucion_proveedor,name='procesar_devolucion_proveedor'),
 	url(r'^filtro_dev_prov/$',views.filtro_dev_prov,name='filtro_dev_prov'),
-
-
-
-
+	url(r'^imprime_hoja_devolucion/$',views.imprime_hoja_devolucion,name='imprime_hoja_devolucion'),
+	url(r'^edita_devprov/(?P<id_prov>[0-9]{1,8})/$',views.edita_devprov,name='edita_devprov'),
+	#url(r'^proveedores/$',views.proveedores,name='proveedores'),
+	#url(r'^edita_proveedor/(?P<proveedorno>[0-9]{1,8})/$',views.edita_proveedor,name='edita_proveedor'),
+	url(r'^lista_devoluciones_recepcionadas/$',views.lista_devoluciones_recepcionadas,name='lista_devoluciones_recepcionadas'),
 
 	]

@@ -1492,7 +1492,7 @@ class CreaDocumentoForm(forms.Form):
 	doc_asociado= forms.IntegerField(label='Socio',initial=0,required=True)
 	doc_concepto = forms.CharField(label="Concepto",initial=' ',required=True)
 	doc_monto = forms.FloatField(label='Monto',initial=0,required=True)
-	usr_crear_documento = forms.IntegerField(label='usr_id',initial=0,required=True)
+	usr_crear_documento = forms.IntegerField(widget=forms.PasswordInput,label='usr_id',initial=0,required=True)
 
 
 	error_messages = {'asociado_inv':'El numero de socio ingresado debe ser mayor a 0 !',\
@@ -1504,6 +1504,11 @@ class CreaDocumentoForm(forms.Form):
 
 	def __init__(self,*args,**kwargs):
 
+		#pdb.set_trace()
+		hoy=datetime.now()
+  		f = hoy.strftime("%d/%m/%Y")
+  		anio_str=f[6:10]
+
 		
 		lprov = lista_Proveedores() # genera una lista de proveedores para ser asignada al combo.
 		super(CreaDocumentoForm, self).__init__(*args,**kwargs)
@@ -1514,7 +1519,7 @@ class CreaDocumentoForm(forms.Form):
 		self.fields['doc_proveedor'] = forms.ChoiceField(widget=forms.Select(),
 			label='Proveedor',choices = lprov,initial=0,required=False )
 		self.fields['doc_asociado'] = forms.IntegerField(label='Socio',initial=0,required=True)
-
+		self.fields['doc_anio'] =forms.IntegerField(label='Año',initial=anio_str,required=False)
 		return
 
 	def clean(self):
@@ -1544,7 +1549,9 @@ class CreaDocumentoForm(forms.Form):
 		elif not (self.monto>0):
 			raise forms.ValidationError(self.error_messages['err_monto'],code='err_monto')
 		else:
-			pass
+			if self.ventadecatalogo==1 and int(self.doc_anio)<2019:
+				raise forms.ValiationError("Ingrese un anio")
+
 
 		return self.cleaned_data
 
@@ -2044,7 +2051,12 @@ class Dev_proveedorForm(forms.Form):
 		self.fields['ordenarpor']= forms.ChoiceField(widget=forms.Select(),
 			label= 'Ordenar por',choices = opciones,initial='Estilo')
 
+		self.fields['num_socio']= forms.IntegerField(label='Numero de Socio',required=True)
+		self.fields['nombre_socio']= forms.CharField(label='Nombre del Socio',required=True,initial='Abel Espinoza Montoya')
 
+
+
+		
 
 class FiltroDevProvForm(forms.Form):
 
@@ -2068,9 +2080,7 @@ class FiltroDevProvForm(forms.Form):
 					'FechaFinal':'Ingrese una fecha final !',
 					'FechIniMayor':'La fecha final debe ser mayor o igual a la fecha inicial !',}
 
-
-
-
+	
 
 	def __init__(self,*args,**kwargs):
 
@@ -2110,3 +2120,118 @@ class FiltroDevProvForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
 
 		return self.cleaned_data
+
+
+class Edicion_devprovForm(forms.Form):
+
+
+	hoy =  date.today()	
+	#t = datetime.now
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+	id = forms.IntegerField(label='id',required=False)
+
+	guia = forms.CharField(label='Guia',required=True)
+
+	observaciones = forms.CharField(label='Observaciones',required=True)
+
+	Colonia = forms.DateField(label='Fecha recepcion',widget=DateInput(),required=False,initial=hoy)
+
+	Ciudad = forms.CharField(label='Recibido por:',required=True)
+
+	num_socio = forms.IntegerField(label='Numero Socio',required=True)
+	Pais = forms.CharField(label='Pais',required=True)
+
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(Edicion_devprovForm, self).__init__(*args,**kwargs)
+
+		self.fields['id'].widget.attrs['readonly'] = True
+		return
+
+	def clean(self):
+
+		cleaned_data = super(Edicion_devprovForm,self).clean()
+	
+		id = cleaned_data.get('id')
+		guia = cleaned_data.get('guia')
+		observaciones = cleaned_data.get('observaciones')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		num_socio = cleaned_data.get('num_socio')
+		Pais = cleaned_data.get('Pais')
+		return self.cleaned_data
+"""
+
+class DatosProveedorForm(forms.Form):
+
+
+	ProveedorNo = forms.IntegerField(label='Proveedor Num.',required=True)
+	RazonSocial = forms.CharField(label='Nombre',required=True)	
+	Direccion = forms.CharField(label='Direccion',required=True)
+	Colonia = forms.CharField(label='Colonia',required=True)
+	Ciudad = forms.CharField(label='Ciudad',required=True)
+	Estado = forms.CharField(label='Estado',required=True)
+	Pais = forms.CharField(label='Pais',required=True)
+	CodigoPostal = forms.IntegerField(label='C.P.',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True)
+	telefono2 = forms.CharField(label='Telefono 2',required=True)
+	fax = forms.CharField(label='Fax',required=True)
+	celular = forms.CharField(label='Celular',required=True)
+	radio = forms.CharField(label='radio',required=True)
+	email = forms.EmailField(label='email',required=True)
+	FechaAlta = forms.DateField(label='Fecha Alta',required=True)
+	FechaBaja = forms.DateField(label='Fecha Baja',required=True)
+	maneja_desc = forms.IntegerField(label='Maneja descuento',widget=forms.CheckBox())
+
+	def clean(self):
+
+		cleaned_data = super(DatosProveedorForm,self).clean()
+	
+		ProveedorNo = cleaned_data.get('ProveedorNo')
+		RazonSocial = cleaned_data.get('RazonSocial')
+		Direccion = cleaned_data.get('Direccion')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		Estado = cleaned_data.get('num_socio')
+		Pais = cleaned_data.get('Pais')
+		CodiPostal = cleaned_data.get('CodigoPostal')
+		telefono1 = cleaned_data.get('telefono1')
+		telefono2 = cleaned_data.get('telefono2')
+		fax = cleaned_data.get('fax')
+		celular = cleaned_data.get('celular')
+		radio = cleaned_data.get('radio')
+		email = cleaned_data.get('email')
+		FechaAlta = cleaned_data.get('FechaAlta')
+		FechaBaja = cleaned_data.get('FechaBaja')
+		maneja_desc = cleaned_data.get('maneja_desc')
+
+		return self.cleaned_data
+		"""
+
+
+
+
+class Lista_dev_recepcionadasForm(forms.Form):
+
+	
+
+	def __init__(self,*args,**kwargs):
+
+		
+		opciones = (('Estilo','Estilo'),('Marca','Marca'))
+
+		
+		super(Lista_dev_recepcionadasForm, self).__init__(*args,**kwargs)
+
+
+
+		
+		self.fields['ordenarpor']= forms.ChoiceField(widget=forms.Select(),
+			label= 'Ordenar por',choices = opciones,initial='Estilo')
+
+		

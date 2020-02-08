@@ -4,7 +4,8 @@
 
 {% load l10n %}
 
-<h4>Socio: {{ socio }}__{{ nombre_socio }}</h4>
+<h4>Proveedor: {{nom_prov }}</h4>
+<h4>Almacen: {{nom_almacen }}</h4>
 <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
 
     <div class="table-responsive">
@@ -21,6 +22,7 @@
                 <th>Observaciones</th>
                 <th>Fecha recepción</th>
                 <th>Recibió</th>
+                <th>Imp</th>
                 
                 
         	</tr>
@@ -29,7 +31,9 @@
         	{% for item in registros %}
                 
         		<tr>
-        			<td> {{item.id}}</td>
+        			
+                    <td><a href="{% url 'pedidos:edita_devprov' item.id %}"> {{item.id}}</a> </td>
+
                     {% localize on %}
                         <td>{{item.fecha | date:'d/M/Y'}}</td>
                     {% endlocalize %}
@@ -43,6 +47,9 @@
                         <td>{{item.fecharecepcion | date:'d/M/Y'}}</td>
                     {% endlocalize %}
                     <td>{{ item.recibio }}</td>
+                    <td><form id="imp_hojadev_form" action="/pedidos/imprime_hoja_devolucion/" method="GET">
+                        <input id="id_imp_hoja_dev" name="id" class="btn-success-btn-lg" type="submit" value="{{item.id}}">
+                    </form></td>
                                                           
             	</tr>
             {% endfor %}
@@ -60,33 +67,32 @@
         </div>-->
     </div>
 
-    
+
     <div class="row">
         <div class='col-md-3'>
-            
+            <!--
             <label for="usr_id">Usuario_id:</label> 
-            <input id="usr_id_pedidos_recepcionar" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>
+            <input id="usr_id_pedidos_recepcionar" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0> -->
    
 
         </div>
         <div class ='col-md-3'>
+          <!--  
           <form id="imp_venta_form" action="{% url 'pedidos:imprime_credito' %}" method="GET" >
                         <input id ='id_nuevo_credito' name ='p_num_credito' class="btn-success-btn" type="submit"  value="000000" />
 
-            </form>
+            </form> -->
   
 
 
         </div>
         <div class='col-md-3'>
-    	    <p align='right'>
-    	        <a class="btn btn-default" href="/pedidos/devolucion_socio" role="button">Regresar</a>
-    	    </p>
+    	    
         </div>
         <div class='col-md-3'>
-    	    <p align='right'>
-    	        <button id='procesar_devolucion_socio' class="btn btn-default" href="#" role="button">Procesar</button>
-    	    </p>
+            <p align='right'>
+                <button id='imprimir_devolucion_socio' class="btn btn-default" href="/pedidos/filtro_dev_prov" role="button">Regresar</button>
+            </p>    	    
 
             
 

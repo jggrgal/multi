@@ -3489,7 +3489,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/procesar_devolucion_proveedor/',
                     type: 'POST',
-                    data: {'TableData':TableData,'usr_id':usr_id,'guia':guia,'observaciones':observaciones,'proveedor':proveedor,'almacen':almacen},
+                    data: {'TableData':TableData,'usr_id':usr_id,'guia':guia,'observaciones':observaciones,'proveedor':proveedor,'almacen':almacen,'num_socio':num_socio,'nombre_socio':nombre_socio,},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){

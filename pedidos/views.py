@@ -42,7 +42,10 @@ from .forms import (AccesoForm,\
 					RpteCreditosForm,
 					Recepcion_dev_provForm,\
 					Dev_proveedorForm,\
-					FiltroDevProvForm,)
+					FiltroDevProvForm,\
+					Edicion_devprovForm,\
+					#DatosProveedorForm,
+					Lista_dev_recepcionadasForm)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -2681,7 +2684,7 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 				request.session['EsSocio'] = asociado_data[4]
 				num_socio = asociado_data[0]
 				telefono_socio = asociado_data[5]
-				nombre_socio = str(asociado_data[0])+' '+asociado_data[1]+ ' '+asociado_data[2]+' '+asociado_data[3]+'          TELEFONO: '+asociado_data[5]
+				nombre_socio = str(asociado_data[0])+' '+asociado_data[1]+ ' '+asociado_data[2]+' '+(asociado_data[3] if (asociado_data[3] is not None) else 'sin apellido')+'          TELEFONO: '+asociado_data[5]
 				
 				form=PedidosForm(request)
 
@@ -2765,7 +2768,7 @@ def imprime_ticket(request):
 		cursor.execute("SELECT PedidoNo,FechaPedido,HoraPedido,UsuarioCrea,idSucursal,AsociadoNo,vtatotal FROM pedidosheader where EmpresaNo=1 and PedidoNo = %s;",[p_num_pedido])
 		pedido_header = cursor.fetchone()
 		
-		cursor.execute("SELECT appaterno,apmaterno,nombre FROM asociado where asociadono=%s;",(pedido_header[5],))
+		cursor.execute("SELECT appaterno,apmaterno,nombre,EsSocio FROM asociado where asociadono=%s;",(pedido_header[5],))
 		datos_socio = cursor.fetchone()
 
 		
@@ -2773,6 +2776,9 @@ def imprime_ticket(request):
 		pedido_detalle = dictfetchall(cursor)
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
+
+
+		
 		if pedido_detalle is not(None):
 
 			for elem in  pedido_detalle:
@@ -2781,7 +2787,7 @@ def imprime_ticket(request):
 					talla = elem['talla']
 				else:
 					talla = elem['Observaciones']
-		
+
 		cursor.execute("SELECT usuario from usuarios where usuariono=%s;",[pedido_header[3]])
 		
 		usuario = cursor.fetchone()
@@ -2872,9 +2878,14 @@ def imprime_ticket(request):
 			else:
 				talla = elemento['Observaciones']
 			
+			if datos_socio[3] != 1:
+				precio_imprimir = elemento['subtotal']
+			else:
+				precio_imprimir = elemento['precio']	
+
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
-			p.drawString(130,paso-10,'$ '+str(elemento['precio']))
+			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
 			paso -= 30
 		p.drawString(20,paso-10,"Total ==>")
 		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
@@ -4679,7 +4690,8 @@ def detalle_documento(request,NoDocto):
 				
 				cursor.execute('ROLLBACK;')
 				msg = 'Error en base de datos !'
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+				e=str(e)
+				return HttpResponse(e)
 
 		else:
 			nodocto = NoDocto
@@ -4860,7 +4872,7 @@ def crea_documento(request):
 						cursor.execute("INSERT INTO sociocatalogostemporada\
 						                   (proveedorno,periodo,anio,\
 						                   clasearticulo,asociadono,activo,nodocto)\
-						                   VALUES(%s,%s,%s,%s,%s,%s,%s);"\
+						                   VALUES(%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE activo=activo;"\
 						                   ,(proveedor,anio,temporada,reg_catalogo['ClaseArticulo'],asociado,1,ultimodocto[0]+1))
 
 				context ={'p_num_credito':p_num_credito,'p_num_venta':p_num_venta,'tipodedocumento':tipodedocumento,}
@@ -5049,14 +5061,6 @@ def calcula_descuento(p_socio,p_idproveedor):
 
 
 
-
-
-
-
-
-
-
-
 def trae_inf_venta(request,num_socio):
 	# funcion llamada desde la rutiona 'ingresa_socio'
 
@@ -5074,6 +5078,7 @@ def trae_inf_venta(request,num_socio):
 
 
 	# trae pedidos que estan aqui
+	# Obervar que en el WHERE se usa un IF para la tamporada, para que se traiga el catalogo correcto
 	cursor.execute("SELECT l.pedido,\
 							l.productono,\
 							l.catalogo,\
@@ -5096,9 +5101,11 @@ def trae_inf_venta(request,num_socio):
 							and l.productono=a.codigoarticulo\
 							and l.catalogo=a.catalogo\
 							left join viasolicitud v on (v.id=h.viasolicitud)\
-							left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=%s and ct.anio=%s and ct.clasearticulo=l.catalogo)\
-							WHERE l.status='Aqui' and  h.asociadono=%s and h.idsucursal=%s;",(ejercicio_vigente, periodo_vigente, num_socio,id_sucursal,))
+							inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+							WHERE l.status='Aqui' and  h.asociadono=%s and h.idsucursal=%s;",(num_socio,id_sucursal,))
 	ventas = dictfetchall(cursor)
+
+	
 	
 	''' Como se va a modificar un registro de la lista de diccionarios,se crea
 	esta lista temporal'''
@@ -5110,8 +5117,9 @@ def trae_inf_venta(request,num_socio):
 	
 		p_idproveedor = venta['idproveedor']
 
+		
 		if venta['no_maneja_descuentos']=='\x01':
-
+		
 			venta['precio_dscto']=p_precio
 		else:
 			p_porcentaje_descuento = Decimal(calcula_descuento(num_socio,p_idproveedor),2)
@@ -5167,8 +5175,8 @@ def nueva_venta(request):
 	is_staff = request.session['is_staff']
 	context={'existe_socio':existe_socio,'form':form,'is_staff':is_staff,'tipo':tipo,}	
 
-
 	return render(request,'pedidos/ingresa_socio.html',context)
+
 '''
 def calcula_descuento(request,*args,**kwargs):
 	#pdb.set_trace() 
@@ -7217,12 +7225,14 @@ def proveedores(request):
 
 
 def edita_proveedor(request,proveedorno):
-	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	
 	
 
 	msg = ''
 	if request.method == 'POST':
+
+		form = DatosProveedorForm(request.POST)
 		if form.is_valid():
 			proveedorno = request.POST.get('proveedorno')
 			RazonSocial = request.POST.get('razonsocial')
@@ -7315,6 +7325,8 @@ def edita_proveedor(request,proveedorno):
 			return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 
 	else:	
+
+		form = DatosProveedorForm()
 		
 		cursor=connection.cursor()
 		cursor.execute("SELECT 	RazonSocial,\
@@ -8318,6 +8330,9 @@ def devolucion_a_proveedor(request):
 
 			ordenarpor = form.cleaned_data['ordenarpor'].encode('latin_1')
 			
+			num_socio = form.cleaned_data['num_socio']
+
+			nombre_socio = form.cleaned_data['nombre_socio']
 			try:
 
 				
@@ -8359,7 +8374,7 @@ def devolucion_a_proveedor(request):
 				
 				reg_encontrados = len(registros)
 
-				return render(request,'pedidos/muestra_devueltos_aEnviar.html',{'registros':registros,'reg_encontrados':reg_encontrados,'proveedor':proveedor,'almacen':almacen,})
+				return render(request,'pedidos/muestra_devueltos_aEnviar.html',{'registros':registros,'reg_encontrados':reg_encontrados,'proveedor':proveedor,'almacen':almacen,'num_socio':num_socio,'nombre_socio':nombre_socio,})
 
 
 
@@ -8396,6 +8411,8 @@ def procesar_devolucion_proveedor(request):
 		proveedor = request.POST.get('proveedor')
 		almacen = request.POST.get('almacen')
 
+		num_socio = request.POST.get('num_socio')
+		nombre_socio = request.POST.get('nombre_socio')
 	
 		cursor = connection.cursor()
 
@@ -8418,7 +8435,7 @@ def procesar_devolucion_proveedor(request):
 			cursor.execute("START TRANSACTION")
 
 			# Crea el registro padre de devoluciones
-			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio,num_socio,nombre_socio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,'19010101','',0,''))
+			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio,num_socio,nombre_socio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,hoy,'',num_socio,nombre_socio))
 
 			cursor.execute("SELECT id from devprov ORDER BY id DESC LIMIT 1;")
 			id_devprov = cursor.fetchone()
@@ -8503,7 +8520,7 @@ def procesar_devolucion_proveedor(request):
 
 
 def filtro_dev_prov(request):
-	pdb.set_trace()
+	#pdb.set_trace()
 	if  request.method =='POST':
 
 		form = FiltroDevProvForm(request.POST)
@@ -8518,14 +8535,20 @@ def filtro_dev_prov(request):
 			cursor = connection.cursor()
 			cursor.execute('SELECT dp.id,dp.fecha,dp.hora,p.razonsocial as proveedor,al.razonsocial as almacen,dp.id_proveedor,dp.id_almacen,dp.guia,dp.observaciones,dp.fecharecepcion,dp.recibio from devprov dp inner join proveedor p on (p.empresano=1 and p.proveedorno=dp.id_proveedor) inner join almacen al on (al.empresano=1 and al.proveedorno=dp.id_proveedor and al.almacen=dp.id_almacen) where fecha>=%s and fecha<=%s  and dp.id_proveedor=%s and dp.id_almacen=%s order by id desc;',(fechainicial,fechafinal,proveedor,almacen))
 			registros = dictfetchall(cursor)
-			return render(request,'pedidos/lista_dev_prov.html',{'registros':registros,})
+			
+			cursor.execute('SELECT razonsocial as nom_prov from proveedor WHERE empresano=1 and proveedorno=%s;',(proveedor))
+			nom_prov = cursor.fetchone()
+
+			cursor.execute('SELECT razonsocial as nom_almacen from almacen where empresano=1 and proveedorno=%s and almacen=%s;',(proveedor,almacen))
+			nom_almacen = cursor.fetchone()
+
+			return render(request,'pedidos/lista_dev_prov.html',{'registros':registros,'nom_prov':nom_prov[0],'nom_almacen':nom_almacen[0],'id':id,})
 
 
 	form = FiltroDevProvForm()
 	return render (request,'pedidos/filtro_dev_prov.html',{'form':form,})		
 
 
-'''
 
  # IMPRESION DE HOJA DE DEVOLUCION A PROVEEDOR
 
@@ -8538,7 +8561,7 @@ def imprime_hoja_devolucion(request):
 	
 	# se encodifica como 'latin_1' ya que viene como unicode.
 
-	id = id.encode('latin_1')
+	id = int(id.encode('latin_1'))
 	
 	
 	response = HttpResponse(content_type='application/pdf')
@@ -8548,25 +8571,25 @@ def imprime_hoja_devolucion(request):
 	cursor =  connection.cursor()
 	#pdb.set_trace()
 
-	pedido_header,pedido_detalle,usuario,NotaCredito = None,None,None,0
+	
 
 	try:
 			
-		cursor.execute("SELECT PedidoNo,FechaPedido,HoraPedido,UsuarioCrea,idSucursal,AsociadoNo,vtatotal FROM pedidosheader where EmpresaNo=1 and PedidoNo = %s;",[p_num_pedido])
+		cursor.execute("SELECT fecha,hora,guia,num_socio,nombre_socio FROM devprov where id=%s;",(id,))
 		pedido_header = cursor.fetchone()
 		
-		cursor.execute("SELECT appaterno,apmaterno,nombre FROM asociado where asociadono=%s;",(pedido_header[5],))
-		datos_socio = cursor.fetchone()
+		'''cursor.execute("SELECT appaterno,apmaterno,nombre FROM asociado where asociadono=%s;",(pedido_header[5],))
+		datos_socio = cursor.fetchone()'''
 
 		
-		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,a.precio FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
+		cursor.execute("SELECT dpl.id_devprov,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo FROM devprovlines dpl inner join pedidoslines l  on (dpl.empresano=l.empresano and dpl.pedido=l.pedido and dpl.productono=l.productono and dpl.catalogo=l.catalogo and dpl.nolinea=l.nolinea) INNER JOIN articulo a ON (l.empresano=a.empresano and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) WHERE dpl.id_devprov=%s;",(id,))
 		pedido_detalle = dictfetchall(cursor)
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
 		if pedido_detalle is not(None):
 
 			for elem in  pedido_detalle:
-				NotaCredito = elem['NoNotaCreditoPorPedido']
+				
 				if elem['talla'] != 'NE':
 					talla = elem['talla']
 				else:
@@ -8605,7 +8628,7 @@ def imprime_hoja_devolucion(request):
 	p = canvas.Canvas(buffer)
 	#p.setPageSize("inch")
 
-	p.setFont("Helvetica",10)
+	p.setFont("Helvetica",12)
 	#p.drawString(1,linea,inicializa_imp)
 	
 
@@ -8614,47 +8637,50 @@ def imprime_hoja_devolucion(request):
 	#p.drawString(20,810,mensaje)
 
 	if (pedido_header and pedido_detalle and usuario):
-		p.drawString(50,linea, request.session['cnf_razon_social'])
-		linea -=20
-		p.drawString(60,linea, 'SUC. '+request.session['sucursal_nombre'])
+		p.drawString(250,linea, request.session['cnf_razon_social'])
 		linea -=20
 		p.setFont("Helvetica",12)
-		p.drawString(20,linea, "*** PEDIDO NUM."+p_num_pedido+" ***")
+		p.drawString(220,linea, " ----- Devolución número "+str(id)+" ------")
 		linea -=20
-		p.setFont("Helvetica",10)
+		p.setFont("Helvetica",8)
 		p.drawString(20,linea,request.session['sucursal_direccion'])
+		p.drawString(470,linea,"FECHA: "+pedido_header[0].strftime("%d-%m-%Y"))
 		linea -= 10
 		p.drawString(20,linea,"COL. "+request.session['sucursal_colonia'])
 		linea -= 10
 		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
 		linea -= 20
-		p.drawString(20,linea,pedido_header[1].strftime("%d-%m-%Y"))
-		p.drawString(100,linea,pedido_header[2].strftime("%H:%M:%S"))
-		linea -= 10
-		p.drawString(20,linea,"CREADO POR: ")
+		
+		p.setFont("Helvetica",8)
+		
+		#p.drawString(100,linea,pedido_header[1].strftime("%H:%M:%S"))
+		#linea -= 10
+	#	p.drawString(20,linea,"CREADO POR: ")
 		#p.drawString(100,linea,request.user.username)
-		p.drawString(100,linea,usuario[0])
-		linea -= 20
+		#p.drawString(100,linea,usuario[0])
+		#linea -= 20
 		p.drawString(20,linea,"SOCIO NUM: ")
-		type(pedido_header[5])
-		p.drawString(100,linea,str(pedido_header[5]))
-		linea -= 10
+		#type()
+		p.drawString(80,linea,str(pedido_header[3]))
+		#linea -= 10
 		
-		var_socio = datos_socio[0]+" "+datos_socio[1]+" "+datos_socio[2]
+		var_socio = "Abel Espinoza Montoya"
 
-		p.drawString(20,linea,var_socio[0:28])
+		p.drawString(110,linea,pedido_header[4])
 		linea -= 10
 
-		p.drawString(20,linea,"--------------------------------------------------")
+				
+		#linea -= 10
 		
+		p.drawString(220,linea,"Estilo      ")
+		p.drawString(270,linea,"Color       ")
+		p.drawString(345,linea,"Talla       ")
 		linea -= 10
-		p.drawString(20,linea,"Descrpcion")
-		p.drawString(130,linea,"Precio")
-		linea -= 10
-		p.drawString(20,linea,"--------------------------------------------------")
+		p.drawString(220,linea,"-------------------------------------------------")
 		linea -= 10
 		#p.setFont("Helvetica",8)
-		i,paso=1,linea-10
+		i,paso=0,linea-10
+		
 		for elemento in pedido_detalle:
 
 			if elemento['talla'] != 'NE':
@@ -8662,19 +8688,18 @@ def imprime_hoja_devolucion(request):
 			else:
 				talla = elemento['Observaciones']
 			
-			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
-			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
-			p.drawString(130,paso-10,'$ '+str(elemento['precio']))
-			paso -= 30
-		p.drawString(20,paso-10,"Total ==>")
-		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
-		p.drawString(20,paso-40,"Para sugerencias o quejas")
-		p.drawString(20,paso-50,"llame al 867 132 9697")
+			
+			p.drawString(220,paso,(elemento['idestilo']+(12-len(elemento['idestilo']))*' ')[0:12])
+			p.drawString(270,paso,(elemento['idcolor']+(12-len(elemento['idcolor']))*' ')[0:12])		
+			p.drawString(345,paso,talla)		
+			paso -= 10
+			i+=1
+		paso-=10
+			
+		p.drawString(220,paso,"TOTAL DE ARTICULOS: "+str(i))
 		linea = paso-110
 	#pdb.set_trace()	
-	if NotaCredito != 0:
-		imprime_documento(NotaCredito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
-	else:
+	
 
 	# Close the PDF object cleanly, and we're done.
 		p.showPage()
@@ -8690,4 +8715,161 @@ def imprime_hoja_devolucion(request):
     # present the option to save the file.
     #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
 	return response
-'''
+
+
+def edita_devprov(request,id_prov):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	msg = ''
+	
+	if request.method == 'POST':
+		form = Edicion_devprovForm(request.POST)
+		if form.is_valid():
+			id = request.POST.get('id')
+			observaciones =request.POST.get('observaciones').encode('latin_1')[0:100]
+			guia = request.POST.get('guia').encode('latin_1')[0:100]
+			fecha_recepcion = request.POST.get('fecha_recepcion')
+			recibio = request.POST.get('recibio').encode('latin_1')[0:20]
+			num_socio = request.POST.get('num_socio')
+			nombre_socio = request.POST.get('nombre_socio').encode('latin_1')[0:30]
+
+			# convierte la fecha a formato adecuado para poder ser grabada en base de datos		
+			if fecha_recepcion is not None:
+				f_convertida = datetime.strptime(fecha_recepcion, "%d/%m/%Y").date()
+	 		else:
+	 			f_convertida = '1901/01/01'
+
+
+
+			''' OJO, los siguientes if's sirven para verificar 
+			los campos boleanos 'vtadecatalogo' y 'bloquearnotacredito' 
+			dado que el templeate los regresa con valores 'None' y 'on'
+			esto hay que investigar porque lo hace, mientras
+			se actualizan con calores correctos dependiendo de lo que 
+			traigan '''
+
+			
+			
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('UPDATE devprov SET guia=%s,observaciones=%s,fecharecepcion=%s,recibio=%s,num_socio=%s,nombre_socio=%s WHERE id=%s;',(guia,observaciones,f_convertida,recibio,num_socio,nombre_socio,id_prov,))
+				cursor.execute("COMMIT;")
+				return HttpResponseRedirect(reverse('pedidos:filtro_dev_prov'))
+				
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+
+			return render(request,'pedidos/detalle_devprov.html',{'form':form,'id':id,})
+	else:	
+				
+		cursor =  connection.cursor()
+		cursor.execute("SELECT d.id,\
+			                   d.guia,\
+			                   d.observaciones,\
+			                   d.fecharecepcion,\
+			                   d.recibio,\
+			                   d.num_socio,\
+			                   d.nombre_socio\
+			                   FROM devprov d WHERE d.id=%s;",(id_prov,))	
+		datos_documento =  cursor.fetchone()
+		
+		id = datos_documento[0]
+		guia = datos_documento[1] 
+		
+		observaciones = datos_documento[2]
+		fecha_recepcion = datos_documento[3]
+		recibio = datos_documento[4]
+		num_socio = datos_documento[5]
+		nombre_socio = datos_documento[6]
+		
+		cursor.close()
+
+		form =  Edicion_devprovForm(initial= {'id':id,'guia':guia,'observaciones':observaciones,'fecha_recepcion':fecha_recepcion,'recibio':recibio,'num_socio':num_socio,'nombre_socio':nombre_socio,})	
+		return render(request,'pedidos/detalle_devprov.html',{'form':form,'id_prov':id_prov,'msg':msg},)
+
+
+# DEVOLUCIONES A PROVEEDOR
+
+
+
+def lista_devoluciones_recepcionadas(request):
+
+	#pdb.set_trace()
+
+	error = ''
+	if request.method == 'POST':
+
+		form = Lista_dev_recepcionadasForm(request.POST)
+
+		if form.is_valid():
+
+			
+			
+
+			ordenarpor = form.cleaned_data['ordenarpor'].encode('latin_1')
+			
+			
+			try:
+
+				
+
+				consulta = """SELECT l.Pedido,l.ProductoNo,
+									l.Catalogo,l.NoLinea,l.precio,
+									l.status,h.AsociadoNo,
+									h.FechaPedido,h.fechaultimamodificacion,
+									a.codigoarticulo,a.catalogo,a.idmarca,
+									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf.fechamvto,al.razonsocial,
+									pr.razonsocial as prov_nombre
+
+									from pedidoslines l
+									 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
+									 inner join articulo a on
+									(a.empresano=1 and 
+									 l.productono=a.codigoarticulo
+									and l.catalogo=a.catalogo)
+									inner join pedidos_status_fechas psf
+									on (l.empresano=psf.empresano and l.pedido=psf.pedido
+									and l.productono=psf.productono
+									and l.catalogo=psf.catalogo
+									and l.nolinea=psf.nolinea and psf.status='Aqui')
+									inner join pedidos_encontrados pe
+									on (l.empresano=pe.empresano
+									and l.pedido=pe.pedido
+									and l.productono=pe.productono
+									and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
+									inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro) 
+									inner join proveedor pr on (l.empresano=pr.empresano and a.idproveedor=pr.proveedorno)
+									where l.status='RecepEnDevol'
+									and h.fechapedido>'20191201' ORDER BY a.Idproveedor,al.almacen,if(%s='Estilo',a.idestilo,a.idmarca);"""
+				#parms =(proveedor,almacen,ordenarpor)
+				parms =(ordenarpor,)
+
+				
+
+				cursor = connection.cursor()
+		
+				cursor.execute(consulta,parms) # observar que se uso parms como parte de una lista en lugar de una tupla, si se usa una tupla marca error
+
+				registros = dictfetchall(cursor)
+				
+				reg_encontrados = len(registros)
+
+				return render(request,'pedidos/lista_devueltos_recepcionados.html',{'registros':registros,'reg_encontrados':reg_encontrados,})
+
+
+
+			except DatabaseError as e:
+
+				error = str(e)
+
+	form = Lista_dev_recepcionadasForm
+	return render(request,'pedidos/ListaDev_proveedor.html',{'form':form,'error':error})
