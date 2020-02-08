@@ -8797,7 +8797,7 @@ def edita_devprov(request,id_prov):
 		return render(request,'pedidos/detalle_devprov.html',{'form':form,'id_prov':id_prov,'msg':msg},)
 
 
-# DEVOLUCIONES A PROVEEDOR
+# LISTA DE DEVOLUCIONES A PROVEEDOR
 
 
 
