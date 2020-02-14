@@ -2053,6 +2053,7 @@ class Dev_proveedorForm(forms.Form):
 
 		self.fields['num_socio']= forms.IntegerField(label='Numero de Socio',required=True)
 		self.fields['nombre_socio']= forms.CharField(label='Nombre del Socio',required=True,initial='Abel Espinoza Montoya')
+		self.fields['dirigir_a']= forms.ChoiceField(widget=forms.Select(),label='Dirigir a',choices=(('Pantalla','Pantalla'),('Archivo','Archivo')),initial='Pantalla',required=True)
 
 
 
@@ -2137,12 +2138,12 @@ class Edicion_devprovForm(forms.Form):
 
 	observaciones = forms.CharField(label='Observaciones',required=True)
 
-	Colonia = forms.DateField(label='Fecha recepcion',widget=DateInput(),required=False,initial=hoy)
+	fecha_recepcion = forms.DateField(label='Fecha recepcion',widget=DateInput(),required=False,initial=hoy)
 
-	Ciudad = forms.CharField(label='Recibido por:',required=True)
+	recibio = forms.CharField(label='Recibido por:',required=True)
 
-	num_socio = forms.IntegerField(label='Numero Socio',required=True)
-	Pais = forms.CharField(label='Pais',required=True)
+	num_socio = forms.CharField(label='Numero Socio',required=True)
+	nombre_socio = forms.CharField(label='Nombre del socio',required=True)
 
 
 	def __init__(self,*args,**kwargs):
@@ -2160,10 +2161,10 @@ class Edicion_devprovForm(forms.Form):
 		id = cleaned_data.get('id')
 		guia = cleaned_data.get('guia')
 		observaciones = cleaned_data.get('observaciones')
-		Colonia = cleaned_data.get('Colonia')
-		Ciudad = cleaned_data.get('Ciudad')
+		fecha_recepcion = cleaned_data.get('fecha_recepcion')
+		recibio = cleaned_data.get('recibio')
 		num_socio = cleaned_data.get('num_socio')
-		Pais = cleaned_data.get('Pais')
+		nombre_socio = cleaned_data.get('nombre_socio')
 		return self.cleaned_data
 """
 
