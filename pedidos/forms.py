@@ -1360,13 +1360,13 @@ class DocumentosForm(forms.Form):
 			no_hay_documento = False
 
 
-		if socio_num == 0 and documento_num == 0:
+		'''if socio_num == 0 and documento_num == 0:
 			#raise forms.ValidationError("Seleccione un proveedor !")
 			raise forms.ValidationError(self.error_messages['DctoSocio'],code='DctoSocio')
-			print "paso por ambos ceros"
+			print "paso por ambos ceros"'''
 		
 		# Si el socio es diferente de cero valida la fecha:		
-		elif socio_num != 0:
+		if int(socio_num) != 0:
 
 			if no_hay_socio:
 				raise forms.ValidationError(self.error_messages['nohaysocio'],code='nohaysocio')
@@ -1386,9 +1386,11 @@ class DocumentosForm(forms.Form):
 		
 		# De otra manera, quiere decir que el socio es cero y quien tiene un valor es
 		# el numero de documento, siendo este el caso no hay ya validacion.
-		else:
+		elif documento_num !=0 :
 			if no_hay_documento:
 				raise forms.ValidationError(self.error_messages['nohaydocto'],code='nohaydocto')
+		else:
+			pass
 
 		return self.cleaned_data
 

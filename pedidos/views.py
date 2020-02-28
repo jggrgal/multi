@@ -1213,7 +1213,7 @@ def documentos(request):
 			socio_num = form.cleaned_data['socio_num']
 			
 
-
+			# filtra por documento
 
 			if documento_num != 0 :
 				
@@ -1238,7 +1238,9 @@ def documentos(request):
 									and d.nodocto =%s;"""
 				parms = [documento_num]
 
-			elif documento_num == 0 and tipo_movimiento == 'Todos':
+			#filtra por socio y todos sus movimientos
+
+			elif documento_num == 0 and tipo_movimiento == 'Todos' and socio_num !=0:
 				
 				consulta = """SELECT d.NoDocto,
 									d.TipoDeDocumento,
@@ -1261,7 +1263,35 @@ def documentos(request):
 									WHERE d.empresano=1
 									and d.asociado =%s and fechacreacion >= %s and fechacreacion<=%s;"""
 				parms =[socio_num,fechainicial,fechafinal]
-			else :
+			
+			
+			# filtra por todos los movimientos sin importar el socio
+			elif documento_num == 0 and tipo_movimiento == 'Todos' and socio_num == 0:
+				
+				consulta = """SELECT d.NoDocto,
+									d.TipoDeDocumento,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.venta,
+									d.saldo,
+									d.comisiones,
+									d.DescuentoAplicado,
+									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1
+									and fechacreacion >= %s and fechacreacion<=%s;"""
+				parms = [fechainicial,fechafinal]
+
+			# filtra por un solo tipo de movimiento de un socio en particular
+
+			elif documento_num == 0 and tipo_movimiento != 'Todos' and socio_num != 0:
 				
 				consulta = """SELECT d.NoDocto,
 									d.TipoDeDocumento,
@@ -1283,6 +1313,32 @@ def documentos(request):
 									WHERE d.empresano=1
 									and d.asociado =%s and fechacreacion >= %s and fechacreacion<=%s and d.TipoDeDocumento=%s;"""
 				parms = [socio_num,fechainicial,fechafinal,tipo_movimiento]
+			
+			# filtra un solo tipo de movimiento para todos los socios
+			else:
+
+				consulta = """SELECT d.NoDocto,
+									d.TipoDeDocumento,
+									d.FechaCreacion,
+									d.asociado,
+									CONCAT(trim(s.nombre),' ',
+									trim(s.appaterno),' ',
+									trim(s.apmaterno)) as nombre_socio,
+									d.concepto,
+									d.monto,
+									d.venta,
+									d.saldo,
+									d.comisiones,
+									d.DescuentoAplicado,
+									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									INNER JOIN asociado s
+									on d.empresano=s.empresano
+									and d.asociado=s.asociadono
+									WHERE d.empresano=1
+									and fechacreacion >= %s and fechacreacion<=%s and d.TipoDeDocumento=%s;"""
+				parms = [fechainicial,fechafinal,tipo_movimiento]
+
+
 			try:
 				cursor = connection.cursor()
 		
@@ -6376,7 +6432,7 @@ def imprime_venta(request):
 		linea -= 10
 		
 		p.drawString(20,linea,"Descrpcion")
-		p.drawString(130,linea,"Precio")
+		p.drawString(125,linea,"Precio")
 		linea -= 10
 		p.drawString(20,linea,"--------------------------------------------------")
 		linea -= 10
@@ -6404,40 +6460,49 @@ def imprime_venta(request):
 				
 				p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 				p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
-				p.drawString(130,paso-12,'$ '+str(elemento['precio']))
+				p.drawString(125,paso-12,'$ '+str(elemento['PrecioOriginal']))
 				paso -= 20
-			p.drawString(20,paso-10,"+ Venta ==>")
-			p.drawString(130,paso-10,'$ '+str(datos_documento[1]))
+			p.setFont("Helvetica-Bold",8)	
+			p.drawString(20,paso-10,"Subtotal ==>")
+			p.drawString(125,paso-10,'$ '+str(datos_documento[1]))
+			p.setFont("Helvetica",8)
 			p.drawString(20,paso-20,"+ Cargo ==>")
-			p.drawString(130,paso-20,'$ '+str(datos_documento[2]))
-			p.drawString(20,paso-30,"-  Credito ==>")
-			p.drawString(130,paso-30,'$ '+str(datos_documento[3]))
-			p.drawString(20,paso-40,"-  Descuento ==>")
-			p.drawString(130,paso-40,'$ '+str(datos_documento[4]))
-			p.drawString(20,paso-50,"   TOTAL ==>")
-			p.drawString(130,paso-50,'$ '+str(0 if datos_documento[10]<0 else datos_documento[10]))
+			p.drawString(125,paso-20,'$ '+str(datos_documento[2]))
+			p.drawString(20,paso-30,"-  Descuento ==>")
+			p.drawString(125,paso-30,'$ '+str(datos_documento[4]))
 
+			p.drawString(125,paso-40,'-------------')
+			p.setFont("Helvetica-Bold",8)
+			p.drawString(20,paso-50,'Total ==>')
+			p.drawString(125,paso-50,'$ '+str(datos_documento[1]+datos_documento[2]-datos_documento[4]))
+			p.setFont("Helvetica",8)
+			p.drawString(20,paso-60,"-  Credito ==>")
+			p.drawString(125,paso-60,'$ '+str(datos_documento[3]))
+			p.setFont("Helvetica-Bold",8)
+			p.drawString(20,paso-70,"Importe a pagar ==>")
+			p.drawString(125,paso-70,'$ '+str(0 if datos_documento[10]<0 else datos_documento[10]))
+			p.setFont("Helvetica",8)
 
 		
-		p.drawString(20,paso-70,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
-		p.drawString(20,paso-90,"Para sugerencias o quejas")
-		p.drawString(20,paso-100,"llame al 867 132 9697")		
+		p.drawString(20,paso-90,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
+		p.drawString(20,paso-110,"Para sugerencias o quejas")
+		p.drawString(20,paso-120,"llame al 867 132 9697")		
 
 		if creditos_aplicados:
-			p.drawString(20,paso-120,"Notas de credito aplicadas:")
-			p.drawString(20,paso-1300,"--------------------------------------------------")
-			linea -= 10
-			p.drawString(20,paso-140,"Num.")
-			p.drawString(55,paso-140,"Concepto")
-			p.drawString(130,paso-140,"Monto")
-			linea -= 10
+			p.drawString(20,paso-140,"Notas de credito aplicadas:")
 			p.drawString(20,paso-150,"--------------------------------------------------")
-			linea = paso-160	
+			linea -= 10
+			p.drawString(20,paso-160,"Num.")
+			p.drawString(55,paso-160,"Concepto")
+			p.drawString(125,paso-160,"Monto")
+			linea -= 10
+			p.drawString(20,paso-170,"--------------------------------------------------")
+			linea = paso-180	
 
 			for elemento in creditos_aplicados:
 				p.drawString(20,linea,str(elemento[0]))
 				p.drawString(55,linea,elemento[4][0:12])
-				p.drawString(130,linea,'$ '+str(elemento[3]))
+				p.drawString(125,linea,'$ '+str(elemento[3]))
 				linea -= 10 
 
 			linea -= 20
@@ -8136,8 +8201,8 @@ def recepcion_dev_prov(request):
 										on (l.empresano=psf.empresano and l.pedido=psf.pedido
 										and l.productono=psf.productono
 										and l.catalogo=psf.catalogo
-										and l.nolinea=psf.nolinea and psf.status='Devuelto')
-										inner join pedidos_status_fechas psf1
+										and l.nolinea=psf.nolinea and (psf.status='Devuelto' or psf.status='Por Devolver')) 
+										left join pedidos_status_fechas psf1
 										on (l.empresano=psf1.empresano and l.pedido=psf1.pedido
 										and l.productono=psf1.productono
 										and l.catalogo=psf1.catalogo
@@ -8148,8 +8213,8 @@ def recepcion_dev_prov(request):
 										and l.productono=pe.productono
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
 										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
-										where h.idsucursal=%s and l.status='Devuelto'
-										and psf.fechamvto>'20191101' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+										where h.idsucursal=%s and (l.status='Devuelto' or l.status='Por Devolver')
+										and psf.fechamvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
 					parms =(sucursal,ordenarpor)
 
 				else:
@@ -8170,8 +8235,8 @@ def recepcion_dev_prov(request):
 										on (l.empresano=psf.empresano and l.pedido=psf.pedido
 										and l.productono=psf.productono
 										and l.catalogo=psf.catalogo
-										and l.nolinea=psf.nolinea and psf.status='Devuelto')
-										inner join pedidos_status_fechas psf1
+										and l.nolinea=psf.nolinea and (psf.status='Devuelto' or psf.status='Por Devolver')) 
+										left join pedidos_status_fechas psf1
 										on (l.empresano=psf1.empresano and l.pedido=psf1.pedido
 										and l.productono=psf1.productono
 										and l.catalogo=psf1.catalogo
@@ -8182,7 +8247,7 @@ def recepcion_dev_prov(request):
 										and l.productono=pe.productono
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
 										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
-										where l.status='Devuelto' and h.idsucursal>=1 and h.idsucursal<=999
+										where (l.status='Devuelto' or l.status='Por Devolver') and h.idsucursal>=1 and h.idsucursal<=999
 										and psf.fechaMvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
 					parms =(ordenarpor,)
 
@@ -8375,7 +8440,7 @@ def devolucion_a_proveedor(request):
 									and l.productono=psf.productono
 									and l.catalogo=psf.catalogo
 									and l.nolinea=psf.nolinea and psf.status='RecepEnDevol')
-									inner join pedidos_status_fechas psf1
+									left join pedidos_status_fechas psf1
 									on (l.empresano=psf1.empresano and l.pedido=psf1.pedido
 									and l.productono=psf1.productono
 									and l.catalogo=psf1.catalogo
@@ -8886,7 +8951,7 @@ def lista_devoluciones_recepcionadas(request):
 									and l.productono=psf.productono
 									and l.catalogo=psf.catalogo
 									and l.nolinea=psf.nolinea and psf.status='RecepEnDevol')
-									inner join pedidos_status_fechas psf1
+									left join pedidos_status_fechas psf1
 									on (l.empresano=psf1.empresano and l.pedido=psf1.pedido
 									and l.productono=psf1.productono
 									and l.catalogo=psf1.catalogo
@@ -8925,9 +8990,9 @@ def lista_devoluciones_recepcionadas(request):
 	return render(request,'pedidos/ListaDev_proveedor.html',{'form':form,'error':error})
 
 '''
-	def imprime_venta(request):
-	#pdb.set_trace()
-	
+def imprime_venta(request):
+#pdb.set_trace()
+
 	is_staff = request.session['is_staff']
 
 	if request.method =='GET':
@@ -9143,5 +9208,4 @@ def lista_devoluciones_recepcionadas(request):
     # present the option to save the file.
     #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
 	#return response
-	return response
-'''
+	return response'''
