@@ -44,7 +44,7 @@ from .forms import (AccesoForm,\
 					Dev_proveedorForm,\
 					FiltroDevProvForm,\
 					Edicion_devprovForm,\
-					#DatosProveedorForm,
+					DatosProveedorForm,
 					Lista_dev_recepcionadasForm)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -7362,31 +7362,31 @@ def edita_proveedor(request,proveedorno):
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
 		else:
-		
+			
 			cursor=connection.cursor()
-			cursor.execute("SELECT 	RazonSocial,\
-									Direccion,\
-									Colonia,\
-									Ciudad,\
-									Estado,\
-									Pais,\
-									CodigoPostal,\
-									telefono1,\
-									telefono2,\
-									fax,\
-									cel,\
-									radio,\
-									email,\
-									FechaAlta,\
-									FechaBaja,\
-									UsuarioQueDioAlta,\
-									Usuaroi,\
-									manejar_desc,\
+			cursor.execute("SELECT 	p.RazonSocial,\
+									p.Direccion,\
+									p.Colonia,\
+									p.Ciudad,\
+									p.Estado,\
+									p.Pais,\
+									p.CodigoPostal,\
+									p.telefono1,\
+									p.telefono2,\
+									p.fax,\
+									p.cel,\
+									p.radio,\
+									p.email,\
+									p.FechaAta,\
+									p.FechaBaja,\
+									p.UsuarioQueDioAlta,\
+									p.Usuaroi,\
+									p.manejar_desc,\
 									k.BaseParaBono\
-									from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+									from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno))
 			proveedor = cursor.fetchone()
 
-			form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+			form = DatosProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
 					
 			return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 
@@ -7395,29 +7395,30 @@ def edita_proveedor(request,proveedorno):
 		form = DatosProveedorForm()
 		
 		cursor=connection.cursor()
-		cursor.execute("SELECT 	RazonSocial,\
-								Direccion,\
-								Colonia,\
-								Ciudad,\
-								Estado,\
-								Pais,\
-								CodigoPostal,\
-								telefono1,\
-								telefono2,\
-								fax,\
-								cel,\
-								radio,\
-								email,\
-								FechaAlta,\
-								FechaBaja,\
-								UsuarioQueDioAlta,\
-								Usuaroi,\
-								manejar_desc,\
+		cursor.execute("SELECT 	p.proveedorno,\
+								p.RazonSocial,\
+								p.Direccion,\
+								p.Colonia,\
+								p.Ciudad,\
+								p.Estado,\
+								p.Pais,\
+								p.CodigoPostal,\
+								p.telefono1,\
+								p.telefono2,\
+								p.fax,\
+								p.cel,\
+								p.radio,\
+								p.email,\
+								p.FechaAta,\
+								p.FechaBaja,\
+								p.UsuarioQueDioAlta,\
+								p.Usuaroi,\
+								p.manejar_desc,\
 								k.BaseParaBono\
-								from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+								from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno))
 		proveedor = cursor.fetchone()
 
-		form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+		form = DatosProveedorForm(initial={'ProveedorNo':proveedor[0],'RazonSocial':proveedor[1],'Direccion':proveedor[2],'Colonia':proveedor[3],'Ciudad':proveedor[4],'Estado':proveedor[5],'Pais':proveedor[6],'CodigoPostal':proveedor[7],'telefono1':proveedor[8],'telefono2':proveedor[9],'fax':proveedor[10],'celular':proveedor[11],'radio':proveedor[12],'email':proveedor[13],'FechaAlta':proveedor[14],'FechaBaja':proveedor[15],'Usuario_Que_Dio_Alta':proveedor[16],'Usuaroi':proveedor[17],'manejar_desc':proveedor[18],'Base_para_Bono_lealtad':proveedor[19]})
 					
 		return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 

@@ -2168,7 +2168,6 @@ class Edicion_devprovForm(forms.Form):
 		num_socio = cleaned_data.get('num_socio')
 		nombre_socio = cleaned_data.get('nombre_socio')
 		return self.cleaned_data
-"""
 
 class DatosProveedorForm(forms.Form):
 
@@ -2189,7 +2188,7 @@ class DatosProveedorForm(forms.Form):
 	email = forms.EmailField(label='email',required=True)
 	FechaAlta = forms.DateField(label='Fecha Alta',required=True)
 	FechaBaja = forms.DateField(label='Fecha Baja',required=True)
-	maneja_desc = forms.IntegerField(label='Maneja descuento',widget=forms.CheckBox())
+	maneja_desc = forms.BooleanField(label='Maneja descuento')
 
 	def clean(self):
 
@@ -2202,7 +2201,7 @@ class DatosProveedorForm(forms.Form):
 		Ciudad = cleaned_data.get('Ciudad')
 		Estado = cleaned_data.get('num_socio')
 		Pais = cleaned_data.get('Pais')
-		CodiPostal = cleaned_data.get('CodigoPostal')
+		CodigoPostal = cleaned_data.get('CodigoPostal')
 		telefono1 = cleaned_data.get('telefono1')
 		telefono2 = cleaned_data.get('telefono2')
 		fax = cleaned_data.get('fax')
@@ -2214,7 +2213,7 @@ class DatosProveedorForm(forms.Form):
 		maneja_desc = cleaned_data.get('maneja_desc')
 
 		return self.cleaned_data
-		"""
+		
 
 
 
