@@ -7753,18 +7753,33 @@ def cancelardocumentoadvertencia(request,NoDocto):
 	print request.is_ajax()
 	if request.method == 'POST'  and not (request.is_ajax()):
 
-			form = CanceladocumentoForm(request.POST)
+		form = CanceladocumentoForm(request.POST)
+		
+		if form.is_valid():
+			print " pasa por aqui"
+			cursor = connection.cursor()
+			# limpia datos 
+			motivo_cancelacion = form.cleaned_data['motivo_cancelacion']
+			usr_cancela_documento = form.cleaned_data['usr_cancela_documento']
+
+			num_usr_valido = verifica_existencia_usr(usr_cancela_documento) # verifica si existe
+
+			if num_usr_valido != 0:
+				tiene_derecho = verifica_derechos_usr(num_usr_valido,25)
+				if tiene_derecho ==0:
+					error_msg = "Usuario sin derechos para cancelar !"
+					return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+			else:
+				error_msg = "Usuario no registrado !"
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+			''' Se cancela documento'''	
+			status_operation,error = cancela_documento(request,nodocto,motivo_cancelacion)			
+			'''Se actualiza el usuario que cancela'''
+			cursor.execute("UPDATE documentos SET UsuarioModifico=%s WHERE nodocto=%s;",(usr_cancela_documento,nodocto,))
+			cursor.close()
 			
-			if form.is_valid():
-				print " pasa por aqui"
-				cursor = connection.cursor()
-				# limpia datos 
-				motivo_cancelacion = form.cleaned_data['motivo_cancelacion']
-				status_operation,error = cancela_documento(request,nodocto,motivo_cancelacion)			
-				cursor.close()
-				
-	
-				return render(request,'pedidos/msj_cancelacion_resultado.html',{'status_operation':status_operation,})
+
+			return render(request,'pedidos/msj_cancelacion_resultado.html',{'status_operation':status_operation,})
 				
 			
 	elif request.method == 'POST'  and (request.is_ajax()):

@@ -1871,11 +1871,14 @@ class RpteVtaNetaSocioxMarcaForm(forms.Form):
 class CanceladocumentoForm(forms.Form):
 
 	motivo_cancelacion = forms.CharField(label='Motivo de cancelacion:',initial=' ',required=True)
+	usr_cancela_documento = forms.IntegerField(widget=forms.PasswordInput,label='usr_id',initial=0,required=True)
 
-	def clean_motivo_cancelacion(self):
+	def clean(self):
 		
 		cleaned_data = super(CanceladocumentoForm,self).clean()
 		motivo_cancelacion = self.cleaned_data.get('motivo_cancelacion')
+		usr_cancela_documento = self.cleaned_data.get('usr_cancela_documento')
+
 
 		if not motivo_cancelacion: 	
 
@@ -1883,7 +1886,7 @@ class CanceladocumentoForm(forms.Form):
 		else:
 			if len(motivo_cancelacion)<10:
 				raise forms.ValidationError("La descripcion del motivo debe tener una longitud superior a 15 caracteres !")
-		return motivo_cancelacion
+		return cleaned_data
 
 
 
