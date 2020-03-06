@@ -2646,8 +2646,9 @@ def cancelarpedidoadvertencia(request,pedido,productono,catalogo,nolinea):
 
 def cancela_producto(request,pedido,productono,catalogo,nolinea,motivo_cancelacion):
 
+	#pdb.set_trace()
 	cursor = connection.cursor()
-
+	usr_id = request.POST.get('usr_id')
 	hoy = datetime.now()
 	fecha_hoy = hoy.strftime("%Y-%m-%d")
 	hora_hoy = hoy.strftime("%H:%M:%S") 
@@ -2657,7 +2658,7 @@ def cancela_producto(request,pedido,productono,catalogo,nolinea,motivo_cancelaci
 		cursor.execute("START TRANSACTION;")
 		cursor.execute("UPDATE pedidoslines l set l.status='Cancelado' WHERE l.empresano=1 and  l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;",(pedido,productono,catalogo,nolinea,))
 		cursor.execute("UPDATE pedidos_encontrados set BodegaEncontro=0,encontrado='' WHERE empresano=1 and pedido=%s and productono=%s and catalogo=%s and nolinea=%s;",(pedido,productono,catalogo,nolinea,))
-		cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);",(1,pedido,productono,'Cancelado',catalogo,nolinea,fecha_hoy,hora_hoy,request.session['socio_zapcat']))
+		cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);",(1,pedido,productono,'Cancelado',catalogo,nolinea,fecha_hoy,hora_hoy,usr_id))
 		cursor.execute("INSERT INTO pedidoscancelados (Empresano,pedido,productono,catalogo,nolinea,motivo) values(1,%s,%s,%s,%s,%s);",(pedido,productono,catalogo,nolinea,motivo_cancelacion))			
 		status_operation='ok'
 		cursor.execute("COMMIT;")
@@ -2681,6 +2682,7 @@ def cancelar_pedido(request):
 	catalogo = request.POST['catalogo']
 	nolinea = request.POST['nolinea']
 	motivo = request.POST['motivo']
+	usr_id = request.POST['usr_id']
 
 	status_operation='fail'
 	error = ''

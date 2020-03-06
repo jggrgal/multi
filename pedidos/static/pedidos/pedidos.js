@@ -614,6 +614,74 @@ $("#procesar_dev_prov").prop('disabled',true)
             });
 
 
+// F U N I C I O N   I
+
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE CANCELAR UN PEDIDO.
+
+$(".btn_cancela_pedido").prop('disabled',true)
+
+
+      
+      $("#usr_id_cancela_pedido").blur(function() {
+
+                var usr_id = $(this).val()
+                $(".btn_cancela_pedido").prop('disabled',true)
+
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'usr_id':usr_id,'usr_derecho':25},
+                  success: function(data){
+                            if (data.num_usr_valido == 0){
+                                         
+                              alert ("Código de empleado inválido, ingrese su código de empleado !"); 
+                              
+                              $(".btn_cancela_pedido").prop('disabled',true)
+                            }
+
+                            else{
+
+                              num_usr_valido = data.num_usr_valido 
+
+                              $(".btn_cancela_pedido").prop('disabled',false)
+
+                              if(data.tiene_derecho == 0){
+                                        
+                                      alert("Ud no tiene derechos como empleado para cancelar pedidos !")
+
+                                        $(".btn_cancela_pedido").prop('disabled',true)
+
+                              }
+                              else {
+                                        tiene_derecho = 1;
+                                        
+                              };
+
+
+                            }
+                    
+                    ;
+                    
+                    console.log(data.num_usr_valido);
+                    console.log(data.tiene_derecho);
+
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+                
+
+
+
+
+
+            });
+
+
 
 
 
@@ -3170,13 +3238,15 @@ $('#procesar_ventas').click(function(e){
         var answer=confirm('Se procederá a cancelar el registro, si está seguro de clic en "aceptar", caso contrario de clic en "cancelar".');
           if(answer){
 
-
+                                
                  var motivo = prompt("Por favor ingrese el motivo de la cancelacion:", "Cancelacion");
-                
                  pedido = $(this).parents('tr').find('td:eq(0)').text();
                  productono = $(this).parents('tr').find('td:eq(1)').text();
                  catalogo = $(this).parents('tr').find('td:eq(2)').text();
                  nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
+                 usr_id = $('#usr_id_cancela_pedido').val();
+
+
                   //TableData = $.toJSON(TableData);
                   //TableData = JSON.stringify(TableData);
                   
@@ -3184,7 +3254,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/cancelar_pedido/',
                     type: 'POST',
-                    data: {'motivo':motivo,'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea },
+                    data: {'motivo':motivo,'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea,'usr_id':usr_id, },
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3197,7 +3267,7 @@ $('#procesar_ventas').click(function(e){
                           }
                         else {
                           alert("Cancelacion exitosa !.");
-                          
+                          $(".btn_cancela_pedido").prop('disabled',false);
 
                           }; 
                         //$("#procesar_recepcion").prop('disabled', true);
