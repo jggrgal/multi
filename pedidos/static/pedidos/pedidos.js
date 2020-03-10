@@ -633,7 +633,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
                 $.ajax({
                   url: '/pedidos/valida_usr/',
                   type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':25},
+                  data:{'usr_id':usr_id,'usr_derecho':7},
                   success: function(data){
                             if (data.num_usr_valido == 0){
                                          
