@@ -2186,10 +2186,10 @@ class DatosProveedorForm(forms.Form):
 	celular = forms.CharField(label='Celular',required=True)
 	radio = forms.CharField(label='radio',required=True)
 	email = forms.EmailField(label='email',required=True)
-	FechaAlta = forms.DateField(label='Fecha Alta',required=True)
-	FechaBaja = forms.DateField(label='Fecha Baja',required=True)
-	maneja_desc = forms.BooleanField(label='Maneja descuento')
-
+	maneja_desc = forms.ChoiceField(label="Maneja Descuento",widget=forms.Select(),choices=(('1','Si'),('0','No')),required=True)
+	baseparabono = forms.BooleanField(label='Base para bono',required=False)
+	usr_id = forms.IntegerField(label='usr_id',required=True)
+	
 	def clean(self):
 
 		cleaned_data = super(DatosProveedorForm,self).clean()
@@ -2208,9 +2208,9 @@ class DatosProveedorForm(forms.Form):
 		celular = cleaned_data.get('celular')
 		radio = cleaned_data.get('radio')
 		email = cleaned_data.get('email')
-		FechaAlta = cleaned_data.get('FechaAlta')
-		FechaBaja = cleaned_data.get('FechaBaja')
 		maneja_desc = cleaned_data.get('maneja_desc')
+		baseparabono = cleaned_data.get('baseparabono')
+		usr_id = cleaned_data.get('usr_id')
 
 		return self.cleaned_data
 		
