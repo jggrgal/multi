@@ -1,0 +1,96 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+
+{% load staticfiles %}
+{% block content %}
+
+
+
+
+<div class="row">
+  <div class="col-md-4">
+     
+    <div class="panel panel-success">
+      <div class='panel-heading'><h3>Status de calzado</h3></div>
+      <div class='panel-body'>
+    
+        <!--{{ mensaje }}
+      {% if error_messages %}<p><strong> {{form.error}}</p>{% endif %}
+
+      {% if form.message.errors %}
+          <ul>
+            {% for error in form.errors %}
+                <li><strong>{{ error }}</strong></li>
+            {% endfor %}
+          </ul>
+        {% endif %} -->
+
+
+        <form action="{% url 'pedidos:rpteStatusPedidosPorSocio' %}" method="post">
+          <div class="form-group">
+            {% csrf_token %}
+            
+
+            {{ form | crispy }} 
+
+            <input  class="btn btn-lg btn-success btn-block" type="submit" value="Buscar" />
+          </div>
+        </form>
+
+      </div>
+    
+
+    </div>
+
+    <div class="btn-group" role="group" aria-label="...">
+
+         
+          <a class="btn btn-success btn-lg" href="/pedidos/consulta_menu" role="button">Regresar</a>
+    </div>
+  </div><br><br>
+  <div class="col-md-4">
+    
+
+    
+                        
+                            
+                          <input id="input_nom_socio" type="text"  placeholder="Nombre a buscar..." aria-describedby="basic-addon1"/>
+
+                          <input  id="buscar_picklistsocio" class="btn btn-sm btn-success" type="submit" value="Buscar" /> 
+                                
+                                
+                        
+                        
+                          <div class="table-responsive">
+                  
+                            <table  class="table table-condensed  thead-default table-hover table-bordered table-inverse ">
+                              <tr>
+                                <th>id</th>
+                                <th> Ap paterno</th>
+                                <th> Ap materno </th>
+                                <th> Nombre </th> 
+                                
+                                  
+                              </tr>
+
+                            
+                            </table>
+                          </div>
+
+        
+
+    
+
+    
+  </div>
+  	
+  <div class="col-md-4">
+    <img src="{% static 'pedidos/ttblues1.png' %}" alt="logo" style="height:100%; width:100%"> 
+  </div>
+</div><br>
+<div class="row">
+
+</div>
+
+{% endblock %}

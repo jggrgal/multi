@@ -45,7 +45,8 @@ from .forms import (AccesoForm,\
 					FiltroDevProvForm,\
 					Edicion_devprovForm,\
 					#DatosProveedorForm,
-					Lista_dev_recepcionadasForm)
+					Lista_dev_recepcionadasForm,
+					RpteStatusDePedidosForm)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -63,9 +64,12 @@ import io
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4,letter
+from reportlab.lib.units import inch,cm 
 import csv
 from decimal import Decimal,getcontext
-import locale
+import locale  # Se usa para representar cantidades monetarias
+  # move the origin up and to the left
+
 getcontext().prec = 6# esta linea establece la precision de decimales para numeros decimales,
 					  # leer la funcion getcontext de decimales.
 
@@ -1404,12 +1408,14 @@ def procesar_pedido(request):
 		
 			
 			usr_id = request.POST.get('usr_id')
-			
-			if request.POST.get('anticipo') is not None:
-				anticipo = int(request.POST.get('anticipo').encode('latin_1'))
-			else:
-				anticipo = 0	
-			
+			try:
+				if float(request.POST.get('anticipo')):
+					anticipo = int(request.POST.get('anticipo').encode('latin_1'))
+				else:
+					anticipo = 0	
+			except ValueError:
+				data = {'status_operacion':status_operacion,}
+				return HttpResponse(json.dumps(data),content_type='application/json',)	
 			
 			
 		else:
@@ -1506,7 +1512,12 @@ def procesar_pedido(request):
 					opcioncompra = '2da.'
 				else:
 					opcioncompra = '3ra'
+		
+				# Se asegura que el campo 'temporada' tenga un valor valido(1 o 2)
+				if not(datos[count-1].temporada ==1 or datos[count-1].temporada==2):
 
+					raise ValueError("Hay un valor invalido para el campo 'temporada' no se grabara la transaccion !")
+		
 				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,'Por Confirmar',0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
 				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,'Por Confirmar',datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
@@ -1528,6 +1539,8 @@ def procesar_pedido(request):
 			print "el error de base de datos es ",e
 			status_operacion = 'fail'
 			cursor.execute("ROLLBACK;")
+		except ValueError as e:
+			status_operation =' fail '
 
 		cursor.close()
 
@@ -2801,8 +2814,11 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 		
 def imprime_ticket(request):
 	#pdb.set_trace()
-	
-	is_staff = request.session['is_staff']
+	try:
+		is_staff = request.session['is_staff']
+	except KeyError:
+		context={'error_msg':"Se perdio su sesion, ingrese por favor nuevamente al sistema !",}
+		return render(request, 'pedido/error.html',context)
 
 	if request.method =='GET':
 		p_num_pedido = request.GET.get('p_num_pedido')
@@ -2871,16 +2887,19 @@ def imprime_ticket(request):
 		
 	cursor.close()
 
-	linea = 800
+	'''COMIENZA IMPRESION EN PDF'''
+	
+	linea = 2400
 	
 	
     # Create a file-like buffer to receive PDF data.
 	buffer = io.BytesIO()
 
     # Create the PDF object, using the buffer as its "file."
-	p = canvas.Canvas(buffer)
+	pagesize = (8.5*inch, 33*inch)
+	p = canvas.Canvas(buffer,pagesize=pagesize)
 	#p.setPageSize("inch")
-
+	p.translate(0.0,0.0)
 	p.setFont("Helvetica",10)
 	#p.drawString(1,linea,inicializa_imp)
 	
@@ -2947,6 +2966,7 @@ def imprime_ticket(request):
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
 			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
 			paso -= 30
+			
 		p.drawString(20,paso-10,"Total ==>")
 		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
 		p.drawString(20,paso-40,"Para sugerencias o quejas")
@@ -2968,9 +2988,9 @@ def imprime_ticket(request):
 		response.write(pdf)
 
     # FileResponse sets the Content-Disposition header so that browsers
-    # present the option to save the file.
-    #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
-	return response
+	    # present the option to save the file.
+	    #return FileResponse(buffer, as_attachment=True,filename='hello.pdf')
+		return response
 
 
 
@@ -5168,7 +5188,8 @@ def trae_inf_venta(request,num_socio):
 							and l.productono=a.codigoarticulo\
 							and l.catalogo=a.catalogo\
 							left join viasolicitud v on (v.id=h.viasolicitud)\
-							inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+							inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+							inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 							WHERE l.status='Aqui' and  h.asociadono=%s and h.idsucursal=%s;",(num_socio,id_sucursal,))
 	ventas = dictfetchall(cursor)
 
@@ -6385,14 +6406,17 @@ def imprime_venta(request):
 		
 	cursor.close()
 
-	linea = 800
+	linea = 2400
+
 	
 	
     # Create a file-like buffer to receive PDF data.
 	buffer = io.BytesIO()
 
     # Create the PDF object, using the buffer as its "file."
-	p = canvas.Canvas(buffer)
+	#p = canvas.Canvas(buffer)
+	pagesize = (8.5*inch, 33*inch)
+	p = canvas.Canvas(buffer,pagesize=pagesize)
 	#p.setPageSize("inch")
 
 	#p.setFont("Helvetica",10)
@@ -9365,16 +9389,17 @@ def rpte_ventas(request):
 				
 				
 				
-				from reportlab.lib.units import inch,cm   # move the origin up and to the left
 			    # Draw things on the PDF. Here's where the PDF generation happens.
 			    # See the ReportLab documentation for the full list of functionality.
 				#p.drawString(20,810,mensaje)
 				li,ls=0,85
 				contador_registros_impresos =0	
 				for j in range(1,1000):
+					
+					#p.translate(0.0,0.0)    # define a large font							
+
 					linea = 800
 									 
-					p.translate(0.0,0.0)    # define a large font							
 					p.drawString(250,linea, request.session['cnf_razon_social'])
 					linea -=20
 					p.setFont("Helvetica",9)
@@ -9432,18 +9457,17 @@ def rpte_ventas(request):
 						p.drawString(330,paso,str(elemento['cred_aplicado']) if elemento['Concepto']=='Venta' else str(0))				
 						p.drawString(370,paso,str(elemento['comisiones']) if elemento['Concepto']=='Venta' else str(0))				
 						p.drawString(410,paso,str(elemento['descuentoaplicado']))
-						p.drawString(450,paso,str(elemento['VtaComisionSaldo']) if elemento['Concepto']=='Venta' else (str(elemento['venta']) if elemento['VtaDeCatalogo'] == 1 else str(0)))				
+						p.drawString(450,paso,str(elemento['VtaComisionSaldo']) if elemento['Concepto']=='Venta' else (str(elemento['venta']) if elemento['VtaDeCatalogo'] else str(0)))				
 						#p.drawString(200,paso,talla)'''		
 						paso -= 8
 						i+=1
 						contador_registros_impresos+=1
-					
+
+					if registros_venta[li:ls]:
+						p.showPage()						
+
 					li=ls
 					ls=85*j	
-						
-					p.showPage()
-					
-					
 					
 					if contador_registros_impresos==elementos:
 					
@@ -9518,3 +9542,136 @@ def rpte_ventas(request):
 
 		form = Consulta_ventasForm()
 	return render(request,'pedidos/rpte_vtas_form.html',{'form':form,})
+
+
+'''CONSULTA DE STATUS DE PEDIDOS CLASIFICADOS POR SOCIO '''
+
+
+
+def rpteStatusPedidosPorSocio(request):
+
+	'''try:
+	
+		g_numero_socio_zapcat = request.session['socio_zapcat']	
+	except KeyError :
+
+		return	HttpResponse("Ocurrió un error de conexión con el servidor, Por favor salgase completamente y vuelva a entrar a la página !")
+
+	if request.user.is_authenticated():'''		
+
+	#pdb.set_trace()		
+	if request.method == 'POST':
+		form = RpteStatusDePedidosForm(request.POST)
+		'''
+		Si la forma es valida se normalizan los campos numpedido, status y fecha,
+		de otra manera se envia la forma con su contenido erroreo para que el validador
+		de errores muestre los mansajes correspondientes '''
+
+		if form.is_valid():
+		
+			# limpia datos 
+			sucursal = form.cleaned_data['sucursal']
+			
+			status = form.cleaned_data['status']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			salida_a = form.cleaned_data['salida_a']
+			
+			# Convierte el string '1901-01-01' a una fecha valida en python
+			# para ser comparada con la fecha ingresada 
+
+			fecha_1901 =datetime.strptime('1901-01-01', '%Y-%m-%d').date()
+			hoy = date.today()
+
+
+			# Establece conexion con la base de datos
+			cursor=connection.cursor()
+
+		
+			# Comienza a hacer selects en base a criterios 
+
+
+			
+
+			if  sucursal ==u'0':
+				suc_ini,suc_fin=1,99
+			else:
+				suc_ini,suc_fin=sucursal,sucursal
+				
+									
+			
+			cursor.execute("SELECT p.pedido,p.precio,p.status,\
+				p.catalogo,p.nolinea,\
+				a.pagina,a.idmarca,a.idestilo,a.idcolor,\
+				a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,\
+				aso.appaterno,aso.apmaterno, psf.fechamvto,\
+				p.Observaciones,CONCAT(CAST(aso.asociadono AS CHAR),\
+				' ',aso.nombre,' ',aso.appaterno,' ',aso.apmaterno)\
+				 as socio,suc.nombre as sucursal FROM pedidoslines p\
+				inner join  pedidosheader h\
+				on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo)\
+				inner join articulo a\
+				on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo\
+				and p.catalogo=a.catalogo)\
+				inner join asociado aso\
+				on (h.asociadoNo=aso.asociadoNo)\
+				inner join  pedidos_status_fechas psf\
+				on (p.empresano=psf.empresaNo\
+				and p.pedido=psf.pedido and p.productono=psf.productono\
+				and p.status=psf.status and p.catalogo=psf.catalogo\
+				and p.nolinea=psf.nolinea) \
+				inner join sucursal suc on (h.idsucursal=suc.sucursalNo)\
+				 WHERE p.status>=%s and p.status<=%s\
+				and psf.fechamvto>=%s and psf.fechamvto<=%s\
+				and h.idsucursal>=%s and h.idsucursal<=%s\
+				ORDER BY aso.asociadoNo,\
+				h.PedidoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
+							
+			pedidos = dictfetchall(cursor)
+			elementos = len(pedidos)
+
+			cursor.execute("SELECT nombre as nombresuc from sucursal where sucursalNo=%s;",(sucursal,))
+			suc_nom=cursor.fetchone()
+			
+
+			if not pedidos:# or not nombre_socio[0]:
+				mensaje = 'No se encontraron registros !'
+				
+				return render(request,'pedidos/lista_pedidos_PorStatus_Socio.html',{'form':form,'mensaje':mensaje,})
+			else:
+				mensaje ='Registros encontrados:'
+				context = {'pedidos':pedidos,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,}
+
+				if salida_a == 'Pantalla':
+
+					return render(request,'pedidos/lista_pedidos_PorStatus_Socio.html',context)
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="PedidosStatusSocios.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['SUCURSAL','SOCIO_NUMERO','SOCIO_NOMBRE','SOCIO_APPATERNO','SOCIO_APMATERNO','PEDIDO','FECHA_MVTO','STATUS','CATALOGO','PAGINA','MARCA','ESTILO','COLOR','TALLA','PRECIO',])
+					
+					for registro in pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['sucursal','asociadoNo','Nombre','appaterno','apmaterno','pedido','fechamvto','status','catalogo','pagina','idmarca','idestilo','idcolor','talla','precio',] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
+
+
+
+			# Cierra la conexion a la base de datos
+			cursor.close()
+			
+		
+	else:
+		form = RpteStatusDePedidosForm()
+		#cursor.close()
+		
+	return render(request,'pedidos/pedidos_por_status_socio_form.html',{'form':form,})
+

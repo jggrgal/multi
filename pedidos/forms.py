@@ -2241,3 +2241,111 @@ class Lista_dev_recepcionadasForm(forms.Form):
 			label= 'Ordenar por',choices = opciones,initial='Estilo')
 
 		
+
+
+
+
+
+
+''' ***********   RPTE_STATUS_PEDIDOS   *************'''
+
+class RpteStatusDePedidosForm(forms.Form):
+
+	#pdb.set_trace()
+	
+	lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
+
+	sucursales = {}
+
+	sucursal = forms.ChoiceField(widget=forms.Select(),	label='Sucursal',initial=1,required='True')
+
+	opciones_status = (('Encontrado','Encontrado',),('Por Confirmar','Por Confirmar',),('Confirmado','Confirmado',),('Aqui','Aqui',),('Cancelado','Cancelado',),('Devuelto','Devuelto',),('RecepEnDevol','RecepEnDevol',),('Dev a Prov','Dev a Prov',),('Facturado','Facturado',),('Descontinuado','Descontinuado'),('Todos','Todos',),)
+	status = forms.ChoiceField(label='Status',initial='Por Confirmar',choices=opciones_status)
+
+	hoy =  date.today()	
+	#t = datetime.now
+	f_inicial_init =  date.today()
+
+	f_final_init = f_inicial_init + timedelta(days=30)
+
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+	#fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),initial=f_inicial_init.strftime('%d/%m/%Y'),required=False)
+	#fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),initial=f_final_init.strftime('%d/%m/%Y'),required=False)
+
+	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
+	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
+
+	salida_a = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
+ 
+
+	error_messages = {'FechaInicial':'Ingrese una fecha inicial !',
+					'FechaFinal':'Ingrese una fecha final !',
+					'FechIniMayor':'La fecha final debe ser mayor o igual a la fecha inicial !',
+					}
+
+
+		
+	def __init__(self,*args,**kwargs):
+
+		
+		
+		lprov = lista_Sucursales()
+
+		super(RpteStatusDePedidosForm, self).__init__(*args,**kwargs)
+		self.fields['sucursal'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal',choices = lprov,initial=1,required='True' )
+		
+		
+
+
+
+	"""def clean_sucursal(self):
+
+		cleaned_data = super(Entrada_sistemaForm, self).clean()
+		sucursal = self.cleaned_data.get('sucursal')
+
+		if sucursal=='0':
+			raise forms.ValidationError("Seleccione una sucursal en particular !")
+		
+		return sucursal"""
+
+
+	def clean(self):
+		
+		cleaned_data = super(RpteStatusDePedidosForm, self).clean()
+
+		sucursal = self.cleaned_data.get('sucursal')
+		status = self.cleaned_data.get('status')
+
+
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		
+		
+
+		'''if sucursal =='0':
+			raise  forms.ValidationError(self.error_messages['CombinacionSucursalInvalida'],code='CombinacionSucursalInvalida')'''
+
+			
+		if not(fechainicial and fechafinal):
+
+			if not fechainicial:
+				raise  forms.ValidationError(self.error_messages['FechaInicial'],code='FechaInicial')
+			if not fechafinal:
+				raise forms.ValidationError(self.error_messages['FechaFinal'],code='FechaFinal')
+			
+		else:
+			if fechainicial > fechafinal:
+				raise forms.ValidationError(self.error_messages['FechIniMayor'],code='FechIniMayor')
+			
+		# De otra manera, quiere decir que el socio es cero y quien tiene un valor es
+		# el numero de documento, siendo este el caso no hay ya validacion.
+
+		return self.cleaned_data
+
+
+
+

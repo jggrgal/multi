@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pedidos por status</title>
+    <meta charset="utf-8">
+    <style>
+        ul { color:#0000ff;
+            font-family: Verdana;
+            
+            
+
+        }
+        li {
+            display: inline-block;
+            font-size: 9px;
+            padding:11px;
+            width: 70px;
+            height: -5px;
+            text-align:left;
+
+        }
+        p {
+            display: inline-block;
+            font-size: 10px;
+            padding: 11px;
+            text-align: center;
+            width:70px;
+            color:#c4bf7a;
+            background-color:#353331;
+            font-family: Verdana;
+        }
+        .a1 {
+            font-size:10px;
+            color:#0000ff;
+        }
+    </style>    
+</head>
+<body>
+
+    <h2 style="text-align:Center;">{{ titulo }}</h2>
+    <h6 style="text-align:Center;">{{ sucursal }}</h6>
+    
+
+   
+    {% regroup pedidos by socio as num_socio %}
+    <ul>
+
+    {% for item in num_socio %}
+        <h5>Socio: {{ item.grouper }} </h5>
+    
+        <p>Pedido</p><p>Fecha</p><p>Catalgo
+        </p><p>Pagina</p><p>Marca</p><p>Estilo</p><p>Color</p><p>Talla</p><p>Precio</p><br>
+        {% for socio in item.list %}
+            <li>{{ socio.pedido }} </li>
+            <li>{{ socio.fechamvto }} </li>
+            <li>{{ socio.catalogo }} </li>
+            <li>{{ socio.pagina }} </li>
+            <li>{{ socio.idmarca }} </li>
+            <li>{{ socio.idestilo }} </li>  
+            <li style="word-spacing:-2;">{{ socio.idcolor }} </li>
+            <li>{{ socio.talla }} </li>
+            <li>{{ socio.precio }} </li><br>
+            
+        {% endfor %}
+        
+    {% endfor %}
+    </ul> 
+    
+ <!--   {% regroup pedidos by asociadoNo as num_socio %}
+    <div class="table-responsive-sm">
+    	<table class='table table-hover table-bordered '>
+        	<tr class='success'>
+        		<th>Pedido num</th>
+                <th>Fecha Mvto</th>
+                <th>Catalogo</th>
+            	<th>Marca</th>
+            	<th>Estilo</th>
+            	<th>Color</th>
+            	<th>Talla</th>
+                <th>Precio</th>
+                              
+        	</tr>
+            <ul>
+            {% for elemento in num_socio %}   
+            <tr>Socio: {{ elemento.grouper }} </tr>
+        	
+
+                
+             {% for item in elemento.list %}   
+        		<tr>
+                    <li>{{ item.pedido }}</li>
+                    
+                    <li>{{ item.catalogo }}</li>
+                    <li>{{ item.idmarca }}</li>
+        			<li>{{ item.idestilo }}</li>
+            		<li>{{ item.idcolor }}</li>
+            		<li>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</li>
+            		<li>{{item.precio}}</li>
+                    
+            	</tr>
+            {% endfor %}
+            {% endfor %}
+            </ul>
+    	</table>
+    </div>
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/rpteStatusPedidosPorSocio" role="button">Salir</a>
+    </li>
+
+
+
+
+
+</body>
+</html>
