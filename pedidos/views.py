@@ -5900,7 +5900,7 @@ def consultavtasxproveedor(request):
 			cursor.execute("SELECT a.idproveedor,\
 				p.razonsocial,\
 				sum(a.precio) as venta,\
-				sum(if (a.precio>l.precio,a.precio-l.precio,0)) as dscto\
+				sum(if (a.precio>l.precio and ct.no_maneja_descuentos=0,a.precio-l.precio,0 )) as dscto\
 				from pedidoslines l inner join pedidosheader h\
 				on (h.empresano=1 and h.pedidono=l.pedido)\
 				inner join pedidos_status_fechas f\
@@ -5913,6 +5913,8 @@ def consultavtasxproveedor(request):
 				and a.catalogo=l.catalogo)\
 				inner join proveedor p\
 				on (p.empresano=1 and p.proveedorno=a.idproveedor)\
+				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+				inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 				where f.fechamvto>=%s and f.fechamvto<=%s\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
 				group by a.idproveedor ; ",\
