@@ -110,5 +110,6 @@ urlpatterns = [
 	url(r'^lista_devoluciones_recepcionadas/$',views.lista_devoluciones_recepcionadas,name='lista_devoluciones_recepcionadas'),
 	url(r'^rpte_ventas/$',views.rpte_ventas,name='rpte_ventas'),
 	url(r'^rpteStatusPedidosPorSocio/$',views.rpteStatusPedidosPorSocio,name='rpteStatusPedidosPorSocio'),
+	url(r'^vtasporusuario/$',views.vtasporusuario,name='vtasporusuario'),
 
 	]

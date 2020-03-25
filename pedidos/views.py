@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate, login, logout,update_session_auth_
 from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib.auth.decorators import login_required,permission_required
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .forms import (AccesoForm,\
+from . forms import (AccesoForm,\
 					BuscapedidosForm,\
 					PedidosForm,\
 					RegsocwebForm,\
@@ -45,8 +45,9 @@ from .forms import (AccesoForm,\
 					FiltroDevProvForm,\
 					Edicion_devprovForm,\
 					#DatosProveedorForm,
-					Lista_dev_recepcionadasForm,
-					RpteStatusDePedidosForm)
+					Lista_dev_recepcionadasForm,\
+					ventasporcajeroForm,\
+					RpteStatusDePedidosForm,)
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -1517,6 +1518,11 @@ def procesar_pedido(request):
 				if not(datos[count-1].temporada ==1 or datos[count-1].temporada==2):
 
 					raise ValueError("Hay un valor invalido para el campo 'temporada' no se grabara la transaccion !")
+				
+				if not(datos[count-1].precio>0):	
+				
+					raise ValueError("Hay un valor invalido para el campo 'precio' no se grabara la transaccion !")
+
 		
 				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,'Por Confirmar',0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
@@ -1540,7 +1546,7 @@ def procesar_pedido(request):
 			status_operacion = 'fail'
 			cursor.execute("ROLLBACK;")
 		except ValueError as e:
-			status_operation =' fail '
+			status_operacion =' fail '
 
 		cursor.close()
 
@@ -9676,4 +9682,418 @@ def rpteStatusPedidosPorSocio(request):
 		#cursor.close()
 		
 	return render(request,'pedidos/pedidos_por_status_socio_form.html',{'form':form,})
+
+def vtasporusuario_consulta(request):
+
+
+	#pdb.set_trace()
+	''' Inicializa Variables '''
+
+	VentaCalzado = 0.0
+	TotalVtaBruta = 0.0
+	TotalCargos = 0.0
+	TotalCreditos = 0.0
+	TotalDescuentos = 0.0
+	TotalRegistros = 0.0
+	TotalVtaCatalogos = 0.0
+	TotalVtaNeta = 0.0
+
+
+
+	mensaje =''
+	if request.method == 'POST':
+
+		form = ventasporcajeroForm(request.POST)
+
+		if form.is_valid():
+
+			sucursal = form.cleaned_data['sucursal']
+			usuario = form.cleaned_data['usuario']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+
+			cursor=connection.cursor()
+
+			if sucursal == '0':
+				sucursalinicial =1
+				sucursalfinal = 9999
+				sucursal_nombre ='GENERAL'
+			else:
+				sucursalinicial =  sucursal
+				sucursalfinal =  sucursal
+				cursor.execute("SELECT nombre from sucursal WHERE EmpresaNo=1 and SucursalNo=%s;",(sucursal))
+				sucursalencontrada = cursor.fetchone()
+				sucursal_nombre = sucursalencontrada[0]
+
+
+			cursor.execute("SELECT usuario from usuarios WHERE EmpresaNo=1 and usuarioNo=%s;",(usuario,))
+			usuario_nombre = cursor.fetchone()
+			
+
+			
+			"""cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))"""
+
+			
+			#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones > d.Saldo,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado,0) as VtaComisionSaldo FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
+			cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s and d.`UsuarioQueCreoDcto.`=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,usuario))
+			
+			
+
+			registros_venta = dictfetchall(cursor)
+
+			elementos = len(registros_venta)
+
+			
+
+
+			"""cursor.execute("SELECT p.razonsocial,a.razonsocial from proveedor p inner join almacen a on (p.empresano=a.empresano and p.proveedorno=a.proveedorno) where p.proveedorno=%s;",(ped['prov_id'],))
+			
+			prov_alm = cursor.fetchone()"""
+
+			if not registros_venta:
+				mensaje = 'No se encontraron registros !'
+				return render(request,'pedidos/lista_ventas_por_usuario.html',{'mensaje':mensaje,})
+
+			else:
+
+				
+				for docto in registros_venta:
+										
+					if (docto['Cancelado'] == '\x00'):  # pregunta si cancelado es '0' en hex o bien falso
+						tipodedocumento = docto['TipoDeDocumento']
+						TotalVtaBruta = TotalVtaBruta + float(docto['venta'])
+						esvta =docto['Concepto'].strip()
+						vtadecatalogo = docto['VtaDeCatalogo']
+
+						# calcula para ventas normales y ventas de catalogo
+						if esvta == 'Venta' or vtadecatalogo =='\x01':
+
+						#if tipodedocumento == 'Remision':
+
+							#Excluye las ventas de catalogo para totales de creditos cargos y descuento
+							if vtadecatalogo =='\x00':
+								TotalCreditos = TotalCreditos + float(docto['cred_aplicado'])															
+								TotalCargos = TotalCargos + float(docto['comisiones'])	
+								TotalDescuentos =  TotalDescuentos + float(docto['descuentoaplicado'])	
+								VentaCalzado = VentaCalzado + float(docto['venta'])
+							print float(docto['venta']),float(docto['comisiones']),float(docto['cred_aplicado'])
+							print "acumulados:"
+							print TotalVtaBruta,TotalCargos,TotalCreditos
+
+						if (TotalVtaBruta + TotalCargos > TotalCreditos):
+							print "entro por vtabruta+cargos > creditos"
+
+							TotalVtaNeta = TotalVtaBruta-TotalCreditos+TotalCargos-TotalDescuentos
+						else:
+							print "entro por el otro lado"
+							TotalVtaNeta = 0;
+
+						if vtadecatalogo == '\x01' :
+							TotalVtaCatalogos = TotalVtaCatalogos + float(docto['Monto'])
+						TotalRegistros = TotalRegistros + 1
+						TotalVtaProductos = TotalVtaBruta - TotalVtaCatalogos -TotalDescuentos
+				
+				mensaje ="Registros encontrados == > "
+
+
+
+				context = {'form':form,'mensaje':mensaje,'registros_venta':registros_venta,'TotalRegistros':TotalRegistros,'sucursal_nombre':sucursal_nombre,'TotalCreditos':TotalCreditos,'TotalCargos':TotalCargos,'TotalDescuentos':TotalDescuentos,'VentaCalzado':VentaCalzado,'TotalVtaCatalogos':TotalVtaCatalogos,'TotalVtaBruta':TotalVtaBruta,'TotalVtaNeta':TotalVtaNeta,'TotalVtaProductos':TotalVtaProductos,'usuario':usuario_nombre[0],}	
+			
+				return render(request,'pedidos/lista_ventas_por_usuario.html',context)
+
+		
+	else:
+
+		form = ventasporcajeroForm()
+	return render(request,'pedidos/consultaventas_por_usuario.html',{'form':form,})
+
+
+def vtasporusuario(request):
+
+
+	#pdb.set_trace()
+	''' Inicializa Variables '''
+	VentaCalzado = 0.0
+	TotalVtaBruta = 0.0
+	TotalCargos = 0.0
+	TotalCreditos = 0.0
+	TotalDescuentos = 0.0
+	TotalRegistros = 0.0
+	TotalVtaCatalogos = 0.0
+	TotalVtaNeta = 0.0
+
+	a=''
+	b=''
+	hoy,hora = trae_fecha_hora_actual(a,b)
+
+
+	# INICIALIZA REPORTLAB PARA REPORTE
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
+
+    # Create a file-like buffer to receive PDF data.
+	buffer = io.BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+	p = canvas.Canvas(buffer,pagesize=letter)
+	#p.setPageSize("inch")
+
+	p.setFont("Helvetica",10)
+	#p.drawString(1,linea,inicializa_imp)
+
+	mensaje =''
+	if request.method == 'POST':
+
+		form = ventasporcajeroForm(request.POST)
+
+		if form.is_valid():
+
+			sucursal = form.cleaned_data['sucursal']
+			usuario = form.cleaned_data['usuario']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+
+			cursor=connection.cursor()
+
+			if sucursal == '0':
+				sucursalinicial =1
+				sucursalfinal = 9999
+				sucursal_nombre ='GENERAL'
+			else:
+				sucursalinicial =  sucursal
+				sucursalfinal =  sucursal
+				cursor.execute("SELECT nombre from sucursal WHERE EmpresaNo=1 and SucursalNo=%s;",(sucursal))
+				sucursalencontrada = cursor.fetchone()
+				sucursal_nombre = sucursalencontrada[0]
+
+			cursor.execute("SELECT usuario from usuarios WHERE EmpresaNo=1 and usuarioNo=%s;",(usuario,))
+			usuario_nombre = cursor.fetchone()
+	
+			
+
+			
+			"""cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))"""
+
+			
+			#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones > d.Saldo,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado,0) as VtaComisionSaldo FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
+			cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s and d.`UsuarioQueCreoDcto.`=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,usuario,))
+			
+			
+
+			registros_venta = dictfetchall(cursor)
+
+			elementos = len(registros_venta)
+
+			
+
+
+			"""cursor.execute("SELECT p.razonsocial,a.razonsocial from proveedor p inner join almacen a on (p.empresano=a.empresano and p.proveedorno=a.proveedorno) where p.proveedorno=%s;",(ped['prov_id'],))
+			
+			prov_alm = cursor.fetchone()"""
+
+			if not registros_venta:
+				mensaje = 'No se encontraron registros !'
+				return render(request,'pedidos/lista_ventas.html',{'mensaje':mensaje,})
+
+			else:
+
+				
+				for docto in registros_venta:
+										
+					if (docto['Cancelado'] == '\x00'):  # pregunta si cancelado es '0' en hex o bien falso
+						tipodedocumento = docto['TipoDeDocumento']
+						TotalVtaBruta = TotalVtaBruta + float(docto['venta'])
+						esvta =docto['Concepto'].strip()
+						vtadecatalogo = docto['VtaDeCatalogo']
+
+						# calcula para ventas normales y ventas de catalogo
+						if esvta == 'Venta' or vtadecatalogo =='\x01':
+
+						#if tipodedocumento == 'Remision':
+
+							#Excluye las ventas de catalogo para totales de creditos cargos y descuento
+							if vtadecatalogo =='\x00':
+								TotalCreditos = TotalCreditos + float(docto['cred_aplicado'])															
+								TotalCargos = TotalCargos + float(docto['comisiones'])	
+								TotalDescuentos =  TotalDescuentos + float(docto['descuentoaplicado'])	
+								VentaCalzado = VentaCalzado + float(docto['venta'])
+							print float(docto['venta']),float(docto['comisiones']),float(docto['cred_aplicado'])
+							print "acumulados:"
+							print TotalVtaBruta,TotalCargos,TotalCreditos
+
+						if (TotalVtaBruta + TotalCargos > TotalCreditos):
+							print "entro por vtabruta+cargos > creditos"
+
+							TotalVtaNeta = TotalVtaBruta-TotalCreditos+TotalCargos-TotalDescuentos
+						else:
+							print "entro por el otro lado"
+							TotalVtaNeta = 0;
+
+						if vtadecatalogo == '\x01' :
+							TotalVtaCatalogos = TotalVtaCatalogos + float(docto['Monto'])
+						TotalRegistros = TotalRegistros + 1
+						TotalVtaProductos = TotalVtaBruta - TotalVtaCatalogos -TotalDescuentos
+				
+				mensaje ="Registros encontrados == > "
+
+				#linea = 800
+				
+				
+				
+			    # Draw things on the PDF. Here's where the PDF generation happens.
+			    # See the ReportLab documentation for the full list of functionality.
+				#p.drawString(20,810,mensaje)
+				li,ls=0,85
+				contador_registros_impresos =0	
+				for j in range(1,1000):
+					
+					#p.translate(0.0,0.0)    # define a large font							
+
+					linea = 800
+									 
+					p.drawString(250,linea, request.session['cnf_razon_social'])
+					linea -=20
+					p.setFont("Helvetica",9)
+					p.drawString(200,linea, " ---- REPORTE DE VENTAS ("+usuario_nombre[0]+")------")
+					p.drawString(250,linea-10, "       "+sucursal_nombre+" ")
+
+					p.setFont("Helvetica",6)
+					p.drawString(240,linea-20, "Entre el "+fechainicial.strftime("%Y-%m-%d")+" y el " +fechafinal.strftime("%Y-%m-%d"))
+						
+					linea -=25
+					
+					p.drawString(80,linea,request.session['sucursal_direccion'])
+					p.drawString(430,linea,"FECHA: "+hoy)
+					
+
+					linea -= 8
+					p.drawString(80,linea,"COL. "+request.session['sucursal_colonia'])
+					p.drawString(430,linea,"HORA:  "+hora)
+
+					linea -= 8
+					p.drawString(80,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+					linea -= 20
+					
+					p.setFont("Helvetica",6)
+
+
+
+					p.drawString(80,linea,"Documento")
+					p.drawString(120,linea,"Remision")
+					p.drawString(160,linea,"Fecha")
+					p.drawString(200,linea,"Socio")
+					p.drawString(220,linea,"Nombre")
+					p.drawString(290,linea,"Vta Bruta")
+					p.drawString(330,linea,"Creditos")
+					p.drawString(370,linea,"Cargos")
+					p.drawString(410,linea,"Desctos")
+					p.drawString(450,linea,"Vta Neta")
+
+					linea -= 10
+					p.drawString(80,linea,"-"*200)
+					linea -= 10
+					#p.setFont("Helvetica",8)
+					i,paso=0,linea-5
+		
+					
+					for elemento in registros_venta[li:ls]:
+
+
+						p.drawString(80,paso,str(elemento['NoDocto']))
+						p.drawString(120,paso,str(elemento['Consecutivo']))
+						p.drawString(160,paso,elemento['FechaCreacion'].strftime("%d-%m-%Y"))		
+						p.drawString(200,paso,str(elemento['Asociado']))
+						p.drawString(220,paso,(elemento['Nombre']+' '+elemento['ApPaterno']+' '+elemento['ApMaterno'])[0:15])
+						p.drawString(290,paso,str(elemento['venta']))			
+						p.drawString(330,paso,str(elemento['cred_aplicado']) if elemento['Concepto']=='Venta' else str(0))				
+						p.drawString(370,paso,str(elemento['comisiones']) if elemento['Concepto']=='Venta' else str(0))				
+						p.drawString(410,paso,str(elemento['descuentoaplicado']))
+						p.drawString(450,paso,str(elemento['VtaComisionSaldo']) if elemento['Concepto']=='Venta' else (str(elemento['venta']) if elemento['VtaDeCatalogo'] else str(0)))				
+						#p.drawString(200,paso,talla)'''		
+						paso -= 8
+						i+=1
+						contador_registros_impresos+=1
+
+					if registros_venta[li:ls]:
+						p.showPage()						
+
+					li=ls
+					ls=85*j	
+					
+					if contador_registros_impresos==elementos:
+					
+						paso=780
+						p.translate(0.0,0.0)
+
+						
+
+						p.setFont("Helvetica",8)
+
+						p.drawString(10,paso,"RESUMEN: ")
+
+						paso-=5
+
+						p.drawString(10,paso,27*'_')
+
+						paso-=10
+
+						
+						locale.setlocale( locale.LC_ALL, '' )
+						p.drawString(10,paso,"Venta Bruta: ")
+						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
+
+						paso-=10
+						p.drawString(10,paso,"- Creditos: ")
+						p.drawString(90,paso,locale.currency(TotalCreditos,grouping=True))
+
+						paso-=10
+						p.drawString(10,paso,"+ Cargos: ")
+						p.drawString(90,paso,locale.currency(TotalCargos,grouping=True))
+
+						paso-=10
+						p.drawString(10,paso,"- Descuentos: ")
+						p.drawString(90,paso,locale.currency(TotalDescuentos,grouping=True))
+
+						paso-=7
+						p.drawString(90,paso,"-"*17)
+
+						paso-=10
+						p.drawString(10,paso,"Venta Neta: ")
+						p.drawString(90,paso,locale.currency(TotalVtaNeta,grouping=True))
+
+						paso-=30
+						p.drawString(10,paso,"Vta Productos: ")
+						p.drawString(90,paso,locale.currency(TotalVtaProductos,grouping=True))
+
+						paso-=10
+						p.drawString(10,paso,"Vta Catalogos: ")
+						p.drawString(90,paso,locale.currency(TotalVtaCatalogos,grouping=True))
+
+
+						p.showPage()
+						p.save()
+
+
+						pdf = buffer.getvalue()
+						buffer.close()
+
+						response.write(pdf)
+
+						return response
+
+
+
+
+				context = {'form':form,'mensaje':mensaje,'registros_venta':registros_venta,'TotalRegistros':TotalRegistros,'sucursal_nombre':sucursal_nombre,'TotalCreditos':TotalCreditos,'TotalCargos':TotalCargos,'TotalDescuentos':TotalDescuentos,'VentaCalzado':VentaCalzado,'TotalVtaCatalogos':TotalVtaCatalogos,'TotalVtaBruta':TotalVtaBruta,'TotalVtaNeta':TotalVtaNeta,'TotalVtaProductos':TotalVtaProductos}	
+			
+				#return render(request,'pedidos/lista_ventas.html',context)
+
+		
+	else:
+
+		form = ventasporcajeroForm()
+	return render(request,'pedidos/consultaventas_por_usuario.html',{'form':form,})
+
+
+
 

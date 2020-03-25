@@ -170,6 +170,54 @@ def lista_almacenes(proveedor):
 			return (lprov)
 
 
+'''   LISTA DE USUARIOS '''
+
+def lista_usuarios():
+			cursor=connection.cursor()
+			cursor.execute('SELECT UsuarioNo,usuario from usuarios where activo;')
+	
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'GENERAL ') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lprov)
+
+
+
+
+
+
+
+
+
+
+
+
 
 f_inicial_init =  date.today()
 
@@ -2349,3 +2397,91 @@ class RpteStatusDePedidosForm(forms.Form):
 
 
 
+class ventasporcajeroForm(forms.Form):
+
+	proveedores = {}
+
+	
+
+	
+	def __init__(self,*args,**kwargs):
+
+		opcion_consulta = (('0','SELECCIONE...'),('1','Nuevos'),('2','Por Confirmar'))
+		
+		lprov = lista_Sucursales()
+		lusr = lista_usuarios()
+
+		super(ventasporcajeroForm, self).__init__(*args,**kwargs)
+
+		self.fields['sucursal'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal',choices = lprov,initial='0',required='True' )
+
+		self.fields['usuario'] = forms.ChoiceField(widget=forms.Select(),
+			label='Usuario',choices = lusr,initial='0',required='True' )
+
+
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+
+		'''error_messages = {
+		
+		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+		'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+		}'''
+
+
+
+
+
+
+
+
+		t = datetime.now
+		#t.strftime('%m/%d/%Y')
+
+		'''tipoconsulta  = forms.ChoiceField(widget=forms.Select(),
+				label='Tipo de Consulta',choices = opcion_consulta,initial='1',required='True' )
+		# Prepara el campo para utilizar datepicker
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		
+		fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)'''
+		
+	error_messages = {
+	
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+	'error_sucursal': 'Seleccione un proveedor..!',
+	'error_tipoconsulta': 'Seleccione el tipo de consulta que desea realizar',
+	}
+
+	def clean(self):
+
+		
+		cleaned_data = super(ventasporcajeroForm, self).clean()
+		sucursal = cleaned_data.get('sucursal')
+		usuario = cleaned_data.get('usuario')
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		'''if proveedor < '1':
+
+			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
+
+		return self.cleaned_data
