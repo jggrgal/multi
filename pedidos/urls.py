@@ -108,5 +108,6 @@ urlpatterns = [
 	url(r'^proveedores/$',views.proveedores,name='proveedores'),
 	url(r'^edita_proveedor/(?P<proveedorno>[0-9]{1,8})/$',views.edita_proveedor,name='edita_proveedor'),
 	url(r'^lista_devoluciones_recepcionadas/$',views.lista_devoluciones_recepcionadas,name='lista_devoluciones_recepcionadas'),
+	url(r'^crea_proveedor/$',views.crea_proveedor,name='crea_proveedor'),
 
 	]
