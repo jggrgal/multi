@@ -2219,9 +2219,15 @@ class Edicion_devprovForm(forms.Form):
 		num_socio = cleaned_data.get('num_socio')
 		nombre_socio = cleaned_data.get('nombre_socio')
 		return self.cleaned_data
-"""
 
 class DatosProveedorForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosProveedorForm, self).__init__(*args,**kwargs)
+
+		self.fields['ProveedorNo'].widget.attrs['readonly'] = True
 
 
 	ProveedorNo = forms.IntegerField(label='Proveedor Num.',required=True)
@@ -2238,9 +2244,19 @@ class DatosProveedorForm(forms.Form):
 	celular = forms.CharField(label='Celular',required=True)
 	radio = forms.CharField(label='radio',required=True)
 	email = forms.EmailField(label='email',required=True)
-	FechaAlta = forms.DateField(label='Fecha Alta',required=True)
-	FechaBaja = forms.DateField(label='Fecha Baja',required=True)
-	maneja_desc = forms.IntegerField(label='Maneja descuento',widget=forms.CheckBox())
+	maneja_desc = forms.ChoiceField(widget=forms.Select(),
+			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+	baseparabono = forms.BooleanField(label='Base para bono',required=False)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	
+
+	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
+					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
+					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
+					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+
+
+
 
 	def clean(self):
 
@@ -2253,19 +2269,104 @@ class DatosProveedorForm(forms.Form):
 		Ciudad = cleaned_data.get('Ciudad')
 		Estado = cleaned_data.get('num_socio')
 		Pais = cleaned_data.get('Pais')
-		CodiPostal = cleaned_data.get('CodigoPostal')
+		CodigoPostal = cleaned_data.get('CodigoPostal')
 		telefono1 = cleaned_data.get('telefono1')
 		telefono2 = cleaned_data.get('telefono2')
 		fax = cleaned_data.get('fax')
 		celular = cleaned_data.get('celular')
 		radio = cleaned_data.get('radio')
 		email = cleaned_data.get('email')
-		FechaAlta = cleaned_data.get('FechaAlta')
-		FechaBaja = cleaned_data.get('FechaBaja')
 		maneja_desc = cleaned_data.get('maneja_desc')
+		baseparabono = cleaned_data.get('baseparabono')
+		usr_id = cleaned_data.get('usr_id')
+		if  not (telefono1 and telefono2 and fax and celular) is None:
+			if not(telefono1.isdigit()):
+				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
+			elif not(telefono2.isdigit()): 
+				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
+			elif not(fax.isdigit()): 
+				raise forms.ValidationError(self.error_messages['fax'],code='fax')
+			elif not(celular.isdigit()):
+				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			else:
+				pass
+		else:
+			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
+
+				
+
 
 		return self.cleaned_data
-		"""
+
+""" FORMA PARA CREAR PROVEEDOR """
+
+class CreaProveedorForm(forms.Form):
+
+	
+	RazonSocial = forms.CharField(label='Nombre',required=True)	
+	Direccion = forms.CharField(label='Direccion',required=True)
+	Colonia = forms.CharField(label='Colonia',required=True)
+	Ciudad = forms.CharField(label='Ciudad',required=True)
+	Estado = forms.CharField(label='Estado',required=True)
+	Pais = forms.CharField(label='Pais',required=True)
+	CodigoPostal = forms.IntegerField(label='C.P.',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True)
+	telefono2 = forms.CharField(label='Telefono 2',required=True)
+	fax = forms.CharField(label='Fax',required=True)
+	celular = forms.CharField(label='Celular',required=True)
+	radio = forms.CharField(label='radio',required=True)
+	email = forms.EmailField(label='email',required=True)
+	maneja_desc = forms.ChoiceField(widget=forms.Select(),
+			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+	baseparabono = forms.BooleanField(label='Base para bono',required=False)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	
+
+	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
+					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
+					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
+					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+
+
+
+
+	def clean(self):
+
+		cleaned_data = super(CreaProveedorForm,self).clean()
+	
+		
+		RazonSocial = cleaned_data.get('RazonSocial')
+		Direccion = cleaned_data.get('Direccion')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		Estado = cleaned_data.get('num_socio')
+		Pais = cleaned_data.get('Pais')
+		CodigoPostal = cleaned_data.get('CodigoPostal')
+		telefono1 = cleaned_data.get('telefono1')
+		telefono2 = cleaned_data.get('telefono2')
+		fax = cleaned_data.get('fax')
+		celular = cleaned_data.get('celular')
+		radio = cleaned_data.get('radio')
+		email = cleaned_data.get('email')
+		maneja_desc = cleaned_data.get('maneja_desc')
+		baseparabono = cleaned_data.get('baseparabono')
+		usr_id = cleaned_data.get('usr_id')
+		if  not (telefono1 and telefono2 and fax and celular) is None:
+			if not(telefono1.isdigit()):
+				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
+			elif not(telefono2.isdigit()): 
+				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
+			elif not(fax.isdigit()): 
+				raise forms.ValidationError(self.error_messages['fax'],code='fax')
+			elif not(celular.isdigit()):
+				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			else:
+				pass
+		else:
+			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
+
+		return self.cleaned_data		
+		
 
 
 

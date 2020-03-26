@@ -5,9 +5,8 @@
 <h1>{{mensaje}}</h1>
 
 <div class="row">
-  <div class="col-md-3"><h3>Catalgo de Proveedores</h3></div>
-  <div class="col-md-3"></div>
-  <div class="col-md-3"></div>
+  <h3 style="text-align: center;color:#7f7b38;">Catalogo de Proveedores</h3>
+  
 </div>
     <div class="table-responsive">
         
@@ -15,20 +14,36 @@
         	<tr class='success'>
         		<th>id</th>
             	<th>Nombre</th>
-            	
+            	<th>Telefono</th>
+                <th>Celular</th>
+                <th>Email</th>
               
         	</tr>
         	{% for item in proveedores %}
         		<tr>
         			<td><a href="{% url 'pedidos:edita_proveedor' item.proveedorno %}">{{ item.proveedorno }}</a></td>
         			<td>{{ item.razonsocial }}</td>
+                    <td>{{ item.telefono1 }}</td>
+                    <td>{{ item.cel }}</td>
+                    <td>{{ item.email }}</td>
             		                    
             	</tr>
             {% endfor %}
             
     	</table>
     </div>
-
+    <div class='row'>
+        <div class='col-md-4'>
+            <p align="left">
+                          <a href="{% url 'pedidos:crea_proveedor' %}" id="crea_proveedor" class="btn btn-success" role="button">Nuevo </a>
+                        </p>
+        </div>
+        <div class='col-md-4'></div>
+        <div class='col-md-4'></div>
+        <div class='col-md-4'></div>
+        
+        
+    </div>
 
 
 

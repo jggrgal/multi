@@ -47,7 +47,11 @@ from . forms import (AccesoForm,\
 					#DatosProveedorForm,
 					Lista_dev_recepcionadasForm,\
 					ventasporcajeroForm,\
-					RpteStatusDePedidosForm,)
+					RpteStatusDePedidosForm,
+					DatosProveedorForm,
+					CreaProveedorForm,
+					Lista_dev_recepcionadasForm)
+
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
@@ -6131,6 +6135,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 
 	cursor.execute("SELECT razonsocial from proveedor WHERE proveedorno=%s;",(idproveedor,))
 	proveedor_nombre = dictfetchall(cursor)
+	proveedor=''
 	for j in proveedor_nombre:
 		proveedor = j['razonsocial']
 
@@ -7324,7 +7329,7 @@ def calcula_bono(request):
 
 def proveedores(request):
 	cursor=connection.cursor()
-	cursor.execute("SELECT proveedorno,razonsocial from proveedor")
+	cursor.execute("SELECT proveedorno,razonsocial,telefono1,cel,email from proveedor")
 	proveedores = dictfetchall(cursor)
 
 	context = {'proveedores':proveedores,}	
@@ -7333,43 +7338,42 @@ def proveedores(request):
 
 
 def edita_proveedor(request,proveedorno):
-	pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	
 	
 
 	msg = ''
+
 	if request.method == 'POST':
 
 		form = DatosProveedorForm(request.POST)
 		if form.is_valid():
-			proveedorno = request.POST.get('proveedorno')
-			RazonSocial = request.POST.get('razonsocial')
-			Direccion = request.POST.get['Direccion']
-			Colonia = request.POST.get['Colonia']
-			Ciudad = request.POST.get['Ciudad']
-			Estado = request.POST.get['Estado']
-			Pais = request.POST.get['Pais']
-			CodigoPostal = request.POST.get['CodigoPostal']
-			telefono1 = request.POST.get['telefono1']
-			telefono2 = request.POST.get['telefono2']
-			fax = request.POST.get['fax']
-			cel = request.POST.get['cel']
-			radio = request.POST.get['radio']
-			email = request.POST.get['email']
-			FechaAlta = request.POST.get['FechaAlta']
-			FechaBaja = request.POST.get['FechaBaja']
-			UsuarioQueDioAlta = request.POST.get['UsuarioQueDioAlta']
-			Usuaroi = request.POST.get['Usaurio']
-			manejar_desc = request.POST.get['manejar_desc']
-			BaseParaBono = request.POST.get['BaseParaBono']
+			ProveedorNo = form.cleaned_data['ProveedorNo']
+			RazonSocial = form.cleaned_data['RazonSocial']
+			Direccion = form.cleaned_data['Direccion']
+			Colonia = form.cleaned_data['Colonia']
+			Ciudad = form.cleaned_data['Ciudad']
+			Estado = form.cleaned_data['Estado']
+			Pais = form.cleaned_data['Pais']
+			CodigoPostal = form.cleaned_data['CodigoPostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			email = form.cleaned_data['email']
+			usr_id = form.cleaned_data['usr_id']
+			maneja_desc = form.cleaned_data['maneja_desc']
+			baseparabono = form.cleaned_data['baseparabono']
 			
+			
+
 
 			cursor =  connection.cursor()
 			try:
 
 				cursor.execute('START TRANSACTION')
-				cursor.execute('UPDATE proveedor SET proveedorno = %s,\
-				RazonSocial = %s,\
+				cursor.execute('UPDATE proveedor SET RazonSocial = %s,\
 				Direccion = %s,\
 				Colonia = %s,\
 				Ciudad = %s,\
@@ -7382,14 +7386,11 @@ def edita_proveedor(request,proveedorno):
 				cel = %s,\
 				radio = %s,\
 				email = %s,\
-				FechaAlta = %s,\
-				FechaBaja = %s,\
-				UsuarioQueDioAlta = %s,\
 				Usuaroi = %s,\
-				manejar_desc = %s,\
-				WHERE proveedorno=%s;',(RazonSocial,Direccion,Colonia,Ciudad,Estado,Pais,CodigoPostal,telefono1,telefono2,fax,cel,radio,email,FechaBaja,UsuarioQueDioAlta,Usuaroi,manejar_desc,))
+				manejar_desc = %s \
+				WHERE proveedorno=%s;',(RazonSocial.upper(),Direccion.upper(),Colonia.upper(),Ciudad.upper(),Estado.upper(),Pais.upper(),CodigoPostal,telefono1,telefono2,fax,cel,radio,email.lower(),usr_id,'\x01' if maneja_desc==u'1' else '\x00',proveedorno,))
 			
-				cursor.execute("UPDATE ProvConfBono SET BaseParaBono=%s WHERE proveedorno=%s;",(BaseParaBono,proveedorno,))
+				cursor.execute("UPDATE ProvConfBono SET BaseParaBono=%s WHERE proveedorno=%s;",(baseparabono,proveedorno,))
 				
 				cursor.execute("COMMIT;")
 
@@ -7404,64 +7405,184 @@ def edita_proveedor(request,proveedorno):
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
 		else:
-		
+			'''
 			cursor=connection.cursor()
-			cursor.execute("SELECT 	RazonSocial,\
-									Direccion,\
-									Colonia,\
-									Ciudad,\
-									Estado,\
-									Pais,\
-									CodigoPostal,\
-									telefono1,\
-									telefono2,\
-									fax,\
-									cel,\
-									radio,\
-									email,\
-									FechaAlta,\
-									FechaBaja,\
-									UsuarioQueDioAlta,\
-									Usuaroi,\
-									manejar_desc,\
+			cursor.execute("SELECT 	p.RazonSocial,\
+									p.Direccion,\
+									p.Colonia,\
+									p.Ciudad,\
+									p.Estado,\
+									p.Pais,\
+									p.CodigoPostal,\
+									p.telefono1,\
+									p.telefono2,\
+									p.fax,\
+									p.cel,\
+									p.radio,\
+									p.email,\
+									p.FechaAta,\
+									p.FechaBaja,\
+									p.UsuarioQueDioAlta,\
+									p.Usuaroi,\
+									p.manejar_desc,\
 									k.BaseParaBono\
-									from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+									from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno))
 			proveedor = cursor.fetchone()
 
-			form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+			form = DatosProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
 					
 			return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
-
+		'''
+		pass
 	else:	
 
 		form = DatosProveedorForm()
 		
 		cursor=connection.cursor()
-		cursor.execute("SELECT 	RazonSocial,\
-								Direccion,\
-								Colonia,\
-								Ciudad,\
-								Estado,\
-								Pais,\
-								CodigoPostal,\
-								telefono1,\
-								telefono2,\
-								fax,\
-								cel,\
-								radio,\
-								email,\
-								FechaAlta,\
-								FechaBaja,\
-								UsuarioQueDioAlta,\
-								Usuaroi,\
-								manejar_desc,\
+		cursor.execute("SELECT 	p.proveedorno,\
+								p.RazonSocial,\
+								p.Direccion,\
+								p.Colonia,\
+								p.Ciudad,\
+								p.Estado,\
+								p.Pais,\
+								p.CodigoPostal,\
+								p.telefono1,\
+								p.telefono2,\
+								p.fax,\
+								p.cel,\
+								p.radio,\
+								p.email,\
+								p.FechaAta,\
+								p.FechaBaja,\
+								p.UsuarioQueDioAlta,\
+								p.Usuaroi,\
+								p.manejar_desc,\
 								k.BaseParaBono\
-								from proveedor inner join BaseParaBono k on (k.empresano= 1 and proveedorno=k.proveedorno) where proveedorno=%s;",(proveedorno))
+								from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno,))
 		proveedor = cursor.fetchone()
 
-		form = EditaProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
+		form = DatosProveedorForm(initial={'ProveedorNo':proveedor[0],'RazonSocial':proveedor[1],'Direccion':proveedor[2],'Colonia':proveedor[3],'Ciudad':proveedor[4],'Estado':proveedor[5],'Pais':proveedor[6],'CodigoPostal':proveedor[7],'telefono1':proveedor[8],'telefono2':proveedor[9],'fax':proveedor[10],'celular':proveedor[11],'radio':proveedor[12],'email':proveedor[13],'FechaAlta':proveedor[14],'maneja_desc':1 if proveedor[18]=='\x01' else 0,'baseparabono':True if proveedor[19] else False,})
 					
-		return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
+	return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
+	
+"""CREACION DE PROVEEDORES"""
+
+
+def crea_proveedor(request):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = CreaProveedorForm(request.POST)
+		if form.is_valid():
+			
+			RazonSocial = form.cleaned_data['RazonSocial']
+			Direccion = form.cleaned_data['Direccion']
+			Colonia = form.cleaned_data['Colonia']
+			Ciudad = form.cleaned_data['Ciudad']
+			Estado = form.cleaned_data['Estado']
+			Pais = form.cleaned_data['Pais']
+			CodigoPostal = form.cleaned_data['CodigoPostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			email = form.cleaned_data['email']
+			usr_id = form.cleaned_data['usr_id']
+			maneja_desc = form.cleaned_data['maneja_desc']
+			baseparabono = form.cleaned_data['baseparabono']
+			
+			
+
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute("SELECT proveedorNo from proveedor order by proveedorno desc limit 1;")
+				proveedorNo = cursor.fetchone()
+
+
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("INSERT INTO proveedor(EmpresaNo,ProveedorNo,RazonSocial,\
+				Direccion,\
+				Colonia,\
+				Ciudad,\
+				Estado,\
+				Pais,\
+				CodigoPostal,\
+				telefono1,\
+				telefono2,\
+				fax,\
+				cel,\
+				radio,\
+				email,\
+				Usuaroi,\
+				UsuarioQueDioAlta,\
+				FechaAta,\
+				FechaBaja,\
+				manejar_desc) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",\
+				(1,proveedorNo[0]+1,RazonSocial.upper(),\
+				Direccion.upper(),\
+				Colonia.upper(),\
+				Ciudad.upper(),\
+				Estado.upper(),\
+				Pais.upper(),\
+				CodigoPostal,\
+				telefono1,\
+				telefono2,\
+				fax,\
+				cel,\
+				radio,\
+				email.lower(),\
+				usr_id,\
+				usr_id,\
+				fecha_hoy,\
+				fecha_hoy,\
+				'\x01' if maneja_desc==u'1' else '\x00'))
+
+					
+				cursor.execute("INSERT INTO ProvConfBono(EmpresaNo,ProveedorNo,BaseParaBono) VALUES(%s,%s,%s);",(1,proveedorNo[0]+1,baseparabono,))
+				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:proveedores'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			pass
+	else:	
+
+	
+
+		form = CreaProveedorForm()
+	
+					
+	return render(request,'pedidos/crea_proveedor.html',{'form':form,})
+
+
+
+
+
+
+
+
+
+
+
 
 
 '''REPORTE QUE CALCULA  LA VENTA NETA POR SOCIO Y POR PROVEEDOR '''
