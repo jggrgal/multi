@@ -39,7 +39,7 @@
 
                     {% if  vta.ventas != 0 or vta.venta_FD != 0   or vta.venta_bruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.venta_neta != 0  %}
             		<tr>
-                        <td><a href="/pedidos/detallevtaxproveedor/{{vta.asociadono}}/{{ fechainicial | date:'Ymd' }}/{{fechafinal | date:'Ymd' }}/{{ sucursalinicial }}/{{ sucursalfinal }}"> {{ vta.asociadono }} </a></td>
+                        <td><a href="/pedidos/detallebonosocio/{{vta.asociadono}}/{{ fechainicial | date:'Ymd' }}/{{fechafinal | date:'Ymd' }}"> {{ vta.asociadono }} </a></td>
                         <td> {{vta.nombre }}</td>
                         <td>{{ vta.ventas | intcomma }}</td>
                         <td>{{ vta.descuento | intcomma }}</td>

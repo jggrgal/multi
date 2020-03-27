@@ -6134,10 +6134,9 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 	totalvta = 0
 
 	cursor.execute("SELECT razonsocial from proveedor WHERE proveedorno=%s;",(idproveedor,))
-	proveedor_nombre = dictfetchall(cursor)
-	proveedor=''
-	for j in proveedor_nombre:
-		proveedor = j['razonsocial']
+	proveedor_nombre = cursor.fetchone()
+
+	proveedor=proveedor_nombre[0]
 
 	try:
 		
@@ -7325,6 +7324,70 @@ def calcula_bono(request):
 
 		form = Genera_BaseBonoForm()
 	return render(request,'pedidos/generabonoforma.html',{'form':form,})
+
+# DETALLE DE LA VENTA BASE PARA CALCULO DE BONO DEL SOCIO
+
+def detallebonosocio(request,idsocio,fechainicial,fechafinal):
+
+	#pdb.set_trace()
+	cursor=connection.cursor()
+
+	totalvta = 0
+
+	cursor.execute("SELECT CONCAT(nombre,' ',appaterno,' ',apmaterno) as socio_nombre from asociado WHERE asociadono=%s;",(idsocio,))
+	socio_nombre = cursor.fetchone()
+
+	asociado=socio_nombre[0]
+
+	try:
+		
+		cursor.execute("SELECT h.pedidono,l.remisionno as remision_num,h.asociadono,h.fechapedido,h.horapedido,a.idmarca, a.idestilo,idcolor,a.talla,l.preciooriginal,l.observaciones from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join ProvConfBono pcb on (pcb.EmpresaNo=h.empresano and pcb.ProveedorNo=a.idproveedor) where pcb.BaseParaBono and f.fechamvto>=%s and f.fechamvto<=%s and h.asociadono=%s;",(fechainicial,fechafinal,idsocio,))
+		"""cursor.execute("SELECT h.pedidono,\
+			l.remisionno as remision_num,\
+			h.asociadono,\
+			h.fechapedido,\
+			h.horapedido,\
+			a.idmarca,\
+			a.idestilo,\
+			a.idcolor,\
+			a.talla,\
+			l.preciooriginal,\
+			from pedidoslines l inner join pedidosheader h\
+			on (h.empresano=1 and h.pedidono=l.pedido)\
+			inner join pedidos_status_fechas f\
+			on (f.empresano=1 and f.pedido=l.pedido\
+			and f.productono=l.productono and f.status='Facturado'\
+			and f.catalogo=l.catalogo)\
+			inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono\
+			and a.catalogo=l.catalogo)\
+			inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor)\
+			where f.fechamvto>=%s and f.fechamvto<=%s\
+			and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))"""
+			
+		vtasresult = dictfetchall(cursor)
+
+		# DETERMINA EL TOTAL DE LA VENTA
+		
+		for reg in vtasresult:
+			totalvta = totalvta + float(reg['preciooriginal'])
+
+
+
+	except DatabaseError as e:
+		print (e)
+
+
+	context = {'vtasresult':vtasresult,'totalvta':totalvta,'asociado':asociado,'fechainicial':fechainicial,'fechafinal':fechafinal,}	
+
+
+	return render(request,'pedidos/detalle_bono_socio.html',context)
+
+
+
+
+
+
+
 
 
 def proveedores(request):
