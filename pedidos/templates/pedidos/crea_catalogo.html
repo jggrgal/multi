@@ -15,13 +15,13 @@
   <div class="col-md-4">
     <div class="panel panel-success">
 
-        <div class='panel-heading'><h4 align='left'>Edita proveedor<h4></div>
+        <div class='panel-heading'><h4 align='left'>Crea catalogo<h4></div>
         <div class='panel-body'>
               
             {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
 
             
-            <form action="{% url 'pedidos:edita_proveedor' proveedorno %}" method="POST">
+            <form action="{% url 'pedidos:crea_catalogo' ProveedorNo %}" method="POST">
                 
                     <!--<div class="alert alert-danger" role="alert">
                       {% for error in form.non_field_errors %}
@@ -53,13 +53,6 @@
 
         </div><br>
  <div class="col-md-4">
-
-
-  <br><p align="left">
-                          <a href="{% url 'pedidos:proveedores' %}" id="regresar" class="btn btn-success" role="button">Regresar </a>
-                        </p>
-
-
  </div>     
  
   </div>

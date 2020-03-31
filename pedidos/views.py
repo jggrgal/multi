@@ -48,8 +48,10 @@ from . forms import (AccesoForm,\
 					Lista_dev_recepcionadasForm,\
 					ventasporcajeroForm,\
 					RpteStatusDePedidosForm,
-					DatosProveedorForm,
+					DatosProveedorForm, # MODIFICA DATOS DEL PROVEEDOR
 					CreaProveedorForm,
+					DatosCatalogoForm, # MODIFICA DATOS DEL CATALOGO
+					CreaCatalogoForm,
 					Lista_dev_recepcionadasForm)
 
 
@@ -7468,35 +7470,8 @@ def edita_proveedor(request,proveedorno):
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
 		else:
-			'''
-			cursor=connection.cursor()
-			cursor.execute("SELECT 	p.RazonSocial,\
-									p.Direccion,\
-									p.Colonia,\
-									p.Ciudad,\
-									p.Estado,\
-									p.Pais,\
-									p.CodigoPostal,\
-									p.telefono1,\
-									p.telefono2,\
-									p.fax,\
-									p.cel,\
-									p.radio,\
-									p.email,\
-									p.FechaAta,\
-									p.FechaBaja,\
-									p.UsuarioQueDioAlta,\
-									p.Usuaroi,\
-									p.manejar_desc,\
-									k.BaseParaBono\
-									from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno))
-			proveedor = cursor.fetchone()
-
-			form = DatosProveedorForm(initial={'Razon Social':proveedor[0],'Direccion':proveedor[1],'Colonia':proveedor[2],'Ciudad':proveedor[3],'Estado':proveedor[4],'Pais':proveedor[5],'Codigo Postal':proveedor[6],'Telefono_1':proveedor[7],'Telefono_2':proveedor[8],'Fax':proveedor[9],'Cel':proveedor[10],'Radio':proveedor[11],'Email':proveedor[12],'Fecha_Alta':proveedor[13],'Fecha_Baja':proveedor[14],'Usuario_Que_Dio_Alta':proveedor[15],'Usuaroi':proveedor[16],'manejar_desc':proveedor[17],'Base_para_Bono_lealtad':proveedor[18]})
-					
-			return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
-		'''
-		pass
+			
+			pass
 	else:	
 
 		form = DatosProveedorForm()
@@ -7636,15 +7611,142 @@ def crea_proveedor(request):
 					
 	return render(request,'pedidos/crea_proveedor.html',{'form':form,})
 
+def lista_catalogos_proveedor(request,proveedorno):
+
+	#pdb.set_trace() 	
+	cursor=connection.cursor()
+	cursor.execute("SELECT ProveedorNo,Periodo,anio,clasearticulo,if(activo=1,'SI','NO') AS activo,if(no_maneja_descuentos=1,'SI','NO') as no_maneja_descuentos,if(catalogo_promociones=1,'SI','NO') as catalogo_promociones from catalogostemporada where proveedorNo=%s;",(proveedorno,))
+	catalogos = dictfetchall(cursor)
+	cursor.execute("SELECT razonsocial FROM proveedor where proveedorno=%s;",(proveedorno,))
+	nombre_proveedor=cursor.fetchone()
+
+	context = {'catalogos':catalogos,'proveedorno':proveedorno,'nombre_proveedor':nombre_proveedor[0]}
+	
+		
+	return render(request,'pedidos/lista_catalogos_proveedor.html',context)
+
+def edita_catalogo(request,ProveedorNo,Anio,Periodo,ClaseArticulo):
+
+	#pdb.set_trace()
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = DatosCatalogoForm(request.POST)
+		if form.is_valid():
+			ProveedorNo = form.cleaned_data['ProveedorNo']
+			Periodo = form.cleaned_data['Periodo']
+			Anio = form.cleaned_data['Anio']
+			ClaseArticulo = form.cleaned_data['ClaseArticulo']
+			Activo = form.cleaned_data['Activo']
+			no_maneja_descuentos = form.cleaned_data['no_maneja_descuentos']
+			catalogo_promociones = form.cleaned_data['catalogo_promociones']
+			
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('UPDATE catalogostemporada SET Activo = %s,\
+				no_maneja_descuentos = %s,\
+				catalogo_promociones = %s \
+				WHERE ProveedorNo=%s and Periodo=%s and Anio=%s and ClaseArticulo=%s ;',('\x01' if Activo==u'1' else '\x00','\x01' if no_maneja_descuentos==u'1' else '\x00','\x01' if catalogo_promociones==u'1' else '\x00',ProveedorNo,int(Periodo),int(Anio),ClaseArticulo,))
+			
+				
+				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_catalogos_proveedor',args=(ProveedorNo,),))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			pass
+
+	else:	
+
+		form = DatosProveedorForm()
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT  ct.ProveedorNo,\
+								ct.Anio,\
+								ct.Periodo,\
+								ct.ClaseArticulo,\
+								ct.Activo,\
+								ct.no_maneja_descuentos,\
+								ct.catalogo_promociones \
+								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(ProveedorNo,Periodo,Anio,ClaseArticulo,))
+		catalogostemporada = cursor.fetchone()
+
+		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
+	context = {'form':form,'ProveedorNo':ProveedorNo,'Anio':Anio,'Periodo':Periodo,'ClaseArticulo':ClaseArticulo,}			
+	
+	return render(request,'pedidos/edita_catalogo.html',context)
 
 
 
 
+def crea_catalogo(request,id_proveedor):
+
+	#pdb.set_trace()
 
 
+	if request.method == 'POST':
+
+		form = CreaCatalogoForm(request.POST)
+
+		if form.is_valid():
+			vProveedorNo = form.cleaned_data['ProveedorNo']
+			vPeriodo = form.cleaned_data['Periodo']
+			vAnio = form.cleaned_data['Anio']
+			vClaseArticulo = form.cleaned_data['ClaseArticulo'].upper()
+			vActivo = form.cleaned_data['Activo']
+			vno_maneja_descuentos = form.cleaned_data['no_maneja_descuentos']
+			vcatalogo_promociones = form.cleaned_data['catalogo_promociones']
+			
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('INSERT INTO catalogostemporada(ProveedorNo,\
+					Periodo,Anio,ClaseArticulo,Activo,no_maneja_descuentos,catalogo_promociones)\
+					VALUES(%s,%s,%s,%s,%s,%s,%s);',\
+					(id_proveedor,int(vPeriodo),int(vAnio),vClaseArticulo,\
+					'\x01' if vActivo==u'1' else '\x00',\
+					'\x01' if vno_maneja_descuentos==u'1' else '\x00',\
+					'\x01' if vcatalogo_promociones==u'1' else '\x00',))
+
+				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_catalogos_proveedor',args=(id_proveedor,),))
 
 
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
+		else:
+			context={'form':form,'ProveedorNo':id_proveedor,}
+
+			
+
+	else:	
+
+		form = CreaCatalogoForm(initial={'ProveedorNo':id_proveedor,})
+		context={'form':form,'ProveedorNo':id_proveedor,}
+		
+	return render(request,'pedidos/crea_catalogo.html',context)
 
 
 

@@ -1,0 +1,70 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  <h4 style="text-align: center;color:#7f7b38;">CATALOGOS DE   {{ nombre_proveedor }}</hf>
+  
+</div>
+    <div class="table-responsive">
+        
+    	<table class='table table-hover table-bordered table-condensed'>
+        	<tr class='success'>
+        		<th>Año</th>
+            	<th>Periodo</th>
+            	<th>Catalogo</th>
+                <th>Activo</th>
+                <th>No maneja descuentos</th>
+                <th>Catalogo de promociones</th>
+              
+        	</tr>
+        	{% for item in catalogos %}
+        		<tr>
+        			<td>{{ item.Periodo }}</td>
+        			<td>{{ item.anio }}</td>
+                    <td><a href="{% url 'pedidos:edita_catalogo' item.ProveedorNo item.anio item.Periodo item.clasearticulo %}">{{ item.clasearticulo }}</a></td>
+                     <td>{{item.activo}}</td>
+                    <td>{{ item.no_maneja_descuentos }}</td>
+                    <td>{{ item.catalogo_promociones }}</td>
+                               		                    
+            	</tr>
+            {% endfor %}
+            
+    	</table>
+    </div>
+    <div class='row'>
+        <div class='col-md-4'>
+            <p align="left">
+                          <a href="{% url 'pedidos:crea_catalogo' proveedorno %}" id="crea_catalogo" class="btn btn-success" role="button">Nuevo </a>
+                        </p>
+        </div>
+        <div class='col-md-4'>
+            <p align="left">
+                          <a href="{% url 'pedidos:proveedores' %}" id="regresar" class="btn btn-success" role="button">Regresar </a>
+                        </p>
+        </div>
+        <div class='col-md-4'></div>
+        <div class='col-md-4'></div>
+        
+        
+    </div>
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

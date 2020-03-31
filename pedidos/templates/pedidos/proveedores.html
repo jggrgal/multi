@@ -17,6 +17,7 @@
             	<th>Telefono</th>
                 <th>Celular</th>
                 <th>Email</th>
+                <th>Catalogos</th>
               
         	</tr>
         	{% for item in proveedores %}
@@ -26,6 +27,9 @@
                     <td>{{ item.telefono1 }}</td>
                     <td>{{ item.cel }}</td>
                     <td>{{ item.email }}</td>
+                    <td><form id="imp_pedido_form" action="/pedidos/lista_catalogos_proveedor/{{item.proveedorno}}" method="GET">
+                        <input id="idpedido" name="p_num_pedido" class="btn-success-btn-lg" type="submit" value="Catalogos...">
+                    </form></td>
             		                    
             	</tr>
             {% endfor %}
