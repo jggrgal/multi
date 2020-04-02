@@ -1,0 +1,88 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class=row>
+    <div class='col-md-4'>
+         <h4 class='success'>Estilos encontrados:</h4>  
+
+       
+    </div>
+    <div class='col-md-4'>
+    </div>
+    <div class='col-md-4'>
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>   
+        
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+    	<table id="lista_estilos" class='display table table-hover table-bordered table-condensed'>
+            
+        	
+            <thead>
+            <tr class='success'>
+
+        		<th>Pedido num</th>
+                <th>Fecha Pedido</th>
+                <th>Socio Num</th>
+                <th>Nombre</th>
+                <th>Status</th>
+            	<th>Marca</th>
+            	<th>Estilo</th>
+            	<th>Color</th>
+            	<th>Talla</th>
+                <th>Precio</th>
+                               
+        	</tr>
+            </thead>
+            <tbody>
+        	{% for item in registros %}
+                
+        		<tr>
+                    <td>{{item.pedido}} </td>
+                    {% localize on %}
+                        <td>{{item.fechacreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    
+                    <td>{{item.asociadono}}</td>
+                    <td>{{item.nombre}}</td>
+                    <td>{{item.status}}</td>
+                    <td>{{ item.idmarca }}</td>
+        			<td> {{ item.idestilo }}</td>
+            		<td>{{ item.idcolor }}</td>
+            		<td>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</td>
+            		<td>{{item.precio}}</td>
+                                                           
+            	</tr>
+            {% endfor %}
+        </tbody>
+        
+                  
+    	</table>
+    </div>
+    <div class='row'>
+        <div class='col-md-3'>
+        </div>
+        <div class='col-md-3'>
+        </div>
+        <div class='col-md-3'>
+
+          
+
+        </div>
+        <div class='col-md-3'>
+            <p align='right'>
+                <a class="btn btn-default" href="/pedidos/busca_estilo" role="button">Salir</a>
+            </p>
+
+        </div>
+
+
+    
+    
+    </div>
+
+{% endblock %}

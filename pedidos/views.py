@@ -52,7 +52,8 @@ from . forms import (AccesoForm,\
 					CreaProveedorForm,
 					DatosCatalogoForm, # MODIFICA DATOS DEL CATALOGO
 					CreaCatalogoForm,
-					Lista_dev_recepcionadasForm)
+					Lista_dev_recepcionadasForm,
+					BuscaEstiloForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -7615,7 +7616,7 @@ def lista_catalogos_proveedor(request,proveedorno):
 
 	#pdb.set_trace() 	
 	cursor=connection.cursor()
-	cursor.execute("SELECT ProveedorNo,Periodo,anio,clasearticulo,if(activo=1,'SI','NO') AS activo,if(no_maneja_descuentos=1,'SI','NO') as no_maneja_descuentos,if(catalogo_promociones=1,'SI','NO') as catalogo_promociones from catalogostemporada where proveedorNo=%s;",(proveedorno,))
+	cursor.execute("SELECT ProveedorNo,Periodo,anio,clasearticulo,if(activo=1,'SI','NO') AS activo,if(no_maneja_descuentos=1,'SI','NO') as no_maneja_descuentos,if(catalogo_promociones=1,'SI','NO') as catalogo_promociones from catalogostemporada where proveedorNo=%s order by Periodo desc;",(proveedorno,))
 	catalogos = dictfetchall(cursor)
 	cursor.execute("SELECT razonsocial FROM proveedor where proveedorno=%s;",(proveedorno,))
 	nombre_proveedor=cursor.fetchone()
@@ -7625,22 +7626,22 @@ def lista_catalogos_proveedor(request,proveedorno):
 		
 	return render(request,'pedidos/lista_catalogos_proveedor.html',context)
 
-def edita_catalogo(request,ProveedorNo,Anio,Periodo,ClaseArticulo):
+def edita_catalogo(request,p_ProveedorNo,p_Anio,p_Periodo,p_ClaseArticulo):
 
 	#pdb.set_trace()
-	msg = ''
+	
 
 	if request.method == 'POST':
 
 		form = DatosCatalogoForm(request.POST)
 		if form.is_valid():
-			ProveedorNo = form.cleaned_data['ProveedorNo']
-			Periodo = form.cleaned_data['Periodo']
-			Anio = form.cleaned_data['Anio']
-			ClaseArticulo = form.cleaned_data['ClaseArticulo']
-			Activo = form.cleaned_data['Activo']
-			no_maneja_descuentos = form.cleaned_data['no_maneja_descuentos']
-			catalogo_promociones = form.cleaned_data['catalogo_promociones']
+			fProveedorNo = form.cleaned_data['ProveedorNo']
+			fPeriodo = form.cleaned_data['Periodo']
+			fAnio = form.cleaned_data['Anio']
+			fClaseArticulo = form.cleaned_data['ClaseArticulo']
+			fActivo = form.cleaned_data['Activo']
+			fno_maneja_descuentos = form.cleaned_data['no_maneja_descuentos']
+			fcatalogo_promociones = form.cleaned_data['catalogo_promociones']
 			
 
 			cursor =  connection.cursor()
@@ -7650,20 +7651,20 @@ def edita_catalogo(request,ProveedorNo,Anio,Periodo,ClaseArticulo):
 				cursor.execute('UPDATE catalogostemporada SET Activo = %s,\
 				no_maneja_descuentos = %s,\
 				catalogo_promociones = %s \
-				WHERE ProveedorNo=%s and Periodo=%s and Anio=%s and ClaseArticulo=%s ;',('\x01' if Activo==u'1' else '\x00','\x01' if no_maneja_descuentos==u'1' else '\x00','\x01' if catalogo_promociones==u'1' else '\x00',ProveedorNo,int(Periodo),int(Anio),ClaseArticulo,))
+				WHERE ProveedorNo=%s and Periodo=%s and Anio=%s and ClaseArticulo=%s ;',('\x01' if fActivo==u'1' else '\x00','\x01' if fno_maneja_descuentos==u'1' else '\x00','\x01' if fcatalogo_promociones==u'1' else '\x00',fProveedorNo,int(fPeriodo),int(fAnio),fClaseArticulo,))
 			
 				
 				
 				cursor.execute("COMMIT;")
 
-				return HttpResponseRedirect(reverse('pedidos:lista_catalogos_proveedor',args=(ProveedorNo,),))
+				return HttpResponseRedirect(reverse('pedidos:lista_catalogos_proveedor',args=(p_ProveedorNo,),))
 
 
 			except DatabaseError as e:
 				print e
 				
 				cursor.execute('ROLLBACK;')
-				msg = 'Error en base de datos !'
+				
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
 		else:
@@ -7671,8 +7672,7 @@ def edita_catalogo(request,ProveedorNo,Anio,Periodo,ClaseArticulo):
 
 	else:	
 
-		form = DatosProveedorForm()
-		
+		form = DatosCatalogoForm()		
 		cursor=connection.cursor()
 		cursor.execute("SELECT  ct.ProveedorNo,\
 								ct.Anio,\
@@ -7681,11 +7681,11 @@ def edita_catalogo(request,ProveedorNo,Anio,Periodo,ClaseArticulo):
 								ct.Activo,\
 								ct.no_maneja_descuentos,\
 								ct.catalogo_promociones \
-								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(ProveedorNo,Periodo,Anio,ClaseArticulo,))
+								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(p_ProveedorNo,p_Periodo,p_Anio,p_ClaseArticulo,))
 		catalogostemporada = cursor.fetchone()
 
 		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
-	context = {'form':form,'ProveedorNo':ProveedorNo,'Anio':Anio,'Periodo':Periodo,'ClaseArticulo':ClaseArticulo,}			
+	context = {'form':form,'ProveedorNo':p_ProveedorNo,'Anio':p_Anio,'Periodo':p_Periodo,'ClaseArticulo':p_ClaseArticulo,}			
 	
 	return render(request,'pedidos/edita_catalogo.html',context)
 
@@ -10381,5 +10381,40 @@ def vtasporusuario(request):
 	return render(request,'pedidos/consultaventas_por_usuario.html',{'form':form,})
 
 
+def busca_estilo(request):
 
+	#pdb.set_trace()
 
+	if request.method=='POST':
+		
+		form = BuscaEstiloForm(request.POST)
+		
+		if form.is_valid():
+
+			vestilo = form.cleaned_data['var_estilo']
+			vfechainicial =form.cleaned_data['fechainicial']
+			vfechafinal = form.cleaned_data['fechafinal']
+
+			string_buscar ="%"+(vestilo).strip()+"%"
+
+			cursor = connection.cursor()
+
+			cursor.execute("SELECT l.pedido,h.fechacreacion,\
+				h.asociadono,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),\
+				' ',trim(aso.apmaterno)) as nombre,l.status,\
+				a.idmarca,a.idestilo,a.idcolor,a.talla,\
+				l.precio,l.Observaciones FROM pedidoslines l \
+				 inner join pedidosheader h on (h.empresano=l.empresano and h.pedidono=l.pedido)\
+				 inner join asociado aso on (h.empresano=aso.empresano and h.asociadono=aso.asociadono)\
+				 inner join articulo a on (l.empresano=a.empresano and l.productono=a.codigoarticulo\
+				 and l.catalogo=a.catalogo) WHERE a.idestilo like %s;",(string_buscar,) )
+			
+			reg_encontrados = dictfetchall(cursor)
+
+			return render(request,'pedidos/muestra_estilos_encontrados.html',{'registros':reg_encontrados,})	
+	else:
+		
+		form =BuscaEstiloForm()
+	
+	return render(request,'pedidos/busca_estilo_forma.html',{'form':form,})	
+			

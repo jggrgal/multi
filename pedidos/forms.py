@@ -2736,3 +2736,50 @@ class CreaCatalogoForm(forms.Form):
 
 		return self.cleaned_data
 
+
+'''BUSCA PRODUCTOS POR ESTILO'''
+
+
+class BuscaEstiloForm(forms.Form):
+
+	#hoy =  date.today()	
+	t = datetime.now
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class':'datepicker'})
+
+
+	var_estilo = forms.CharField(label='Estilo a buscar:',required=True)
+	
+	#fecha = forms.DateField(label='Fecha en que hizo (dd/mm/yyyy)',initial= datetime.now,input_formats=['%d/%m/%Y',],)
+	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
+	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
+	
+	error_messages = {
+	'fecha_invalida': 'La fecha debe ser menor o igual a la fecha actual',
+	'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+	'Error_en_mes': 'El mes de la fecha que esta ingresando es invalido !',
+	}
+
+	def clean(self):
+		
+		cleaned_data = super(BuscaEstiloForm,self).clean()
+		var_estilo = cleaned_data.get('var_estilo')
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+
+
+
+		if fechainicial and fechafinal:
+
+			if fechainicial > fechafinal:
+				raise forms.ValidationError('La fecha final debe ser mayor o igual a la fecha inicial !')
+		else:
+
+			if not fechainicial:
+				raise  forms.ValidationError('Ingrese una fecha inicial !')
+			if not fechafinal:
+				raise forms.ValidationError('Ingrese una fecha final !')
+		if (var_estilo) is None:
+			raise forms.ValidationError("Ingrese un valor para estilo !")
+
+		return self.cleaned_data

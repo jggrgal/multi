@@ -110,11 +110,12 @@ urlpatterns = [
 	url(r'^edita_proveedor/(?P<proveedorno>[0-9]{1,8})/$',views.edita_proveedor,name='edita_proveedor'),
 	url(r'^crea_proveedor/$',views.crea_proveedor,name='crea_proveedor'),
 	url(r'^lista_catalogos_proveedor/(?P<proveedorno>[0-9]{1,8})/$',views.lista_catalogos_proveedor,name='lista_catalogos_proveedor'),
-	url(r'^edita_catalogo/(?P<ProveedorNo>[0-9]{1,8})/(?P<Anio>[0-9]{1,8})/(?P<Periodo>[0-9]{1,8})/(?P<ClaseArticulo>.*)/$',views.edita_catalogo,name='edita_catalogo'),
+	url(r'^edita_catalogo/(?P<p_ProveedorNo>[0-9]{1,8})/(?P<p_Anio>[0-9]{1,8})/(?P<p_Periodo>[0-9]{1,8})/(?P<p_ClaseArticulo>.*)/$',views.edita_catalogo,name='edita_catalogo'),
 	url(r'^crea_catalogo/(?P<id_proveedor>[0-9]{1,8})/$',views.crea_catalogo,name='crea_catalogo'),
 	url(r'^lista_devoluciones_recepcionadas/$',views.lista_devoluciones_recepcionadas,name='lista_devoluciones_recepcionadas'),
 	url(r'^rpte_ventas/$',views.rpte_ventas,name='rpte_ventas'),
 	url(r'^rpteStatusPedidosPorSocio/$',views.rpteStatusPedidosPorSocio,name='rpteStatusPedidosPorSocio'),
 	url(r'^vtasporusuario/$',views.vtasporusuario,name='vtasporusuario'),
+	url(r'^busca_estilo/$',views.busca_estilo,name='busca_estilo'),
 
 	]
