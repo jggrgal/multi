@@ -439,7 +439,7 @@ class PedidosForm(forms.Form):
 		  	else:
 		  		escondido ='display: ;'
 		except:
-			return HttpResponse("<H2> Problemas son su sesion !, suele ocurrir, inicie sesion nuevamente !")
+			return None
 
 	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
 

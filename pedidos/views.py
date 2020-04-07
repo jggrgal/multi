@@ -5273,10 +5273,12 @@ def nueva_venta(request):
 	form = Ingresa_socioForm()
 	tipo = 'V'
 	existe_socio = True
-	is_staff = request.session['is_staff']
-	context={'existe_socio':existe_socio,'form':form,'is_staff':is_staff,'tipo':tipo,}	
-
-	return render(request,'pedidos/ingresa_socio.html',context)
+	try:
+		is_staff = request.session['is_staff']
+		context={'existe_socio':existe_socio,'form':form,'is_staff':is_staff,'tipo':tipo,}	
+		return render(request,'pedidos/ingresa_socio.html',context)
+	except KeyError as e:
+		return render(request,'pedidos/error.html',{'error_msg':'Caducó la sesión, salga completamente del sistema e ingrese nuevamente !. mensaje tecnico: '+str(e),})
 
 '''
 def calcula_descuento(request,*args,**kwargs):
