@@ -10405,11 +10405,19 @@ def busca_estilo(request):
 				h.asociadono,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),\
 				' ',trim(aso.apmaterno)) as nombre,l.status,\
 				a.idmarca,a.idestilo,a.idcolor,a.talla,\
-				l.precio,l.Observaciones FROM pedidoslines l \
+				l.precio,l.Observaciones,suc.nombre as nom_suc,alm.RazonSocial as nom_alm FROM pedidoslines l \
 				 inner join pedidosheader h on (h.empresano=l.empresano and h.pedidono=l.pedido)\
 				 inner join asociado aso on (h.empresano=aso.empresano and h.asociadono=aso.asociadono)\
 				 inner join articulo a on (l.empresano=a.empresano and l.productono=a.codigoarticulo\
-				 and l.catalogo=a.catalogo) WHERE a.idestilo like %s;",(string_buscar,) )
+				 and l.catalogo=a.catalogo) inner join sucursal suc\
+				 on (suc.EmpresaNo=l.Empresano and suc.SucursalNo=h.idsucursal)\
+				 inner join pedidos_encontrados pe\
+				 on (pe.EmpresaNo=l.Empresano and pe.pedido=l.pedido\
+				 and pe.productono=l.productono\
+				 and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)\
+                 inner join almacen alm on (alm.EmpresaNo=h.Empresano\
+                 and alm.ProveedorNo=a.idproveedor and alm.Almacen=pe.BodegaEncontro)\
+				 WHERE a.idestilo like %s;",(string_buscar,) )
 			
 			reg_encontrados = dictfetchall(cursor)
 

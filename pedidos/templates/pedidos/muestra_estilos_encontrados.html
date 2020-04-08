@@ -26,6 +26,8 @@
             <tr class='success'>
 
         		<th>Pedido num</th>
+                <th>Sucursal</th>>
+                <th>Bodega</th>
                 <th>Fecha Pedido</th>
                 <th>Socio Num</th>
                 <th>Nombre</th>
@@ -43,10 +45,11 @@
                 
         		<tr>
                     <td>{{item.pedido}} </td>
+                    <td>{{item.nom_suc}}</td>
+                    <td>{{item.nom_alm}}</td>
                     {% localize on %}
                         <td>{{item.fechacreacion | date:'d/M/Y'}}</td>
                     {% endlocalize %}
-                    
                     <td>{{item.asociadono}}</td>
                     <td>{{item.nombre}}</td>
                     <td>{{item.status}}</td>
