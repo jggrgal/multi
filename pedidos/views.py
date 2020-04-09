@@ -2830,7 +2830,7 @@ def imprime_ticket(request):
 	try:
 		is_staff = request.session['is_staff']
 	except KeyError:
-		context={'error_msg':"Se perdio su sesion, ingrese por favor nuevamente al sistema !",}
+		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
 		return render(request, 'pedido/error.html',context)
 
 	if request.method =='GET':
@@ -2988,6 +2988,7 @@ def imprime_ticket(request):
 	#pdb.set_trace()	
 	if NotaCredito != 0:
 		imprime_documento(NotaCredito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
+		return response	
 	else:
 
 	# Close the PDF object cleanly, and we're done.
@@ -3194,7 +3195,7 @@ def imprime_documento(p_num_documento=0,
 			
 		p.setFont("Helvetica",8)
 		i,paso = 1,linea
-		if pedido_detalle:
+		if pedido_detalle and (documento[4][slice(0,43,None)].find("Anticipo a pedido")==-1):# Iprime el detalle siempre que no sea un anticipo a pedido.
 
 			for elemento in pedido_detalle:
 				

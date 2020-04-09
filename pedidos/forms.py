@@ -2232,19 +2232,19 @@ class DatosProveedorForm(forms.Form):
 
 
 	ProveedorNo = forms.IntegerField(label='Proveedor Num.',required=True)
-	RazonSocial = forms.CharField(label='Nombre',required=True)	
-	Direccion = forms.CharField(label='Direccion',required=True)
-	Colonia = forms.CharField(label='Colonia',required=True)
-	Ciudad = forms.CharField(label='Ciudad',required=True)
-	Estado = forms.CharField(label='Estado',required=True)
-	Pais = forms.CharField(label='Pais',required=True)
+	RazonSocial = forms.CharField(label='Nombre',required=True,max_length=45)	
+	Direccion = forms.CharField(label='Direccion',required=True,max_length=45)
+	Colonia = forms.CharField(label='Colonia',required=True,max_length=45)
+	Ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
+	Estado = forms.CharField(label='Estado',required=True,max_length=45)
+	Pais = forms.CharField(label='Pais',required=True,max_length=11)
 	CodigoPostal = forms.IntegerField(label='C.P.',required=True)
-	telefono1 = forms.CharField(label='Telefono 1',required=True)
-	telefono2 = forms.CharField(label='Telefono 2',required=True)
-	fax = forms.CharField(label='Fax',required=True)
-	celular = forms.CharField(label='Celular',required=True)
-	radio = forms.CharField(label='radio',required=True)
-	email = forms.EmailField(label='email',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
+	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
+	fax = forms.CharField(label='Fax',required=True,max_length=15)
+	celular = forms.CharField(label='Celular',required=True,max_length=15)
+	radio = forms.CharField(label='radio',required=True,max_length=15)
+	email = forms.EmailField(label='email',required=True,max_length=100)
 	maneja_desc = forms.ChoiceField(widget=forms.Select(),
 			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
 	baseparabono = forms.BooleanField(label='Base para bono',required=False)
@@ -2281,6 +2281,14 @@ class DatosProveedorForm(forms.Form):
 		baseparabono = cleaned_data.get('baseparabono')
 		usr_id = cleaned_data.get('usr_id')
 		if  not (telefono1 and telefono2 and fax and celular) is None:
+			
+			# elimina espacios al inicio
+
+			telefono1=telefono1.strip()
+			telefono2=telefono2.strip()
+			fax=fax.strip()
+			celular=celular.strip()
+
 			if not(telefono1.isdigit()):
 				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
 			elif not(telefono2.isdigit()): 
@@ -2304,19 +2312,19 @@ class DatosProveedorForm(forms.Form):
 class CreaProveedorForm(forms.Form):
 
 	
-	RazonSocial = forms.CharField(label='Nombre',required=True)	
-	Direccion = forms.CharField(label='Direccion',required=True)
-	Colonia = forms.CharField(label='Colonia',required=True)
-	Ciudad = forms.CharField(label='Ciudad',required=True)
-	Estado = forms.CharField(label='Estado',required=True)
-	Pais = forms.CharField(label='Pais',required=True)
+	RazonSocial = forms.CharField(label='Nombre',required=True,max_length=45)	
+	Direccion = forms.CharField(label='Direccion',required=True,max_length=45)
+	Colonia = forms.CharField(label='Colonia',required=True,max_length=45)
+	Ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
+	Estado = forms.CharField(label='Estado',required=True,max_length=45)
+	Pais = forms.CharField(label='Pais',required=True,max_length=45)
 	CodigoPostal = forms.IntegerField(label='C.P.',required=True)
-	telefono1 = forms.CharField(label='Telefono 1',required=True)
-	telefono2 = forms.CharField(label='Telefono 2',required=True)
-	fax = forms.CharField(label='Fax',required=True)
-	celular = forms.CharField(label='Celular',required=True)
-	radio = forms.CharField(label='radio',required=True)
-	email = forms.EmailField(label='email',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
+	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
+	fax = forms.CharField(label='Fax',required=True,max_length=15)
+	celular = forms.CharField(label='Celular',required=True,max_length=15)
+	radio = forms.CharField(label='radio',required=True,max_length=15)
+	email = forms.EmailField(label='email',required=True,max_length=100)
 	maneja_desc = forms.ChoiceField(widget=forms.Select(),
 			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
 	baseparabono = forms.BooleanField(label='Base para bono',required=False)
