@@ -935,8 +935,8 @@ class PedidosgeneralForm(forms.Form):
 		hoy=datetime.now()
   		f = hoy.strftime("%d/%m/%Y")
 
-		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial.. (dd/mm/yyyy)',initial=f,widget=DateInput())			
-		self.fields['fechafinal'] = forms.DateField(label='Fecha final.. (dd/mm/yyyy)',initial=f,widget=DateInput())			
+		self.fields['fechainicial'] = forms.DateField(label='Fecha de mvto inicial (dd/mm/yyyy)',initial=f,widget=DateInput())			
+		self.fields['fechafinal'] = forms.DateField(label='Fecha de mvto final (dd/mm/yyyy)',initial=f,widget=DateInput())			
 		self.fields['socionum'] = forms.IntegerField(initial=0,validators=[MinValueValidator(0)])			
 
 

@@ -31,7 +31,7 @@
                 <th style="display:none">nolinea</th>
                 <th>Socio Num</th>
                 <th>Nombre</th>
-                <th>Fecha</th>
+                <th>Fecha mvto</th>
             	<th>Marca</th>
             	<th>Estilo</th>
             	<th>Color</th>
@@ -55,7 +55,7 @@
                     <td>{{item.asociadono}}</td>
                     <td>{{item.socionomb}}</td>
                     {% localize on %}
-                        <td>{{item.fechapedido | date:'d/M/Y'}}</td>
+                        <td>{{item.fechamvto | date:'d/M/Y'}}</td>
                     {% endlocalize %}
                     <td>{{ item.idmarca }}</td>
         			<td><a href="/pedidos/pedidosgeneraldetalle/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}"> {{ item.idestilo }} </a></td>
