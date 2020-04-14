@@ -37,6 +37,7 @@
                 <th>Saldo / Credito aplic</th>
                 <th>Cargos</th>
                 <th>Descuento</th>
+                <th>St</th>
                 
                 <th> Cancelar</th>
                 <th> Imprimir </th>
@@ -45,7 +46,7 @@
         <tbody>
         	{% for item in documentos %}
                 
-        		<tr>
+        		<tr  {% if item.Cancelado == "Cancelado" %} style='color:red' {% else %} style='color:black' {% endif %}>
                     <td><a href="{% url 'pedidos:detalle_documento' item.NoDocto %}"> {{item.NoDocto}}</a> </td>
                     <td>{{item.TipoDeDocumento}}</td>
                     {% localize on %}
@@ -56,11 +57,13 @@
                     
                    
         			<td>{{ item.concepto }}</td> 
-            		<td>{{ item.monto }}</td>
+            		<td  >{{ item.monto }}</td>
             		<td>{{item.venta}}</td>
                     <td>{{item.saldo}}</td>
                     <td>{{item.comisiones}}</td>
                     <td>{{item.DescuentoAplicado}}</td>
+                    <!--<td>{% if item.Cancelado == '1' %} {{item.Cancelado}} {% else %} ACTIVO {% endif %} <td>-->
+                    <td>{{item.Cancelado}}</td>
                   
                     <td><p align="left">
                           <a class="btn btn-danger btn-sm " href="/pedidos/cancelardocumentoadvertencia/{{ item.NoDocto }}" role="button" {% if  not item.cancelar %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>

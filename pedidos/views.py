@@ -1244,7 +1244,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1270,7 +1270,7 @@ def documentos(request):
 									d.comisiones,
 									d.DescuentoAplicado,
 	#pdb.set_trace()
-									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1295,7 +1295,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1320,7 +1320,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
@@ -1344,7 +1344,7 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-									d.Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
+									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
 									and d.asociado=s.asociadono
