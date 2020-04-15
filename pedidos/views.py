@@ -7693,7 +7693,7 @@ def edita_catalogo(request,p_ProveedorNo,p_Anio,p_Periodo,p_ClaseArticulo):
 								ct.catalogo_promociones \
 								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(p_ProveedorNo,p_Periodo,p_Anio,p_ClaseArticulo,))
 		catalogostemporada = cursor.fetchone()
-
+		type(catalogostemporada)
 		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
 	context = {'form':form,'ProveedorNo':p_ProveedorNo,'Anio':p_Anio,'Periodo':p_Periodo,'ClaseArticulo':p_ClaseArticulo,}			
 	
@@ -10448,7 +10448,7 @@ def busca_estilo(request):
 				 and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)\
                  inner join almacen alm on (alm.EmpresaNo=h.Empresano\
                  and alm.ProveedorNo=a.idproveedor and alm.Almacen=pe.BodegaEncontro)\
-				 WHERE a.idestilo like %s;",(string_buscar,) )
+				 WHERE h.fechacreacion>=%s and h.fechacreacion<=%s and a.idestilo like %s;",(vfechainicial,vfechafinal,string_buscar,) )
 			
 			reg_encontrados = dictfetchall(cursor)
 

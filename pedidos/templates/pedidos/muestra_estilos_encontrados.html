@@ -3,25 +3,21 @@
 {% block content %}
 
 {% load l10n %}
-<div class=row>
+<div class='row'>
     <div class='col-md-4'>
-         <h4 class='success'>Estilos encontrados:</h4>  
-
-       
+         <h4> Estilos encontrados: </h4>       
     </div>
     <div class='col-md-4'>
     </div>
     <div class='col-md-4'>
-        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>   
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}</h4>   
         
     </div>
 </div>
 
-
-    <div class="table-responsive">
+     <div class="table-responsive">
     	<table id="lista_estilos" class='display table table-hover table-bordered table-condensed'>
-            
-        	
+                	
             <thead>
             <tr class='success'>
 
