@@ -2731,12 +2731,19 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 	form = Ingresa_socioForm()
 	context ={}	
 	asociado_data =()
-	existe_socio = True
-	is_staff =  request.session['is_staff']
-	id_sucursal = 0
-	session_id = request.session.session_key
 
-	
+	try:
+
+		existe_socio = True
+		is_staff =  request.session['is_staff']
+		id_sucursal = 0
+		session_id = request.session.session_key
+		
+	except KeyError:
+		
+		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
+		return render(request, 'pedido/error.html',context)
+
 	if request.method == 'POST':
 		
 
@@ -9927,6 +9934,29 @@ def rpteStatusPedidosPorSocio(request):
 			pedidos = dictfetchall(cursor)
 			elementos = len(pedidos)
 
+
+			cursor.execute("SELECT aso.asociadoNo,SUM(p.precio) AS subtotal FROM pedidoslines p\
+				inner join  pedidosheader h\
+				on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo)\
+				inner join articulo a\
+				on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo\
+				and p.catalogo=a.catalogo)\
+				inner join asociado aso\
+				on (h.asociadoNo=aso.asociadoNo)\
+				inner join  pedidos_status_fechas psf\
+				on (p.empresano=psf.empresaNo\
+				and p.pedido=psf.pedido and p.productono=psf.productono\
+				and p.status=psf.status and p.catalogo=psf.catalogo\
+				and p.nolinea=psf.nolinea) \
+				inner join sucursal suc on (h.idsucursal=suc.sucursalNo)\
+				 WHERE p.status>=%s and p.status<=%s\
+				and psf.fechamvto>=%s and psf.fechamvto<=%s\
+				and h.idsucursal>=%s and h.idsucursal<=%s\
+				GROUP BY aso.asociadoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
+							
+			subxsocio = dictfetchall(cursor)
+			
+
 			cursor.execute("SELECT nombre as nombresuc from sucursal where sucursalNo=%s;",(sucursal,))
 			suc_nom=cursor.fetchone()
 			
@@ -9937,7 +9967,7 @@ def rpteStatusPedidosPorSocio(request):
 				return render(request,'pedidos/lista_pedidos_PorStatus_Socio.html',{'form':form,'mensaje':mensaje,})
 			else:
 				mensaje ='Registros encontrados:'
-				context = {'pedidos':pedidos,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,}
+				context = {'pedidos':pedidos,'subxsocio':subxsocio,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,'fechainicial':fechainicial,'fechafinal':fechafinal,}
 
 				if salida_a == 'Pantalla':
 

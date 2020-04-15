@@ -1,116 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Pedidos por status</title>
-    <meta charset="utf-8">
-    <style>
-        ul { color:#0000ff;
-            font-family: Verdana;
-            
-            
+{% extends 'pedidos/base.html' %}
 
-        }
-        li {
-            display: inline-block;
-            font-size: 9px;
-            padding:11px;
-            width: 70px;
-            height: -5px;
-            text-align:left;
+{% block content %}
 
-        }
-        p {
-            display: inline-block;
-            font-size: 10px;
-            padding: 11px;
-            text-align: center;
-            width:70px;
-            color:#c4bf7a;
-            background-color:#353331;
-            font-family: Verdana;
-        }
-        .a1 {
-            font-size:10px;
-            color:#0000ff;
-        }
-    </style>    
-</head>
-<body>
-
-    <h2 style="text-align:Left;padding:33px;">{{ titulo }}</h2>
-    <h6 style="text-align:Left;font-size:14px;padding:33px; ">Sucursal: {{ sucursal }}</h6>
+ 
     
-
-   
-    {% regroup pedidos by socio as num_socio %}
-    <ul>
-
+<h3>{{ titulo }}</h3>    
+<p> Entre las fechas {{ fechainicial }} y {{ fechafinal }}
+<div class="table-responsive">
+    {% regroup pedidos by asociadoNo as num_socio %}
     {% for item in num_socio %}
-        <h5>Socio: {{ item.grouper }} </h5>
-    
-        <p>Pedido</p><p>Fecha</p><p>Catalgo
-        </p><p>Pagina</p><p>Marca</p><p>Estilo</p><p>Color</p><p>Talla</p><p>Precio</p><br>
-        {% for socio in item.list %}
-            <li>{{ socio.pedido }} </li>
-            <li>{{ socio.fechamvto }} </li>
-            <li>{{ socio.catalogo }} </li>
-            <li>{{ socio.pagina }} </li>
-            <li>{{ socio.idmarca }} </li>
-            <li>{{ socio.idestilo }} </li>  
-            <li style="word-spacing:-2;">{{ socio.idcolor }} </li>
-            <li>{{ socio.talla }} </li>
-            <li>{{ socio.precio }} </li><br>
-            
-        {% endfor %}
+        <!--Socio: {{ item.grouper }} -->
+        <table id="pedidosxstatus" class='display table table-hover table-bordered  table-condensed'>
+        <thead>
+            <tr class='success'>    
+                <th>Pedido</th>
+                <th>Socio</th>
+                <th>Fecha</th>
+                <th>Catalgo</th>
+                <th>Pagina</th>
+                <th>Marca</th>
+                <th>Estilo</th>
+                <th>Color</th>
+                <th>Talla</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+          
+            {% for socio in item.list %}
+            <tr>
+                <td>{{ socio.pedido }} </td>
+                <td> {{socio.socio |slice:":15"}} </td>
+                
+                <td>{{ socio.fechamvto | date:'d/m/Y' }} </td>
+                
+                <td>{{ socio.catalogo }} </td>
+                <td>{{ socio.pagina }} </td>
+                <td>{{ socio.idmarca }} </td>
+                <td>{{ socio.idestilo }} </td>  
+                <td style="word-spacing:-2;">{{ socio.idcolor }} </td>
+                <td>{{ socio.talla }} </td>
+                <td>{{ socio.precio }} </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            {% for sub in subxsocio %}
+
+                {% if item.grouper == sub.asociadoNo %}
+            <tr>
+                    <td></td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td>Subtotal: </td><td>{{sub.subtotal}}</td><br>
+            </tr>
+                {% endif %}
+            {% endfor %}
+        </tfoot>
+
+        </table> 
+                
+      
         
     {% endfor %}
-    </ul> 
+
+</div>
+{% endblock %}
     
- <!--   {% regroup pedidos by asociadoNo as num_socio %}
-    <div class="table-responsive-sm">
-    	<table class='table table-hover table-bordered '>
-        	<tr class='success'>
-        		<th>Pedido num</th>
-                <th>Fecha Mvto</th>
-                <th>Catalogo</th>
-            	<th>Marca</th>
-            	<th>Estilo</th>
-            	<th>Color</th>
-            	<th>Talla</th>
-                <th>Precio</th>
-                              
-        	</tr>
-            <ul>
-            {% for elemento in num_socio %}   
-            <tr>Socio: {{ elemento.grouper }} </tr>
-        	
-
-                
-             {% for item in elemento.list %}   
-        		<tr>
-                    <li>{{ item.pedido }}</li>
-                    
-                    <li>{{ item.catalogo }}</li>
-                    <li>{{ item.idmarca }}</li>
-        			<li>{{ item.idestilo }}</li>
-            		<li>{{ item.idcolor }}</li>
-            		<li>{% if item.talla == 'NE' %} {{item.Observaciones}} {% else %} {{item.talla}} {% endif %}</li>
-            		<li>{{item.precio}}</li>
-                    
-            	</tr>
-            {% endfor %}
-            {% endfor %}
-            </ul>
-    	</table>
-    </div>
-
-    <p align='right'>
-        <a class="btn btn-default" href="/pedidos/rpteStatusPedidosPorSocio" role="button">Salir</a>
-    </li>
-
-
-
-
-
-</body>
-</html>
