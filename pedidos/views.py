@@ -3328,10 +3328,15 @@ def muestra_colocaciones(request):
 	ordenado_por = ordenado_por.encode('latin_1')
 	ordenado_por = int(ordenado_por)
 
+	try:
+		# Igualmente, las fechas se convierten a un formato adecuado para ser grabadas en la BD
+		fechainicial = datetime.strptime(fechainicial, "%d/%m/%Y").date()
+		fechafinal = datetime.strptime(fechafinal, "%d/%m/%Y").date()
+	except ValueError:
 
-	# Igualmente, las fechas se convierten a un formato adecuado para ser grabadas en la BD
-	fechainicial = datetime.strptime(fechainicial, "%d/%m/%Y").date()
-	fechafinal = datetime.strptime(fechafinal, "%d/%m/%Y").date()
+		error_msg="Fechas con formato incorrecto, use dd/mm/AAAA"
+		return render(request,'pedidos/error.html',{'error_msg':error_msg},)
+
 	hay_cancelados = False
 	cursor = connection.cursor()
 

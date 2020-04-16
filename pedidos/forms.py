@@ -1360,7 +1360,7 @@ class DocumentosForm(forms.Form):
 
 	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
 	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
-	socio_num = forms.IntegerField(label='Socio',initial=0,required=False)
+	socio_num = forms.IntegerField(label='Socio',initial=0,required=True)
 
 	error_messages = {'DctoSocio':'Ingrese un numero de documento o bien un numero de socio !',
 					'FechaInicial':'Ingrese una fecha inicial !',
@@ -1382,6 +1382,16 @@ class DocumentosForm(forms.Form):
 		socio_num =  cleaned_data.get('socio_num')
 		#import pdb; pdb.set_trace()
 		cursor = connection.cursor()
+
+		try:
+
+			x=int(socio_num)
+ 		except TypeError:
+ 			socio_num = u'0'
+
+
+
+
 
 		# valida socio
 
