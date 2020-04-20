@@ -2742,7 +2742,7 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 	except KeyError:
 		
 		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
-		return render(request, 'pedido/error.html',context)
+		return render(request, 'pedidos/error.html',context)
 
 	if request.method == 'POST':
 		
@@ -2838,7 +2838,7 @@ def imprime_ticket(request):
 		is_staff = request.session['is_staff']
 	except KeyError:
 		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
-		return render(request, 'pedido/error.html',context)
+		return render(request, 'pedidos/error.html',context)
 
 	if request.method =='GET':
 		p_num_pedido = request.GET.get('p_num_pedido')
@@ -4318,14 +4318,26 @@ def procesar_recepcion(request):
 		almacen = almacen.encode('latin_1')
 		marcartodo_nollego = request.POST.get('marcartodo_nollego')
 		cierre = request.POST.get('cierre').encode('latin_1')
-		nueva_fecha_llegada = request.POST.get('nueva_fecha_llegada').encode('latin_1')
-		
-		if nueva_fecha_llegada == u'None': 
+	
 
- 			f_convertida = '1901/01/01'
- 		else:
- 			f_convertida = datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").strftime("%Y%m%d")
-			#f_convertida = datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").date()
+		try:
+
+			nueva_fecha_llegada = request.POST.get('nueva_fecha_llegada').encode('latin_1')
+			
+			if nueva_fecha_llegada == u'None': 
+
+	 			f_convertida = '1901/01/01'
+	 		else:
+	 			f_convertida = datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").strftime("%Y%m%d")
+				#f_convertida = datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").date()
+		except ValueError:
+
+			error_msg="El campo de Nueva Fecha de llegada tiene un formato incorrecto, use dd/mm/AAAA"
+			return render(request,'pedidos/error.html',{'error_msg':error_msg},)
+
+
+			error_msg="Fecha "
+
 
 		cursor = connection.cursor()
 
