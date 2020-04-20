@@ -10451,7 +10451,7 @@ def busca_estilo(request):
 				 on (pe.EmpresaNo=l.Empresano and pe.pedido=l.pedido\
 				 and pe.productono=l.productono\
 				 and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)\
-                 inner join almacen alm on (alm.EmpresaNo=h.Empresano\
+                 left join almacen alm on (alm.EmpresaNo=h.Empresano\
                  and alm.ProveedorNo=a.idproveedor and alm.Almacen=pe.BodegaEncontro)\
 				 WHERE h.fechacreacion>=%s and h.fechacreacion<=%s and a.idestilo like %s;",(vfechainicial,vfechafinal,string_buscar,) )
 			
