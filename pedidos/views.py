@@ -9951,6 +9951,10 @@ def rpteStatusPedidosPorSocio(request):
 			pedidos = dictfetchall(cursor)
 			elementos = len(pedidos)
 
+			total_gral=0
+			
+			for i in pedidos:
+				total_gral+= i['precio']
 
 			cursor.execute("SELECT aso.asociadoNo,SUM(p.precio) AS subtotal FROM pedidoslines p\
 				inner join  pedidosheader h\
@@ -9984,7 +9988,7 @@ def rpteStatusPedidosPorSocio(request):
 				return render(request,'pedidos/lista_pedidos_PorStatus_Socio.html',{'form':form,'mensaje':mensaje,})
 			else:
 				mensaje ='Registros encontrados:'
-				context = {'pedidos':pedidos,'subxsocio':subxsocio,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,'fechainicial':fechainicial,'fechafinal':fechafinal,}
+				context = {'pedidos':pedidos,'subxsocio':subxsocio,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,'fechainicial':fechainicial,'fechafinal':fechafinal,'total_gral':total_gral,'elementos':elementos,}
 
 				if salida_a == 'Pantalla':
 
