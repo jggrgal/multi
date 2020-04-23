@@ -6562,7 +6562,31 @@ def imprime_venta(request):
 		
 		p.drawString(20,paso-90,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
 		p.drawString(20,paso-110,"Para sugerencias o quejas")
-		p.drawString(20,paso-120,"llame al 867 132 9697")		
+		p.drawString(20,paso-120,"llame al 867 132 9697")
+
+
+		compras = calcula_compras_socio_por_proveedor(datos_documento[0],datos_documento[8])	
+		
+		p.setFont("Helvetica-Bold",6)	
+		p.drawString(20,paso-130,"SUS COMPRAS DE MES:")
+		p.drawString(20,paso-140,"Catalogo")
+		p.drawString(55,paso-140,"Compra")
+		p.drawString(85,paso-140,"Dev.")
+		p.drawString(110,paso-140,"Compra Neta")
+
+		
+		p.drawString(20,paso-150,"-"*70)
+		
+		linea=paso-160
+		for compra in compras:
+			
+			p.drawString(20,linea,str(compra['nombreprov']))
+			p.drawString(55,linea,str(compra['ventabruta']))
+			p.drawString(85,linea,str(compra['devoluciones']))
+			p.drawString(110,linea,str(compra['ventas']))
+			linea-=10
+
+		paso = linea	
 
 		if creditos_aplicados:
 			p.drawString(20,paso-140,"Notas de credito aplicadas:")
@@ -6573,7 +6597,7 @@ def imprime_venta(request):
 			p.drawString(125,paso-160,"Monto")
 			linea -= 10
 			p.drawString(20,paso-170,"--------------------------------------------------")
-			linea = paso-180	
+			linea = paso-180
 
 			for elemento in creditos_aplicados:
 				p.drawString(20,linea,str(elemento[0]))
@@ -6581,15 +6605,22 @@ def imprime_venta(request):
 				p.drawString(125,linea,'$ '+str(elemento[3]))
 				linea -= 10 
 
-			linea -= 20
+		#linea -= 20
 		linea -= 110
+
+		
+
+
+
 
 	#pdb.set_trace()	
 	if p_num_credito != u'0':
+
 		imprime_documento(p_num_credito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
 	else:
-
+		print "se vino por acaa.."
 	# Close the PDF object cleanly, and we're done.
+
 		p.showPage()
 		p.save()
 
@@ -10480,3 +10511,204 @@ def busca_estilo(request):
 	
 	return render(request,'pedidos/busca_estilo_forma.html',{'form':form,})	
 			
+
+
+def calcula_compras_socio_por_proveedor(sociono,fechavta):
+	''' Inicializa Variables '''
+	pdb.set_trace()
+
+	sucursal = '0'
+	fechainicial = fechavta.replace(day=1)
+
+	fechafinal = fechavta 
+
+	cursor=connection.cursor()
+
+
+	# CREA TABLA TEMPORAL
+	cursor.execute("DROP TEMPORARY TABLE IF EXISTS vtas_pro_tmp;")
+	cursor.execute("CREATE TEMPORARY TABLE vtas_pro_tmp SELECT * FROM vtas_proveedor_imagenbase;")
+
+	if sucursal == '0':
+		sucursalinicial =1
+		sucursalfinal = 9999
+		sucursal_nombre ='GENERAL'
+	else:
+		sucursalinicial =  sucursal
+		sucursalfinal =  sucursal
+		cursor.execute("SELECT nombre from sucursal WHERE EmpresaNo=1 and SucursalNo=%s;",(sucursal))
+		sucursalencontrada = cursor.fetchone()
+		sucursal_nombre = sucursalencontrada[0]
+
+
+	
+	# TRAE VENTA Y DESCUENTOS
+
+	#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
+
+
+	cursor.execute("SELECT a.idproveedor,\
+		p.razonsocial,\
+		sum(a.precio) as venta,\
+		sum(if (a.precio>l.precio and ct.no_maneja_descuentos=0,a.precio-l.precio,0 )) as dscto\
+		from pedidoslines l inner join pedidosheader h\
+		on (h.empresano=1 and h.pedidono=l.pedido)\
+		inner join pedidos_status_fechas f\
+		on (f.empresano=1 and f.pedido=l.pedido\
+		and f.productono=l.productono\
+		and f.status='Facturado'\
+		and f.catalogo=l.catalogo and f.nolinea=l.nolinea)\
+		inner join articulo a\
+		on (a.empresano=1 and a.codigoarticulo=l.productono\
+		and a.catalogo=l.catalogo)\
+		inner join proveedor p\
+		on (p.empresano=1 and p.proveedorno=a.idproveedor)\
+		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+		where f.fechamvto>=%s and f.fechamvto<=%s\
+		and h.idsucursal>=%s and h.idsucursal<=%s\
+		and h.asociadono=%s\
+		group by a.idproveedor ; ",\
+		(fechainicial,fechafinal,sucursalinicial,sucursalfinal,sociono))
+
+	
+	registros_venta = dictfetchall(cursor)
+	#print "descuentos:",registros_venta[3]
+	
+	elementos = len(registros_venta)
+	#TRAE DEVOLUCIONES GRAL
+	cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
+	 from (SELECT psf.pedido,\
+	 psf.productono,\
+	 psf.nolinea,\
+	 psf.catalogo,\
+	 psf.fechamvto from\
+	 pedidos_status_fechas as psf \
+	 INNER JOIN pedidosheader as h \
+	 ON h.pedidono=psf.pedido WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s and h.idSucursal>=%s and h.idSucursal<=%s and h.asociadono=%s) as t2\
+	 INNER JOIN pedidos_status_fechas as t3 on\
+	 (t2.pedido=t3.pedido and t2.productono=t3.productono\
+	 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
+     INNER JOIN pedidoslines as l\
+     on (l.pedido=t3.pedido and l.productono=t3.productono\
+     and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
+     INNER JOIN articulo as art\
+     on (art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
+     WHERE t3.status='Facturado'\
+     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,sociono))
+
+	registros_devgral = dictfetchall(cursor)
+
+
+
+
+	if not registros_venta:
+
+		pass
+		
+	else:
+
+		cursor.execute("SELECT COUNT(*) as totrec FROM vtas_pro_tmp")
+		totrectmp=dictfetchall(cursor)
+
+		
+		for registro in registros_venta:
+
+			cursor.execute("UPDATE vtas_pro_tmp SET\
+				ventas= %s,\
+				venta_FD=0,\
+				ventabruta=0,\
+				descuento=%s,\
+				devoluciones=0,\
+				ventaneta=0,nombreprov=%s where idproveedor=%s;",\
+			 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
+			 		registro['razonsocial'],registro['idproveedor']))					 
+                										
+			'''TotalVta   = TotalVta + float(registro['venta'])
+			Totaldscto = Totaldscto + float(registro['dscto'])
+			
+			if (float(registro['venta']) != 0.0):
+				TotalRegVentas = TotalRegVentas + 1'''
+
+
+	if not registros_devgral:
+		
+		pass
+
+	else:				
+
+		for registro in registros_devgral:
+
+			cursor.execute("UPDATE vtas_pro_tmp\
+				SET devoluciones=%s WHERE idproveedor=%s;",\
+			 			(registro['devgral'],registro['idproveedor']))
+								
+			
+			'''TotalDevGral = TotalDevGral + float(registro['devgral'])
+			
+			if (float(registro['devgral']) != 0.0):
+				TotalRegDev = TotalRegDev + 1'''
+
+	cursor.execute("UPDATE vtas_pro_tmp as t INNER JOIN proveedor as p on t.idproveedor=p.proveedorno SET t.nombreprov=p.razonsocial;")
+	cursor.execute("DELETE FROM vtas_pro_tmp WHERE  ventas = 0 and  descuento =0 and devoluciones = 0 and ventaneta = 0;")
+	cursor.execute("UPDATE vtas_pro_tmp SET ventabruta = ventas + venta_FD;")
+	cursor.execute("UPDATE vtas_pro_tmp SET ventaneta = ventabruta - descuento - devoluciones;")
+	
+	mensaje =" "
+
+	cursor.execute("SELECT * FROM vtas_pro_tmp;")
+	vtasresult =  dictfetchall(cursor)
+	print vtasresult
+	'''
+	cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(ventabruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(ventaneta) as tot_ventaneta FROM vtas_pro_tmp;")	
+	totales = dictfetchall(cursor)
+	for tot in totales:
+		tot_vtas = tot['tot_vtas']
+		tot_ventaFD = tot['tot_ventaFD']
+		tot_ventabruta = tot['tot_ventabruta']
+		tot_descuento = tot['tot_descuento']
+		tot_devoluciones = tot['tot_devoluciones']
+		tot_ventaneta = tot['tot_ventaneta']
+
+
+	cursor.execute("SELECT d.Monto,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.Concepto FROM documentos d  WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
+	
+	
+
+	registros_vtacomis_vtacatal = dictfetchall(cursor)
+
+
+	for docto in registros_vtacomis_vtacatal:
+								
+			if (docto['Cancelado'] == '\x00'):  # pregunta si cancelado es '0' en hex o bien falso
+				
+				esvta =docto['Concepto'].strip()
+				if esvta == 'Venta':
+												
+					TotalCargos = TotalCargos + float(docto['comisiones'])	
+									
+				if docto['VtaDeCatalogo'] == '\x01' :
+					TotalVtaCatalogos = TotalVtaCatalogos + float(docto['Monto'])
+
+
+	# SI TOTALES SON None, LES ASIGNA UN CERO YA QUE EN EL CONTEXT
+	# HABRIA PROBLEMAS CON LA FUNCION FLOAT(), DADO QUE NO ACEPTA UN None COMO PARAMETRO.
+	if tot_vtas is None:
+		tot_vtas = 0
+	if tot_ventabruta is None:
+		tot_ventabruta = 0
+	if tot_ventaFD is None:
+		tot_ventaFD = 0
+	if tot_ventaneta is None:
+		tot_ventaneta = 0
+	if tot_descuento is None:
+		tot_descuento = 0
+	if tot_devoluciones is None:
+		tot_devoluciones =0
+	
+
+	
+
+	context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
+	'''
+	return vtasresult	
