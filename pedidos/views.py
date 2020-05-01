@@ -168,6 +168,40 @@ def days_between(d1, d2):
 
 
 
+"""LA SIGUIENTE RUTINA ACTUALIZA EL PRECIOORIGINAL EN PEDIDOSLINES YA QUE
+SE PIERDE, MIENTRAS SE HACE DETERMINA EL ORIGEN DEL ERROR SE IMPLEMENTA ESTA ( REVISAR BIEN
+RUTINA DE RECEPCION DE MERCANCIA, AL PARECER AHI HAY PROBLEMA.
+
+ESTA RUTINA ES LLAMADA CADA VEZ QUE ALGUIEN ENTRA AL SISTEMA """
+
+def actualiza_preciooriginal():
+
+	#pdb.set_trace() 	
+		
+	hoy = date.today()
+	
+	fechainicial = hoy - timedelta(days=15)
+
+	cursor = connection.cursor()
+	
+	try:
+		cursor.execute("UPDATE pedidoslines l INNER JOIN pedidosheader h on (l.empresano=h.empresano and l.pedido=h.pedidono) INNER JOIN articulo a ON (a.empresano=l.empresano and l.productono=a.codigoarticulo and l.catalogo =a.catalogo) SET l.preciooriginal=a.precio WHERE h.fechapedido >=%s and l.preciooriginal=0;",(fechainicial,))
+		
+	except DatabaseError as e:
+		print e
+	
+
+	return
+
+
+
+
+
+
+
+
+
+
 '''VISTA_4 CONTINUA ACCESO AL SISTEMA'''
 def acceso(request):
 
@@ -266,6 +300,7 @@ def acceso(request):
 					request.session.set_expiry(0)
 					
 					if user.is_staff:
+						actualiza_preciooriginal()
 						form = Entrada_sistemaForm()
 						return render(request,'pedidos/entrada_sistema.html',{'form':form,'usuario':request.user,'is_staff':True},)
 					else:
@@ -6448,7 +6483,7 @@ def imprime_venta(request):
 		
 	cursor.close()
 
-	linea = 2400
+	linea = 2350
 
 	
 	
@@ -6559,45 +6594,50 @@ def imprime_venta(request):
 			p.drawString(125,paso-70,'$ '+str(0 if datos_documento[10]<0 else datos_documento[10]))
 			p.setFont("Helvetica",8)
 
-		
-		p.drawString(20,paso-90,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
-		p.drawString(20,paso-110,"Para sugerencias o quejas")
-		p.drawString(20,paso-120,"llame al 867 132 9697")
-
-
 		compras = calcula_compras_socio_por_proveedor(datos_documento[0],datos_documento[8])	
 		
-		p.setFont("Helvetica-Bold",6)	
-		p.drawString(20,paso-130,"SUS COMPRAS DE MES:")
-		p.drawString(20,paso-140,"Catalogo")
-		p.drawString(55,paso-140,"Compra")
-		p.drawString(85,paso-140,"Dev.")
-		p.drawString(110,paso-140,"Compra Neta")
+		#p.setFont("Helvetica",6)	
+		
+		p.drawString(20,paso-100,"SUS COMPRAS DE MES:")
+		p.drawString(20,paso-110,"Catalogo")
+		p.drawString(55,paso-110,"Compra")
+		p.drawString(86,paso-110,"Dev.")
+		p.drawString(117,paso-110,"Compra Neta")
 
 		
-		p.drawString(20,paso-150,"-"*70)
+		p.drawString(20,paso-120,"-"*50)
 		
-		linea=paso-160
+		linea=paso-130
 		for compra in compras:
+			if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
 			
-			p.drawString(20,linea,str(compra['nombreprov']))
-			p.drawString(55,linea,str(compra['ventabruta']))
-			p.drawString(85,linea,str(compra['devoluciones']))
-			p.drawString(110,linea,str(compra['ventas']))
-			linea-=10
+				p.drawString(20,linea,str(compra['nombreprov'])[:7])
+				p.drawString(55,linea,str(compra['ventabruta']-compra['descuento']))
+				p.drawString(86,linea,str(compra['devoluciones'] if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
+				p.drawString(117,linea,str((compra['ventabruta']-compra['descuento']-compra['devoluciones']) if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
+				linea-=10
 
-		paso = linea	
+		paso = linea
+
+		p.setFont("Helvetica",8)	
+
+		p.drawString(20,paso-10,"Gracias por su compra !!!" if tipodedocumento=='Remision' else " ")
+		p.drawString(20,paso-20,"Para sugerencias o quejas")
+		p.drawString(20,paso-30,"llame al 867 132 9697")
+
+
+
 
 		if creditos_aplicados:
-			p.drawString(20,paso-140,"Notas de credito aplicadas:")
-			p.drawString(20,paso-150,"--------------------------------------------------")
+			p.drawString(20,paso-50,"Notas de credito aplicadas:")
+			p.drawString(20,paso-60,"--------------------------------------------------")
 			linea -= 10
-			p.drawString(20,paso-160,"Num.")
-			p.drawString(55,paso-160,"Concepto")
-			p.drawString(125,paso-160,"Monto")
+			p.drawString(20,paso-70,"Num.")
+			p.drawString(55,paso-70,"Concepto")
+			p.drawString(125,paso-70,"Monto")
 			linea -= 10
-			p.drawString(20,paso-170,"--------------------------------------------------")
-			linea = paso-180
+			p.drawString(20,paso-80,"--------------------------------------------------")
+			linea = paso-100
 
 			for elemento in creditos_aplicados:
 				p.drawString(20,linea,str(elemento[0]))
@@ -6605,8 +6645,8 @@ def imprime_venta(request):
 				p.drawString(125,linea,'$ '+str(elemento[3]))
 				linea -= 10 
 
-		#linea -= 20
-		linea -= 110
+		linea -= 20
+		#linea -= 110
 
 		
 
@@ -10515,7 +10555,7 @@ def busca_estilo(request):
 
 def calcula_compras_socio_por_proveedor(sociono,fechavta):
 	''' Inicializa Variables '''
-	pdb.set_trace()
+	#pdb.set_trace()
 
 	sucursal = '0'
 	fechainicial = fechavta.replace(day=1)
@@ -10566,10 +10606,9 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
 		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 		where f.fechamvto>=%s and f.fechamvto<=%s\
-		and h.idsucursal>=%s and h.idsucursal<=%s\
 		and h.asociadono=%s\
 		group by a.idproveedor ; ",\
-		(fechainicial,fechafinal,sucursalinicial,sucursalfinal,sociono))
+		(fechainicial,fechafinal,sociono))
 
 	
 	registros_venta = dictfetchall(cursor)
@@ -10578,24 +10617,24 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 	elementos = len(registros_venta)
 	#TRAE DEVOLUCIONES GRAL
 	cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
-	 from (SELECT psf.pedido,\
+	 from (SELECT psf.empresano,psf.pedido,\
 	 psf.productono,\
 	 psf.nolinea,\
 	 psf.catalogo,\
 	 psf.fechamvto from\
 	 pedidos_status_fechas as psf \
 	 INNER JOIN pedidosheader as h \
-	 ON h.pedidono=psf.pedido WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s and h.idSucursal>=%s and h.idSucursal<=%s and h.asociadono=%s) as t2\
+	 ON h.empresano=psf.empresano and h.pedidono=psf.pedido WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s and h.asociadono=%s) as t2\
 	 INNER JOIN pedidos_status_fechas as t3 on\
 	 (t2.pedido=t3.pedido and t2.productono=t3.productono\
 	 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
      INNER JOIN pedidoslines as l\
-     on (l.pedido=t3.pedido and l.productono=t3.productono\
+     on (t2.empresano=t3.empresano and l.pedido=t3.pedido and l.productono=t3.productono\
      and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
      INNER JOIN articulo as art\
-     on (art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
+     on (art.empresano= t3.empresano and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
      WHERE t3.status='Facturado'\
-     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,sociono))
+     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono))
 
 	registros_devgral = dictfetchall(cursor)
 
@@ -10712,3 +10751,9 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 	context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,}	
 	'''
 	return vtasresult	
+
+
+
+
+
+	
