@@ -6591,23 +6591,33 @@ def imprime_venta(request):
 			p.drawString(125,paso-60,'$ '+str(datos_documento[3]))
 			p.setFont("Helvetica-Bold",8)
 			p.drawString(20,paso-70,"Importe a pagar ==>")
-			p.drawString(125,paso-70,'$ '+str(0 if datos_documento[10]<0 else datos_documento[10]))
+			
+			importe_a_pagar = 0 if datos_documento[10]<0 else datos_documento[10]
+			p.drawString(125,paso-70,'$ '+str(importe_a_pagar))
 			p.setFont("Helvetica",8)
+
+			p.drawString(20, paso-90,"Su pago ==>")
+			p.drawString(125,paso -90, '$'+str(datos_documento[5]))
+			p.drawString(20, paso-100,"Vuelto ==>")
+			p.drawString(125,paso -100,'$'+str(0 if datos_documento[5]-importe_a_pagar<=0 else datos_documento[5]-importe_a_pagar))
+
 
 		compras = calcula_compras_socio_por_proveedor(datos_documento[0],datos_documento[8])	
 		
 		#p.setFont("Helvetica",6)	
-		
-		p.drawString(20,paso-100,"SUS COMPRAS DE MES:")
-		p.drawString(20,paso-110,"Catalogo")
-		p.drawString(55,paso-110,"Compra")
-		p.drawString(86,paso-110,"Dev.")
-		p.drawString(117,paso-110,"Compra Neta")
+
 
 		
-		p.drawString(20,paso-120,"-"*50)
+		p.drawString(20,paso-120,"SUS COMPRAS DE MES:")
+		p.drawString(20,paso-130,"Catalogo")
+		p.drawString(55,paso-130,"Compra")
+		p.drawString(86,paso-130,"Dev.")
+		p.drawString(117,paso-130,"Compra Neta")
+
 		
-		linea=paso-130
+		p.drawString(20,paso-140,"-"*50)
+		
+		linea=paso-150
 		for compra in compras:
 			if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
 			
