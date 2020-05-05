@@ -21,7 +21,7 @@
                 <th>Suc.</th>
                 <th>Socio</th>
                 <th>LLegó a suc el</th>
-                <th>Se devolvió el</th>
+                <th>Recepc. area Dev Prov</th>
                 <th>Marca</th>
                 <th>Estilo</th>
                 <th>Color</th>
@@ -46,7 +46,7 @@
                         <td>{{item.fechamvto | date:'d/M/Y'}}</td>
                     {% endlocalize %}
                     {% localize on %}
-                        <td> {{item.fechaultimamodificacion | date:'d/M/Y'  }}</td>
+                        <td> {{item.fechaRecepEnDevol | date:'d/M/Y'  }}</td>
                     {% endlocalize %}
                     <td>{{ item.idmarca }}</td>
         			<td>{{ item.idestilo }}</td>

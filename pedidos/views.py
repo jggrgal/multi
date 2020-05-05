@@ -6598,7 +6598,7 @@ def imprime_venta(request):
 
 			p.drawString(20, paso-90,"Su pago ==>")
 			p.drawString(125,paso -90, '$'+str(datos_documento[5]))
-			p.drawString(20, paso-100,"Vuelto ==>")
+			p.drawString(20, paso-100,"Cambio ==>")
 			p.drawString(125,paso -100,'$'+str(0 if datos_documento[5]-importe_a_pagar<=0 else datos_documento[5]-importe_a_pagar))
 
 
@@ -8879,7 +8879,7 @@ def devolucion_a_proveedor(request):
 									l.status,h.AsociadoNo,
 									h.FechaPedido,h.fechaultimamodificacion,
 									a.codigoarticulo,a.catalogo,a.idmarca,
-									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,al.razonsocial
+									a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,psf.fechamvto as fechaRecepEnDevol,al.razonsocial
 									from pedidoslines l
 									 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
 									 inner join articulo a on
