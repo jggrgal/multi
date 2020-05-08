@@ -12,91 +12,72 @@
 {% block content %}
 
 
-<div class="container" Style="">
+<div class="container" id='r1'>
 
     <div  id='a2' class="col-md-12">
-            <!--<h2 align="Center" style="color:green;">Sistema de Pedidos</h2>-->
-
+           
             <br><br><br>
             
     </div>
-<!--<div class="alert alert-success" align="Center">
-                <h3 align="Center">Bienvenido Socio !</h3>
-                
-<div><head><style>
-body {
-  background-image: url("{% static 'pedidos/inicia-tu-negocio.png' %}");
-}
-</style>
-</head>
-    </div>    
-        
 
 
+  <div class="row">
+   </div> 
+  <br><br><br><br><br><br><br><br><br>
+  <div class="row">
+  </div> 
 
-    <div class="row">
-        <div class="col-md-6">
-           
-        
-               
+  <div class='row'>
+    <div class ='col-md-6'>
+      
     </div>
+    <div class="col-md-6" align="Center">
+                     
+  </div>
+
+     <br><br>
+  <div class="row">
+
+    <div class="col-md-4">
+    </div>
+
+    <div class="col-md-4">
+
+    </div>
+
+
+
+    <div class="col-md-4">
+      <br><br><br><br><br>
+      <center>
+        <a class="btn btn-info btn-lg" href= '{% url 'pedidos:acceso' %}' role="button">Entrar</a>
+      </center>
        
-
-</div><br>
-<div class="row" align="Center">
-                   
-                    <!--<a class="btn btn-success btn-lg " href="{% url 'pedidos:logout_view' %}">Salir</a>-->
-</div><br><br>
-<div class="row">
- </div> 
-<br><br><br><br><br><br><br><br><br>
- <div class="row">
- </div> 
-
-<div class='row'>
-<div class ='col-md-6'></div>
-<div class="col-md-6" align="Center">
-                 <a class="btn btn-info btn-lg" href= '{% url 'pedidos:acceso' %}' role="button" >Entrar</a>
-</div>
-
- <br><br>
-<div class="row">
-  <div class="col-md-3">
-  </div>
-  <div class="col-md-3">
+     <br><br>
+      <h1 id='a1' align="right"><strong><font style="font-family: Helvetica, sans-serif;font-size:50px;font-style:italic;" color="Black"><em> " Todo en un solo lugar "</em></font> </strong></h1>
+                <br><br>
+                    
+    </div>
   </div>
 
+  <div>
+    <style>
+        #r1{
+          background-image: url("{% static 'pedidos/inicia-tu-negocio.png' %}"); 
+        	 background-repeat: no-repeat;
+           position: relative;
+            }
+    	
+        #a1  {
+          background-color: #84ede1;
+          align-content: center;
+          opacity: 0.3
+        }
+    </style>
 
+  </div> 
 
-<div class="col-md-6">
-
- <div id='a1'>
- 
-  <h1 align="Center"><strong><font style="font-family: Helvetica, sans-serif;font-size:64px;font-style:italic;" color="Black"><em> " Todo en un solo lugar "</em></font> </strong></h1>
-            <br><br>
-                
 </div>
-</div>
-
-<div><head><style>
-body {
-  background-image: url("{% static 'pedidos/inicia-tu-negocio.png' %}"); 
-	 background-repeat: no-repeat;
-}
-</style>
-	<style>
-#a1  {
-  background-color: skyblue;
-}
-</style>
-</head>
-    </div>  
-</div>
-
-
-
-
-
 
 
 {% endblock content %}
