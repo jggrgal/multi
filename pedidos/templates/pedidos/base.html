@@ -95,7 +95,7 @@ body
 
   </head>
 
-  <body role="document" style="background-color:white;">
+  <body role="document" style="background-color:#f2f2e7;">
 
      <!-- Fixed navbar -->
     <!--<nav class="navbar navbar-inverse navbar-fixed-top">-->
@@ -105,7 +105,7 @@ body
     
     
 
-    <div class="container theme-showcase" role="main">
+    <div class="container theme-showcase" role="main" >
 
       <!-- Main jumbotron for a primary marketing message or call to action 
       <div class="jumbotron">
@@ -121,7 +121,7 @@ body
       </div>-->
 
     
-        <div class="row">
+        <div class="row"  style="background-color:#8ba888 ;">
           {% if request.session.is_staff and request.session.sucursal_activa > 0 %}
             
               {% include 'pedidos/navegador.html' %}
@@ -135,11 +135,11 @@ body
           
 
           <div class="col-md-4"  align="center" >
-            <p class="text-info"><h1><font style="" color="#2E811D"> {{request.session.sucursal_nombre}}</font></h1></p>
+            <p class="text-info"><h1><font style="" color="black"> {{request.session.sucursal_nombre}}</font></h1></p>
             
           </div>
           <div class="col-md-4" align="right">
-            <p class="text-info"><h2>Usuario: <font style="" color="#2E811D"> {{ request.user }}</font> </h2></p>
+            <p class="text-info"><h2>Usuario: <font style="" color="black"> {{ request.user }}</font> </h2></p>
             
             
           </div>
