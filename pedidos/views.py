@@ -53,7 +53,8 @@ from . forms import (AccesoForm,\
 					DatosCatalogoForm, # MODIFICA DATOS DEL CATALOGO
 					CreaCatalogoForm,
 					Lista_dev_recepcionadasForm,
-					BuscaEstiloForm)
+					BuscaEstiloForm,
+					PiezasNoSolicitadasForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -10764,6 +10765,75 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 
 
 
+def PiezasNoSolicitadas(request): # el parametro 'tipo' toma los valores 'P' de pedido o 'D' de documento y se pasa a los templates 
+	#pdb.set_trace()
+
+	context ={}	
+	asociado_data =()
+
+	tipo='P'
+
+	try:
+
+		existe_socio = True
+		is_staff =  request.session['is_staff']
+		id_sucursal = 0
+		session_id = request.session.session_key
+		
+	except KeyError:
+		
+		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
+		return render(request, 'pedidos/error.html',context)
+
+	form = PiezasNoSolicitadasForm()
+
+	socio = 3
+	
+	cursor = connection.cursor()
+	
+	cursor.execute("SELECT asociadono,nombre,appaterno,apmaterno,EsSocio,telefono1 from asociado where asociadono=%s;",(socio,))
+	
+	asociado_data = cursor.fetchone()
+				
+	print asociado_data	
+	print asociado_data		
+
+
+	request.session['socio_pidiendo'] = asociado_data[0]
+	request.session['EsSocio'] = asociado_data[4]
+	num_socio = asociado_data[0]
+	telefono_socio = asociado_data[5]
+	nombre_socio = str(asociado_data[0])+' '+asociado_data[1]+ ' '+asociado_data[2]+' '+(asociado_data[3] if (asociado_data[3] is not None) else 'sin apellido')+'          TELEFONO: '+asociado_data[5]
+	
+
+	# trae catalogo de viasolicitud
+
+	cursor.execute("SELECT id,descripcion FROM viasolicitud;")
+	vias_solicitud = dictfetchall(cursor)
+
+	# trae catalogo de tipos de servicio
+
+	cursor.execute("SELECT tiposervicio from tiposervicio;")
+	tipo_servicio = dictfetchall(cursor)
+
+
+	cursor.execute("DELETE FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])	
+
+
+	cursor.close()
+
+	
+	cursor = connection.cursor()
+	cursor.close()
+
+
+	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':id_sucursal,'is_staff':is_staff,'tipo':tipo,}
+	return render(request,'pedidos/articulos_no_solicitados.html',context,)
+	
+
+
 
 
 	
+
+

@@ -34,7 +34,7 @@ $(document).ready(function() {
   	<div class="panel panel-success">
   		<div class='panel-heading'>
         <h3 class="panel-title">Elegir Articulo <h3> 
-        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  
+        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final guarde...</h6></p>  
       </div>
   		<div class='panel-body'>
   	
@@ -113,12 +113,7 @@ $(document).ready(function() {
         
     </div>
 
-          
-        
-          
-        
-
-
+       
   </div>
 
   <div class ="col-md-4">
@@ -144,7 +139,7 @@ $(document).ready(function() {
 
   <hr>
   <div class="col-md-4">
-      
+    <!--  
     <label for="sucursal">Recoger pedido en:</label> 
   
     <select id="sucursal" class="form-control" init="{{id_sucursal}}">
@@ -155,34 +150,37 @@ $(document).ready(function() {
           <option value="3">ANAHUAC</option>
 
             
-    </select>
+    </select>-->
   </div>
 
   <div class="col-md-4">
 
-      <label for="viasolicitud_id">Via de solicitud:</label> 
+<!--      <label for="viasolicitud_id">Via de solicitud:</label> 
       <select id="viasolicitud_id" name="viasolicitud" class="form-control">
             {% for entry in vias_solicitud %}
                 <option value="{{ entry.id }}">{{ entry.descripcion }}</option>
             {% endfor %}
-      </select>
+      </select>-->
   </div>
   <br><br><br>
   
   <div class="col-md-4">
+    <!--
     <label for="tiposervicio_id">Tipo de servicio:</label> 
     <select id="tiposervicio_id" name = "tiposervicio" class="form-control">
           {% for entry in tipo_servicio %}
               <option value="{{ entry.tiposervicio }}">{{ entry.tiposervicio }}</option>
           {% endfor %}
     </select>
+  -->
   </div>
   <div class="col-md-4">
+   <!--
     <label for="anticipo_id">Anticipo:</label> 
     <input id="anticipo_id" name="anticipo" class="form-control" type="number" value=0>
   
          
-  <!--</div> -->
+  </div> -->
    </div>
    
     <div class="col-md-8">
@@ -208,14 +206,16 @@ $(document).ready(function() {
 
   <div class="col-md-4">
     <p align="left">
-      <button id='procesar' type="button" class="btn btn-success btn-lg"> Procesar</button>
+      <button id='procesar' type="button" class="btn btn-success btn-lg"> Grabar </button>
 
           
        <!-- <a id ="idpedido" name="p_num_pedido" class="btn btn-success btn-lg " href="/pedidos/imprime_ticket/" value="000000" role="button">000000</a> -->
+
+      <!--
       <form id="imp_pedido_form" action="{% url 'pedidos:imprime_ticket' %}" method="GET">
         <input id ='idpedido' name ='p_num_pedido' class=btn-success-btn-lg" type="submit"  value="000000" />
       </form>
-
+      -->
 
 
 
