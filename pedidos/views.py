@@ -10765,7 +10765,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 
 
 
-def PiezasNoSolicitadas(request): # el parametro 'tipo' toma los valores 'P' de pedido o 'D' de documento y se pasa a los templates 
+def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' de pedido o 'D' de documento y se pasa a los templates 
 	#pdb.set_trace()
 
 	context ={}	
@@ -10785,7 +10785,7 @@ def PiezasNoSolicitadas(request): # el parametro 'tipo' toma los valores 'P' de 
 		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
 		return render(request, 'pedidos/error.html',context)
 
-	form = PiezasNoSolicitadasForm()
+	form = PiezasNoSolicitadasForm(request)
 
 	socio = 3
 	

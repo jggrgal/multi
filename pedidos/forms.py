@@ -2899,4 +2899,24 @@ class PiezasNoSolicitadasForm(forms.Form):
 		label='Talla',initial='Seleccione',required='True')
 
 		self.fields['tallaalt'] = forms.CharField(label='',help_text='Si talla es "NE", ingrese una aqui')
+
+
+
+		try:# Si usuario no es del estaff no debe se mostrara ni periodo de entrega ni fechamaximaentrega.
+			if not request.session['is_staff']:
+		  		escondido = 'display: none;'
+		  	else:
+		  		escondido ='display: ;'
+		except:
+			return None
+
 	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
+
+	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=0,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
+		self.fields['opcioncompra'] = forms.ChoiceField(label='Opcion de compra:',initial='1ra.',help_text='',widget=forms.Select(attrs={'style':escondido,}),choices=opcion_opt)
+	  		
+  		DateInput = partial(forms.DateInput, {'class': 'datepicker','style':escondido})
+
+  		hoy=datetime.now()
+  		f = hoy.strftime("%d/%m/%Y")
+		self.fields['fechamaximaentrega'] = forms.DateField(label='Fecha max entrega (dd/mm/yyyy)',initial=f,widget=DateInput())			

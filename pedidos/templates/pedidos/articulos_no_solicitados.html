@@ -33,8 +33,8 @@ $(document).ready(function() {
 
   	<div class="panel panel-success">
   		<div class='panel-heading'>
-        <h3 class="panel-title">Elegir Articulo <h3> 
-        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final guarde...</h6></p>  
+        <h3 class="panel-title">Eleccion de articulo no solicitado <h3> 
+        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  
       </div>
   		<div class='panel-body'>
   	
@@ -58,10 +58,10 @@ $(document).ready(function() {
   </div>
   <div class="col-md-8">
 
-    <div class="warning"> Capturando pedido de: {{nombre_socio}}</div>
+    <div class="warning"> Capturando para: {{nombre_socio}}</div>
     <div class="panel panel-success">
       <div class="panel-heading">
-        <h3 class="panel-title">Articulos elegidos</h3>
+        <h3 class="panel-title">Articulos capturados</h3>
       </div>
       <div class="panel-body">
         <div class="table-responsive">
@@ -113,7 +113,12 @@ $(document).ready(function() {
         
     </div>
 
-       
+          
+        
+          
+        
+
+
   </div>
 
   <div class ="col-md-4">
@@ -134,53 +139,50 @@ $(document).ready(function() {
 </span></h3></div> -->
 
   </div>
-.
+
   <br><br><br>
 
   <hr>
   <div class="col-md-4">
-    <!--  
-    <label for="sucursal">Recoger pedido en:</label> 
+      
+    <label for="sucursal" style="display: none;">Recoger pedido en:</label> 
   
-    <select id="sucursal" class="form-control" init="{{id_sucursal}}">
+    <select id="sucursal" class="form-control" init="{{id_sucursal}}" style="display: none;">
 
           <option value="0">GENERAL</option>
-          <option {% if nombre_socio %} selected="selected" {% endif %} value="1">LA FE</option>
+          <option {% if nombre_socio %} selected="selected" {% endif %} value="3">LA FE</option>
           <option value="2">DR. MIER</option>
           <option value="3">ANAHUAC</option>
 
             
-    </select>-->
+    </select>
   </div>
 
   <div class="col-md-4">
 
-<!--      <label for="viasolicitud_id">Via de solicitud:</label> 
-      <select id="viasolicitud_id" name="viasolicitud" class="form-control">
+      <label for="viasolicitud_id" style="display: none;">Via de solicitud:</label> 
+      <select id="viasolicitud_id" name="viasolicitud" class="form-control" style="display: none;">
             {% for entry in vias_solicitud %}
                 <option value="{{ entry.id }}">{{ entry.descripcion }}</option>
             {% endfor %}
-      </select>-->
+      </select>
   </div>
   <br><br><br>
   
   <div class="col-md-4">
-    <!--
-    <label for="tiposervicio_id">Tipo de servicio:</label> 
-    <select id="tiposervicio_id" name = "tiposervicio" class="form-control">
+    <label for="tiposervicio_id" style="display: none;">Tipo de servicio:</label> 
+    <select id="tiposervicio_id" name = "tiposervicio" class="form-control" style="display: none;">
           {% for entry in tipo_servicio %}
               <option value="{{ entry.tiposervicio }}">{{ entry.tiposervicio }}</option>
           {% endfor %}
     </select>
-  -->
   </div>
   <div class="col-md-4">
-   <!--
-    <label for="anticipo_id">Anticipo:</label> 
-    <input id="anticipo_id" name="anticipo" class="form-control" type="number" value=0>
+    <label for="anticipo_id" style="display: none;">Anticipo:</label> 
+    <input id="anticipo_id" name="anticipo" class="form-control" type="number" value=0 style="display: none;">
   
          
-  </div> -->
+  <!--</div> -->
    </div>
    
     <div class="col-md-8">
@@ -199,23 +201,23 @@ $(document).ready(function() {
       
   <div class="col-md-4">
     <p align="left">
-      <a class="btn btn-success btn-lg " {% if nombre_socio %} href="/pedidos/pedidosgeneral" {% else %} href="/pedidos/busca_pedidos" {% endif %} role="button">Regresar</a>
+      <a class="btn btn-success btn-lg " href="/pedidos/consulta_menu" role="button">Regresar</a>
     </p>
     
   </div>
 
   <div class="col-md-4">
     <p align="left">
-      <button id='procesar' type="button" class="btn btn-success btn-lg"> Grabar </button>
+      <button id='procesar_articulo_no_solicitado' type="button" class="btn btn-success btn-lg"> Procesar</button>
 
           
        <!-- <a id ="idpedido" name="p_num_pedido" class="btn btn-success btn-lg " href="/pedidos/imprime_ticket/" value="000000" role="button">000000</a> -->
 
-      <!--
+       <!--
       <form id="imp_pedido_form" action="{% url 'pedidos:imprime_ticket' %}" method="GET">
         <input id ='idpedido' name ='p_num_pedido' class=btn-success-btn-lg" type="submit"  value="000000" />
-      </form>
-      -->
+      </form>-->
+
 
 
 
@@ -225,10 +227,7 @@ $(document).ready(function() {
 
   <br><br><br><br>
   <div class="col-md-8">
-    <p class="bg-info"> Si al hacer un pedido tiene problemas, favor de eliminar el historial de navegación.
-
-      <a href="https://support.google.com/chrome/answer/2392709?co=GENIE.Platform%3DAndroid&hl=es-419">Más información...</a>`  
-    </p>
+    
                         
     <p>
                                 <input id="input_estilo" type="text"  placeholder="Estilo a buscar..." aria-describedby="basic-addon1"/>
