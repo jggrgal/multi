@@ -54,7 +54,8 @@ from . forms import (AccesoForm,\
 					CreaCatalogoForm,
 					Lista_dev_recepcionadasForm,
 					BuscaEstiloForm,
-					PiezasNoSolicitadasForm)
+					PiezasNoSolicitadasForm,
+					RpteArtNoSolicitadosForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -10848,6 +10849,103 @@ def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' d
 
 
 
+
+
+
+
+
+
+
+
+
+
+# REPORTE DE ARTICULOS NO SOLICITADOS ORDENADO POR MARCA 
+
+
+
+def rpte_piezas_no_solicitadas(request):
+	#pdb.set_trace()
+	mensaje =''
+	if request.method == 'GET':
+
+		
+
+		form = RpteArtNoSolicitadosForm(request.GET)
+
+		if form.is_valid():
+
+			proveedor = form.cleaned_data['proveedor']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			#op = form.cleaned_data['op']
+			op='Pantalla'
+			cursor=connection.cursor()
+
+			
+			"""cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))"""
+
+			if proveedor != u'0':
+				
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,proveedor,))
+			else:
+				
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s order by (a.idproveedor,p.fechapedido);",(fechainicial,fechafinal,))
+
+			 
+			lista_pedidos = dictfetchall(cursor)
+
+			
+
+			elementos = len(lista_pedidos)
+
+			
+
+
+			"""cursor.execute("SELECT p.razonsocial,a.razonsocial from proveedor p inner join almacen a on (p.empresano=a.empresano and p.proveedorno=a.proveedorno) where p.proveedorno=%s;",(ped['prov_id'],))
+			
+			prov_alm = cursor.fetchone()"""
+
+			if not lista_pedidos:
+				mensaje = 'No se encontraron registros !'
+				return render(request,'pedidos/rpte_piezas_no_solicitadas.html',{'mensaje':mensaje,})
+
+			else:
+
+				if op == 'Pantalla':
+
+					print "lo que hay en pedidos"
+					for ped in lista_pedidos:
+						print ped
+
+					
+					mensaje ="Registros encontrados == > "
+
+					context = {'form':form,'mensaje':mensaje,'elementos':elementos,'lista_pedidos':lista_pedidos,}	
+				
+					return render(request,'pedidos/rpte_piezas_no_solicitadas.html',context)
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="piezas_no_solicitadas.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['PEDIDO','FECHA_PEDIDO','PROVEEDOR','MARCA','ESTILO','COLOR','TALLA','PRECIO'])
+					
+					for registro in lista_pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['Pedido','fechapedido','provnom','idmarca','idestilo','idcolor','talla','precio'] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
+
+		
+	else:
+
+		form = RpteArtNoSolicitadosForm()
+	return render(request,'pedidos/rpte_piezas_no_solicitadas_form.html',{'form':form,})
 	
 
 

@@ -2926,3 +2926,67 @@ class PiezasNoSolicitadasForm(forms.Form):
   		hoy=datetime.now()
   		f = hoy.strftime("%d/%m/%Y")
 		self.fields['fechamaximaentrega'] = forms.DateField(label='Fecha max entrega (dd/mm/yyyy)',initial=f,widget=DateInput())			
+
+
+class RpteArtNoSolicitadosForm(forms.Form):
+	
+	def __init__(self,*args,**kwargs):
+
+		
+		lprov = lista_Proveedores()
+
+		super(RpteArtNoSolicitadosForm, self).__init__(*args,**kwargs)
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label='Proveedor',choices = lprov,initial='0',required='True' )
+
+
+	#hoy =  date.today()	
+	t = datetime.now
+	#t.strftime('%m/%d/%Y')
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		
+	fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+	fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+		
+
+	opciones_rpte = (('Pantalla','Pantalla',),('Archivo_Excel','Archivo_Excel',),)
+	#op = forms.ChoiceField(label='Dirigir a:',initial='Pantalla',choices=opciones_rpte,required=False)
+
+
+	error_messages = {
+		
+		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+		'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+		'campo_vacio': 'Este omitiendo un valor de fecha, por favor ingrese un valor en todos los campos fecha !'
+		}
+		
+
+	def clean(self):
+
+		
+		
+		cleaned_data = super(RpteArtNoSolicitadosForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		#op = cleaned_data.get('op')
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+	
+		
+
+		return self.cleaned_data

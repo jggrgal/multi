@@ -118,4 +118,6 @@ urlpatterns = [
 	url(r'^vtasporusuario/$',views.vtasporusuario,name='vtasporusuario'),
 	url(r'^busca_estilo/$',views.busca_estilo,name='busca_estilo'),
 	url(r'^piezas_no_solicitadas/$',views.piezas_no_solicitadas,name='piezas_no_solicitadas'),
+	url(r'^rpte_piezas_no_solicitadas/$',views.rpte_piezas_no_solicitadas,name='rpte_piezas_no_solicitadas'),
+
 	]
