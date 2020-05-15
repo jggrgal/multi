@@ -145,14 +145,15 @@ $(document).ready(function() {
   <hr>
   <div class="col-md-4">
       
-    <label for="sucursal" style="display: none;">Recoger pedido en:</label> 
+    <label for="sucursal" style="">Recoger pedido en:</label> 
   
-    <select id="sucursal" class="form-control" init="{{id_sucursal}}" style="display: none;">
+    <select id="sucursal" class="form-control" init="{{ id_sucursal }}" style="">
 
-          <option value="0">GENERAL</option>
-          <option {% if nombre_socio %} selected="selected" {% endif %} value="3">LA FE</option>
-          <option value="2">DR. MIER</option>
-          <option value="3">ANAHUAC</option>
+        <!-- SE SELECCIONA ANAHUAC EN LAS TRES..YA QUE ES ANAHUA A DONDE IRAN LOS DEVUELTOS -->
+          <option value="0">ANAHUAC</option>
+          <option value="1">ANAHUAC</option>
+          <option value="2">ANAHUAC</option>
+          <option value="3" selected="selected" >ANAHUAC</option>
 
             
     </select>
@@ -208,7 +209,7 @@ $(document).ready(function() {
 
   <div class="col-md-4">
     <p align="left">
-      <button id='procesar_articulo_no_solicitado' type="button" class="btn btn-success btn-lg"> Procesar</button>
+      <button id='procesar' type="button" class="btn btn-success btn-lg"> Procesar</button>
 
           
        <!-- <a id ="idpedido" name="p_num_pedido" class="btn btn-success btn-lg " href="/pedidos/imprime_ticket/" value="000000" role="button">000000</a> -->

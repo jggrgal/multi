@@ -1443,6 +1443,16 @@ def procesar_pedido(request):
 			# y, lsuc toma el numero de la sucursal_activa en la session.
 			
 			socio_a_validar = request.session['socio_pidiendo']
+			
+			# Si es un pedido para el socio 3 (Devoluciones a provedor) directamente
+			# debe asignar el status RecepEnDevol.
+
+			if socio_a_validar != 3:
+
+				status_a_asignar='Por Confirmar'
+			else:
+				status_a_asignar='RecepEnDevol'
+			
 			#capturista = request.session['socio_zapcat'] # toma el valor del empleado que captura
 			capturista =  request.POST.get('usr_id') # toma el id  de confirmacion del empleado que captura 
 			tiposervicio = request.POST.get('tiposervicio')
@@ -1567,9 +1577,9 @@ def procesar_pedido(request):
 					raise ValueError("Hay un valor invalido para el campo 'precio' no se grabara la transaccion !")
 
 		
-				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,'Por Confirmar',0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
+				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,status_a_asignar,0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
-				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,'Por Confirmar',datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
+				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,status_a_asignar,datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
 				cursor.execute("INSERT INTO pedidos_encontrados(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,FechaEncontrado,BodegaEncontro,FechaProbable,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,encontrado,id_cierre,causadevprov,observaciones) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,'19010101',0,'19010101','','','','','','','','','','',0,0,''])
 				cursor.execute("INSERT INTO pedidos_notas(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,Observaciones) VALUES (%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,''])
 				
@@ -10827,7 +10837,7 @@ def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' d
 	cursor.close()
 
 
-	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':id_sucursal,'is_staff':is_staff,'tipo':tipo,}
+	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':3,'is_staff':is_staff,'tipo':tipo,}
 	return render(request,'pedidos/articulos_no_solicitados.html',context,)
 	
 
