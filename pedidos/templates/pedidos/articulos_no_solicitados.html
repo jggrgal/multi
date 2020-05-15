@@ -26,15 +26,19 @@ $(document).ready(function() {
 </script>
 
 
+ 
 
 <div class="row">
+   <br>
+
   <!--<div class="col-md-4"></div> -->
   <div class="col-md-4">
-
+    <br>
   	<div class="panel panel-success">
+      
   		<div class='panel-heading'>
-        <h3 class="panel-title">Eleccion de articulo no solicitado <h3> 
-        <p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  
+        <h4 class="panel-title">ARTICULOS NO SOLICITADOS. <h4>
+        <!--<p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  -->
       </div>
   		<div class='panel-body'>
   	
@@ -160,6 +164,8 @@ $(document).ready(function() {
   </div>
 
   <div class="col-md-4">
+    <label for="usr_id">Usuario_id:</label> 
+      <input id="usr_id" name="usr_id" class="form-control" type="password" pattern=".{,3}" value=0>
 
       <label for="viasolicitud_id" style="display: none;">Via de solicitud:</label> 
       <select id="viasolicitud_id" name="viasolicitud" class="form-control" style="display: none;">
@@ -187,8 +193,7 @@ $(document).ready(function() {
    </div>
    
     <div class="col-md-8">
-      <label for="usr_id">Usuario_id:</label> 
-      <input id="usr_id" name="usr_id" class="form-control" type="password" pattern=".{,3}" value=0>
+      
     
          
   <!--</div> -->
@@ -201,6 +206,7 @@ $(document).ready(function() {
 
       
   <div class="col-md-4">
+    <br>
     <p align="left">
       <a class="btn btn-success btn-lg " href="/pedidos/consulta_menu" role="button">Regresar</a>
     </p>
@@ -208,6 +214,7 @@ $(document).ready(function() {
   </div>
 
   <div class="col-md-4">
+    <br>
     <p align="left">
       <button id='procesar' type="button" class="btn btn-success btn-lg"> Procesar</button>
 

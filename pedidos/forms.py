@@ -441,7 +441,7 @@ class PedidosForm(forms.Form):
 		except:
 			return None
 
-	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
+	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
 
 	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=0,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
 		self.fields['opcioncompra'] = forms.ChoiceField(label='Opcion de compra:',initial='1ra.',help_text='',widget=forms.Select(attrs={'style':escondido,}),choices=opcion_opt)
@@ -1073,12 +1073,19 @@ class Ingresa_socioForm(forms.Form):
 	def clean_socio(self):
 		cleaned_data = super(Ingresa_socioForm, self).clean()
 		socio = self.cleaned_data.get('socio')
+		
 		if socio <= 0: 	
 
 			raise forms.ValidationError('Ingrese un numero de socio !')
-
 		
+		elif socio == 3:
+
+			raise forms.ValidationError('Este socio es para devoluciones a proveedor !')
+		else:
+
+			pass
 		return socio	
+
 
 
 class ColocacionesForm(forms.Form):
@@ -2902,17 +2909,16 @@ class PiezasNoSolicitadasForm(forms.Form):
 
 
 
-		try:# Si usuario no es del estaff no debe se mostrara ni periodo de entrega ni fechamaximaentrega.
-			if not request.session['is_staff']:
-		  		escondido = 'display: none;'
-		  	else:
-		  		escondido ='display: ;'
+		try:# Á diferencia de pedido normal en art no solicitados siempre se esconderan algunos campos por eso se la siguiente variable
+			
+		  	escondido = 'display: none;'
+		  	
 		except:
 			return None
 
 	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
 
-	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=0,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
+	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=1,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
 		self.fields['opcioncompra'] = forms.ChoiceField(label='Opcion de compra:',initial='1ra.',help_text='',widget=forms.Select(attrs={'style':escondido,}),choices=opcion_opt)
 	  		
   		DateInput = partial(forms.DateInput, {'class': 'datepicker','style':escondido})

@@ -1119,10 +1119,13 @@ def grabar_pedidos(request):
 				#El select con la tabla 'articulo' 
 
 
-
+				
 				cursor.execute("SELECT b.codigoarticulo, b.precio,if(a.descontinuado,'1','0') as descont From preciobase b inner join articulo a  on ( b.empresano=a.empresano and b.codigoarticulo=a.codigoarticulo and b.catalogo=a.catalogo) where b.proveedorid=%s and b.temporada =%s and b.catalogo=%s and b.pagina=%s and b.estilo=%s and b.idmarca=%s and b.idcolor=%s and b.talla=%s limit 1;", [id_prov,id_temp,id_cat,id_pag,id_est,id_mar,id_col,id_talla])
 				num_art = cursor.fetchone()
 
+
+				cursor.execute("SELECT b.precio From preciosopcionales b  where b.empresano=1  and b.Proveedor=%s and b.Temporada=%s and b.catalogo=%s and b.Articuloid=%s and b.TipoPrecio=%s limit 1;",(id_prov,id_temp,id_cat,num_art[0],'Cliente',))
+				precio_opcional = cursor.fetchone()
 			
 				
 				
@@ -1131,6 +1134,7 @@ def grabar_pedidos(request):
 
 				#Selecciona el precio dependiendo de si se es socio o cliente:
 
+				precio_cliente = precio_opcional[0]
 				precio_final = num_art[1] if EsSocio else precio_cliente
 	
 				try:
@@ -1148,7 +1152,7 @@ def grabar_pedidos(request):
 
 					data = {'id':id_rec[0],'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':str(id_talla),'precio': str(precio_final),'id_tallaalt':id_tallaalt,'descontinuado': num_art[2],'is_staff':request.session['is_staff'],}
 					
-				except Error as e:
+				except DatabaseError as e:
 					
 					data = "Error en la ejecucion de la insercion: "
 					print e		
