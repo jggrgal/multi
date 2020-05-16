@@ -441,7 +441,7 @@ class PedidosForm(forms.Form):
 		except:
 			return None
 
-	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
+	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
 
 	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=0,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
 		self.fields['opcioncompra'] = forms.ChoiceField(label='Opcion de compra:',initial='1ra.',help_text='',widget=forms.Select(attrs={'style':escondido,}),choices=opcion_opt)
@@ -1073,12 +1073,19 @@ class Ingresa_socioForm(forms.Form):
 	def clean_socio(self):
 		cleaned_data = super(Ingresa_socioForm, self).clean()
 		socio = self.cleaned_data.get('socio')
+		
 		if socio <= 0: 	
 
 			raise forms.ValidationError('Ingrese un numero de socio !')
-
 		
+		elif socio == 3:
+
+			raise forms.ValidationError('Este socio es para devoluciones a proveedor !')
+		else:
+
+			pass
 		return socio	
+
 
 
 class ColocacionesForm(forms.Form):
@@ -2799,5 +2806,187 @@ class BuscaEstiloForm(forms.Form):
 				raise forms.ValidationError('Ingrese una fecha final !')
 		if (var_estilo) is None:
 			raise forms.ValidationError("Ingrese un valor para estilo !")
+
+		return self.cleaned_data
+
+
+class PiezasNoSolicitadasForm(forms.Form):
+
+	proveedores = {}
+	
+
+	# La funcion siguiente "init" tambien  recibe el parametro
+	# request, esto se hace para tener tambien disponibles las variables de entorno, en este caso
+	# se requerira el request.session['is_staff'] para manejarlos en los campos
+	# de fechaMaximaEntrega y el de periodo de entrega.
+	# en el views.py los llamados deben inculir request como parametro tanto si la forma es valida como si no lo es.
+	def __init__(self,request,*args,**kwargs):
+
+
+		
+		def lista_PeriodosEntrega():
+			cursor=connection.cursor()
+			cursor.execute('SELECT id,periodo from periodosentrega;')
+	
+			pr=() # Inicializa una tupla para llenar combo de Periodosentrega
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'SELECCIONE...') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lper_ent = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lper_ent)
+
+		
+		
+		lprov = lista_Proveedores()
+		lcat = (('0','Seleccione'),)
+		lestilo = []
+		lmarca = []
+		lcolor = []
+		ltalla = []
+		lper_ent = lista_PeriodosEntrega()
+		
+
+		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
+		opcion_opt = (('1','1ra.'),('2','2da'),('3','3ra.'))
+
+		
+		#pr_dict = [['1','MODELI'],['2','IMPULS'],['3','OTRO']]
+		#pr_dict = (('MODELI','MODELI'),('IMPULS','IMPULS'),('OTRO','OTRO'),)
+		#pr_dict = lista_Proveedores()
+
+		super(PiezasNoSolicitadasForm, self).__init__(*args,**kwargs)
+		
+		
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+		label='Proveedor',choices = lprov,initial='0',required='True' )
+
+		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),
+		label='Temporada',choices = opcion_temporada, initial='0',required ='True')
+		
+		self.fields['catalogo']  = forms.ChoiceField(widget=forms.Select(),
+		label='Catalogo',initial = 'SELECCIONE...',required ='True' )
+		
+		self.fields['pagina'] = forms.CharField(label='Pagina')
+		
+		self.fields['estilo'] = forms.ChoiceField(widget=forms.Select(),
+		label='Estilo',initial='Seleccione',required='True')
+		
+		self.fields['marca'] = forms.ChoiceField(widget = forms.Select(),
+		label='Marca',initial='Seleccione',required='True')
+
+		self.fields['color'] = forms.ChoiceField(widget = forms.Select(),
+		label='Color', initial='Seleccione',required='True')
+		
+		self.fields['talla'] = forms.ChoiceField(widget = forms.Select(),
+		label='Talla',initial='Seleccione',required='True')
+
+		self.fields['tallaalt'] = forms.CharField(label='',help_text='Si talla es "NE", ingrese una aqui')
+
+
+
+		try:# Á diferencia de pedido normal en art no solicitados siempre se esconderan algunos campos por eso se la siguiente variable
+			
+		  	escondido = 'display: none;'
+		  	
+		except:
+			return None
+
+	  	self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':escondido}))
+
+	  	self.fields['plazoentrega'] = forms.ChoiceField(label='Plazo de entrega:',initial=1,choices=lper_ent,required=True,widget=forms.Select(attrs={'style':escondido,}))
+		self.fields['opcioncompra'] = forms.ChoiceField(label='Opcion de compra:',initial='1ra.',help_text='',widget=forms.Select(attrs={'style':escondido,}),choices=opcion_opt)
+	  		
+  		DateInput = partial(forms.DateInput, {'class': 'datepicker','style':escondido})
+
+  		hoy=datetime.now()
+  		f = hoy.strftime("%d/%m/%Y")
+		self.fields['fechamaximaentrega'] = forms.DateField(label='Fecha max entrega (dd/mm/yyyy)',initial=f,widget=DateInput())			
+
+
+class RpteArtNoSolicitadosForm(forms.Form):
+	
+	def __init__(self,*args,**kwargs):
+
+		
+		lprov = lista_Proveedores()
+
+		super(RpteArtNoSolicitadosForm, self).__init__(*args,**kwargs)
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label='Proveedor',choices = lprov,initial='0',required='True' )
+
+
+	#hoy =  date.today()	
+	t = datetime.now
+	#t.strftime('%m/%d/%Y')
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		
+	fechainicial = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+	fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+		
+
+	opciones_rpte = (('Pantalla','Pantalla',),('Archivo_Excel','Archivo_Excel',),)
+	#op = forms.ChoiceField(label='Dirigir a:',initial='Pantalla',choices=opciones_rpte,required=False)
+
+
+	error_messages = {
+		
+		'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+		'Error_en_Fecha': 'Existe un error en el valor de la fecha !',
+		'campo_vacio': 'Este omitiendo un valor de fecha, por favor ingrese un valor en todos los campos fecha !'
+		}
+		
+
+	def clean(self):
+
+		
+		
+		cleaned_data = super(RpteArtNoSolicitadosForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		#op = cleaned_data.get('op')
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+	
+		
 
 		return self.cleaned_data

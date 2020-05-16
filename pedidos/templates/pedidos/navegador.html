@@ -21,6 +21,9 @@
               <li><a href="/pedidos/pedidosgeneral">Pedidos</a></li>
               <li><a href="/pedidos/devolucion_socio">Devoluciones del socio</a></li>
               <li role="separator" class="divider"></li>
+              <li><a href="/pedidos/piezas_no_solicitadas">Captura de piezas no solicitadas</a></li>
+              <li role="separator" class="divider"></li>
+
               <li><a href="/pedidos/recepcion_dev_prov">Recepcion devoluciones a proveedor</a></li>
               <li><a href="/pedidos/lista_devoluciones_recepcionadas">Lista devoluciones recepcionadas</a></li>
 
@@ -70,6 +73,9 @@
             <li><a href="{% url 'pedidos:consultacomisiones'%}">Ingresos por comisiones</a></li>
             <li><a href="{% url 'pedidos:consultadsctos'%}">Desglose de descuentos aplicados a ventas por proveedor</a></li>
             <li><a href="{% url 'pedidos:vtaneta_socio'%}">Ventas netas por socio de un proveedor</a></li>
+            <li role="separator" class="divider"></li>
+
+            <li><a href="{% url 'pedidos:rpte_piezas_no_solicitadas'%}">Piezas no solicitadas</a></li>
 
             <li><a href="#"></a></li>
 

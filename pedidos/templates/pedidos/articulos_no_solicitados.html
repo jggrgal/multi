@@ -1,0 +1,288 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<script>
+$(document).ready(function() {
+       
+  window.addEventListener("beforeunload", function (e) {
+    var confirmationMessage = "\o/";
+
+    e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+    return confirmationMessage; 
+
+  //alert("Alerta sobre uracan")             // Gecko, WebKit, Chrome <34
+  });
+
+  
+  
+
+});
+
+
+
+</script>
+
+
+ 
+
+<div class="row">
+   <br>
+
+  <!--<div class="col-md-4"></div> -->
+  <div class="col-md-4">
+    <br>
+  	<div class="panel panel-success">
+      
+  		<div class='panel-heading'>
+        <h4 class="panel-title">ARTICULOS NO SOLICITADOS. <h4>
+        <!--<p class="bg-info"><h6>Vaya eligiendo tantos artículos como desee y al final procese...</h6></p>  -->
+      </div>
+  		<div class='panel-body'>
+  	
+  			 
+		  	{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+
+          </strong>	
+        <form id="PedidosForm" action="{% url 'pedidos:crea_pedidos' %}" method="post">
+				  <div class="form-group">
+					 {% csrf_token %}
+            {{ form | crispy }}
+            <input  style="display: none;" class="btn btn-lg btn-success btn-block" type="submit" value="Agregar" />
+				  </div>
+          <input id="grabar" class="btn btn-success btn-lg" type="button" value="Elegir" />
+          <div id="mensaje">
+          </div>
+			 </form>
+		  </div>
+		</div>	
+	
+  </div>
+  <div class="col-md-8">
+
+    <div class="warning"> Capturando para: {{nombre_socio}}</div>
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title">Articulos capturados</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table id="TablaCarrito" class='table table-hover table-bordered table-condensed'>
+            <h6>
+              <secondary>
+                <thead>
+                  <tr class='warning'>
+
+                
+                    <th>id.</th>
+                    <th>Pagina</th>
+                    <th>Estilo</th>
+                    <th>Marca</th>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Precio</th>
+                    <th></th>
+                    <!--<th><input class='check_all' type='checkbox' onclick="select_all()"/></th>--> 
+                  
+
+                  </tr>
+                </thead>
+              <div id="searchResults">
+                <tbody id="cesto">
+                  <tr>
+                  
+
+                  </tr> 
+
+
+                </tbody> 
+              </div> 
+
+              </secondary>
+            </h6>
+          </table>
+        </div>
+
+        
+                       
+        
+        <br>
+
+       
+        
+        
+        
+        
+    </div>
+
+          
+        
+          
+        
+
+
+  </div>
+
+  <div class ="col-md-4">
+
+    <div ><h3>Artículos: <span id="contador" class="label label-primary">0</span></h3></div>
+        
+        <!--<p>Total de artículos :</p><div id="contador">0</div>-->
+        <!--<p>Monto Total:</p><div id="grantotal">0</div>-->
+  </div>
+
+  <div class="col-md-4" align="right">
+    <div ><h3>Total: $ <span id="grantotal" class="label label-primary" value=0 ></span></h3></div> 
+
+  </div>
+<!--
+  <div class="col-md-4" align="right">
+    <div ><h3>Total: $ <span  class="label label-primary"  >    <input id="grantotal" name="grantotal" class="form-control" type="number" value=0>
+</span></h3></div> -->
+
+  </div>
+
+  <br><br><br>
+
+  <hr>
+  <div class="col-md-4">
+      
+    <label for="sucursal" style="">Recoger pedido en:</label> 
+  
+    <select id="sucursal" class="form-control" init="{{ id_sucursal }}" style="">
+
+        <!-- SE SELECCIONA ANAHUAC EN LAS TRES..YA QUE ES ANAHUA A DONDE IRAN LOS DEVUELTOS -->
+          <option value="0">ANAHUAC</option>
+          <option value="1">ANAHUAC</option>
+          <option value="2">ANAHUAC</option>
+          <option value="3" selected="selected" >ANAHUAC</option>
+
+            
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <label for="usr_id">Usuario_id:</label> 
+      <input id="usr_id" name="usr_id" class="form-control" type="password" pattern=".{,3}" value=0>
+
+      <label for="viasolicitud_id" style="display: none;">Via de solicitud:</label> 
+      <select id="viasolicitud_id" name="viasolicitud" class="form-control" style="display: none;">
+            {% for entry in vias_solicitud %}
+                <option value="{{ entry.id }}">{{ entry.descripcion }}</option>
+            {% endfor %}
+      </select>
+  </div>
+  <br><br><br>
+  
+  <div class="col-md-4">
+    <label for="tiposervicio_id" style="display: none;">Tipo de servicio:</label> 
+    <select id="tiposervicio_id" name = "tiposervicio" class="form-control" style="display: none;">
+          {% for entry in tipo_servicio %}
+              <option value="{{ entry.tiposervicio }}">{{ entry.tiposervicio }}</option>
+          {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label for="anticipo_id" style="display: none;">Anticipo:</label> 
+    <input id="anticipo_id" name="anticipo" class="form-control" type="number" value=0 style="display: none;">
+  
+         
+  <!--</div> -->
+   </div>
+   
+    <div class="col-md-8">
+      
+    
+         
+  <!--</div> -->
+   </div>
+    
+  
+  
+  <br><br><br><br>
+
+
+      
+  <div class="col-md-4">
+    <br>
+    <p align="left">
+      <a class="btn btn-success btn-lg " href="/pedidos/consulta_menu" role="button">Regresar</a>
+    </p>
+    
+  </div>
+
+  <div class="col-md-4">
+    <br>
+    <p align="left">
+      <button id='procesar' type="button" class="btn btn-success btn-lg"> Procesar</button>
+
+          
+       <!-- <a id ="idpedido" name="p_num_pedido" class="btn btn-success btn-lg " href="/pedidos/imprime_ticket/" value="000000" role="button">000000</a> -->
+
+       <!--
+      <form id="imp_pedido_form" action="{% url 'pedidos:imprime_ticket' %}" method="GET">
+        <input id ='idpedido' name ='p_num_pedido' class=btn-success-btn-lg" type="submit"  value="000000" />
+      </form>-->
+
+
+
+
+    </p>
+  </div>
+    
+
+  <br><br><br><br>
+  <div class="col-md-8">
+    
+                        
+    <p>
+                                <input id="input_estilo" type="text"  placeholder="Estilo a buscar..." aria-describedby="basic-addon1"/>
+
+                          <input  id="buscar_estilopagina" class="btn btn-sm btn-success" type="submit" value="Buscar" /> 
+                          
+                                
+                        
+                        
+                          <div class="table-responsive">
+                  
+                              <table id="busca_socio_javascr" class="table table-condensed table-hover table-bordered table-inverse">
+                                <thead>
+                                  <tr>
+                                    <th>estilo</th>
+                                    <th>pagina</th>
+                                    <th>precio</th>
+                                   
+                                  </tr>
+                                </thead>
+                               <tbody id='estilopagina'>
+                                
+                                 
+                               </tbody>
+                                                          
+                              </table>
+                          </div>
+
+
+
+    </p>    
+ 
+      
+  </div>
+  <div>
+    
+  </div>
+  
+</div>
+
+<script>
+
+  var is_staff = "{{is_staff }}";
+ 
+</script>
+
+
+
+
+{% endblock %}

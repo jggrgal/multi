@@ -53,7 +53,9 @@ from . forms import (AccesoForm,\
 					DatosCatalogoForm, # MODIFICA DATOS DEL CATALOGO
 					CreaCatalogoForm,
 					Lista_dev_recepcionadasForm,
-					BuscaEstiloForm)
+					BuscaEstiloForm,
+					PiezasNoSolicitadasForm,
+					RpteArtNoSolicitadosForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -1118,10 +1120,13 @@ def grabar_pedidos(request):
 				#El select con la tabla 'articulo' 
 
 
-
+				
 				cursor.execute("SELECT b.codigoarticulo, b.precio,if(a.descontinuado,'1','0') as descont From preciobase b inner join articulo a  on ( b.empresano=a.empresano and b.codigoarticulo=a.codigoarticulo and b.catalogo=a.catalogo) where b.proveedorid=%s and b.temporada =%s and b.catalogo=%s and b.pagina=%s and b.estilo=%s and b.idmarca=%s and b.idcolor=%s and b.talla=%s limit 1;", [id_prov,id_temp,id_cat,id_pag,id_est,id_mar,id_col,id_talla])
 				num_art = cursor.fetchone()
 
+
+				cursor.execute("SELECT b.precio From preciosopcionales b  where b.empresano=1  and b.Proveedor=%s and b.Temporada=%s and b.catalogo=%s and b.Articuloid=%s and b.TipoPrecio=%s limit 1;",(id_prov,id_temp,id_cat,num_art[0],'Cliente',))
+				precio_opcional = cursor.fetchone()
 			
 				
 				
@@ -1130,6 +1135,7 @@ def grabar_pedidos(request):
 
 				#Selecciona el precio dependiendo de si se es socio o cliente:
 
+				precio_cliente = precio_opcional[0]
 				precio_final = num_art[1] if EsSocio else precio_cliente
 	
 				try:
@@ -1147,7 +1153,7 @@ def grabar_pedidos(request):
 
 					data = {'id':id_rec[0],'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':str(id_talla),'precio': str(precio_final),'id_tallaalt':id_tallaalt,'descontinuado': num_art[2],'is_staff':request.session['is_staff'],}
 					
-				except Error as e:
+				except DatabaseError as e:
 					
 					data = "Error en la ejecucion de la insercion: "
 					print e		
@@ -1442,6 +1448,16 @@ def procesar_pedido(request):
 			# y, lsuc toma el numero de la sucursal_activa en la session.
 			
 			socio_a_validar = request.session['socio_pidiendo']
+			
+			# Si es un pedido para el socio 3 (Devoluciones a provedor) directamente
+			# debe asignar el status RecepEnDevol.
+
+			if socio_a_validar != 3:
+
+				status_a_asignar='Por Confirmar'
+			else:
+				status_a_asignar='RecepEnDevol'
+			
 			#capturista = request.session['socio_zapcat'] # toma el valor del empleado que captura
 			capturista =  request.POST.get('usr_id') # toma el id  de confirmacion del empleado que captura 
 			tiposervicio = request.POST.get('tiposervicio')
@@ -1566,9 +1582,9 @@ def procesar_pedido(request):
 					raise ValueError("Hay un valor invalido para el campo 'precio' no se grabara la transaccion !")
 
 		
-				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,'Por Confirmar',0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
+				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,status_a_asignar,0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
-				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,'Por Confirmar',datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
+				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,status_a_asignar,datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
 				cursor.execute("INSERT INTO pedidos_encontrados(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,FechaEncontrado,BodegaEncontro,FechaProbable,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,encontrado,id_cierre,causadevprov,observaciones) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,'19010101',0,'19010101','','','','','','','','','','',0,0,''])
 				cursor.execute("INSERT INTO pedidos_notas(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,Observaciones) VALUES (%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,''])
 				
@@ -10764,6 +10780,172 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 
 
 
+def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' de pedido o 'D' de documento y se pasa a los templates 
+	#pdb.set_trace()
 
+	context ={}	
+	asociado_data =()
+
+	tipo='P'
+
+	try:
+
+		existe_socio = True
+		is_staff =  request.session['is_staff']
+		id_sucursal = 0
+		session_id = request.session.session_key
+		
+	except KeyError:
+		
+		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
+		return render(request, 'pedidos/error.html',context)
+
+	form = PiezasNoSolicitadasForm(request)
+
+	socio = 3
+	
+	cursor = connection.cursor()
+	
+	cursor.execute("SELECT asociadono,nombre,appaterno,apmaterno,EsSocio,telefono1 from asociado where asociadono=%s;",(socio,))
+	
+	asociado_data = cursor.fetchone()
+				
+	print asociado_data	
+	print asociado_data		
+
+
+	request.session['socio_pidiendo'] = asociado_data[0]
+	request.session['EsSocio'] = asociado_data[4]
+	num_socio = asociado_data[0]
+	telefono_socio = asociado_data[5]
+	nombre_socio = str(asociado_data[0])+' '+asociado_data[1]+ ' '+asociado_data[2]+' '+(asociado_data[3] if (asociado_data[3] is not None) else 'sin apellido')+'          TELEFONO: '+asociado_data[5]
+	
+
+	# trae catalogo de viasolicitud
+
+	cursor.execute("SELECT id,descripcion FROM viasolicitud;")
+	vias_solicitud = dictfetchall(cursor)
+
+	# trae catalogo de tipos de servicio
+
+	cursor.execute("SELECT tiposervicio from tiposervicio;")
+	tipo_servicio = dictfetchall(cursor)
+
+
+	cursor.execute("DELETE FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])	
+
+
+	cursor.close()
 
 	
+	cursor = connection.cursor()
+	cursor.close()
+
+
+	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':3,'is_staff':is_staff,'tipo':tipo,}
+	return render(request,'pedidos/articulos_no_solicitados.html',context,)
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# REPORTE DE ARTICULOS NO SOLICITADOS ORDENADO POR MARCA 
+
+
+
+def rpte_piezas_no_solicitadas(request):
+	#pdb.set_trace()
+	mensaje =''
+	if request.method == 'GET':
+
+		
+
+		form = RpteArtNoSolicitadosForm(request.GET)
+
+		if form.is_valid():
+
+			proveedor = form.cleaned_data['proveedor']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			#op = form.cleaned_data['op']
+			op='Pantalla'
+			cursor=connection.cursor()
+
+			
+			"""cursor.execute("SELECT c.id,c.fechacolocacion,c.fechacierre,psf.fechatentativallegada,c.prov_id,c.almacen,c.total_articulos,c.numpedido,c.paqueteria,c.NoGuia FROM prov_ped_cierre c  left  join  pedidos_encontrados p on (c.id=p.id_cierre)  left join  pedidoslines psf on (p.empresano=psf.empresaNo and p.pedido=psf.pedido and p.productono=psf.productono and p.catalogo=psf.catalogo and p.nolinea=psf.nolinea) WHERE psf.fechatentativallegada>=%s and psf.fechatentativallegada<=%s and c.id<>0 group by c.id,psf.fechatentativallegada;",(fechainicial,fechafinal))"""
+
+			if proveedor != u'0':
+				
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,proveedor,))
+			else:
+				
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s order by (a.idproveedor,p.fechapedido);",(fechainicial,fechafinal,))
+
+			 
+			lista_pedidos = dictfetchall(cursor)
+
+			
+
+			elementos = len(lista_pedidos)
+
+			
+
+
+			"""cursor.execute("SELECT p.razonsocial,a.razonsocial from proveedor p inner join almacen a on (p.empresano=a.empresano and p.proveedorno=a.proveedorno) where p.proveedorno=%s;",(ped['prov_id'],))
+			
+			prov_alm = cursor.fetchone()"""
+
+			if not lista_pedidos:
+				mensaje = 'No se encontraron registros !'
+				return render(request,'pedidos/rpte_piezas_no_solicitadas.html',{'mensaje':mensaje,})
+
+			else:
+
+				if op == 'Pantalla':
+
+					print "lo que hay en pedidos"
+					for ped in lista_pedidos:
+						print ped
+
+					
+					mensaje ="Registros encontrados == > "
+
+					context = {'form':form,'mensaje':mensaje,'elementos':elementos,'lista_pedidos':lista_pedidos,}	
+				
+					return render(request,'pedidos/rpte_piezas_no_solicitadas.html',context)
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="piezas_no_solicitadas.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['PEDIDO','FECHA_PEDIDO','PROVEEDOR','MARCA','ESTILO','COLOR','TALLA','PRECIO'])
+					
+					for registro in lista_pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['Pedido','fechapedido','provnom','idmarca','idestilo','idcolor','talla','precio'] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
+
+		
+	else:
+
+		form = RpteArtNoSolicitadosForm()
+	return render(request,'pedidos/rpte_piezas_no_solicitadas_form.html',{'form':form,})
+	
+
+
