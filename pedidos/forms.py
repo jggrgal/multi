@@ -2869,9 +2869,11 @@ class PiezasNoSolicitadasForm(forms.Form):
 		ltalla = []
 		lper_ent = lista_PeriodosEntrega()
 		
+		
 
 		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
 		opcion_opt = (('1','1ra.'),('2','2da'),('3','3ra.'))
+		lista_almacenes = ((0,'Seleccione'),(1,'Seleccione'),(2,'Seleccione'),(3,'Seleccione'),(4,'Seleccione'),(5,'Seleccione'),(6,'Seleccione'),(7,'Seleccione'),(8,'Seleccione'),(9,'Seleccione'))
 
 		
 		#pr_dict = [['1','MODELI'],['2','IMPULS'],['3','OTRO']]
@@ -2906,7 +2908,7 @@ class PiezasNoSolicitadasForm(forms.Form):
 		label='Talla',initial='Seleccione',required='True')
 
 		self.fields['tallaalt'] = forms.CharField(label='',help_text='Si talla es "NE", ingrese una aqui')
-
+		self.fields['almacen'] = forms.ChoiceField(widget = forms.Select(),label='Almacen',initial=0,choices=lista_almacenes)
 
 
 		try:# Á diferencia de pedido normal en art no solicitados siempre se esconderan algunos campos por eso se la siguiente variable

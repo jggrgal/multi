@@ -2121,9 +2121,16 @@ $(".btn_cancela_pedido").prop('disabled',true)
         plazoentrega = $('#id_plazoentrega').val();
         opcioncompra = $('#id_opcioncompra').val();
         fechamaximaentrega = $('#id_fechamaximaentrega').val();
+        
         precio_cliente = $('#id_precio').val();
 
+         if (num_socio == 3){
 
+          almacen = $('#id_almacen').val();
+        }
+         else {
+          almacen = 0;
+        };
                
 
         hayerror = 0;
@@ -2161,7 +2168,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
                       
                       url: '/pedidos/grabar_pedidos/',
                       type: 'POST',
-                      data:{'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':id_talla,'id_tallaalt':id_tallaalt,'descontinuado':descontinuado,'opcioncompra':opcioncompra,'plazoentrega':plazoentrega,'fechamaximaentrega':fechamaximaentrega,'precio_cliente':precio_cliente},
+                      data:{'id_prov':id_prov,'id_temp':id_temp,'id_cat':id_cat,'id_pag':id_pag,'id_est':id_est,'id_mar':id_mar,'id_col':id_col,'id_talla':id_talla,'id_tallaalt':id_tallaalt,'descontinuado':descontinuado,'opcioncompra':opcioncompra,'plazoentrega':plazoentrega,'fechamaximaentrega':fechamaximaentrega,'precio_cliente':precio_cliente,'almacen':almacen,},
                       datatype:'application/json',
                       //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                       success: function(data){

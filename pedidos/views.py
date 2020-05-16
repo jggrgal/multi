@@ -1083,7 +1083,7 @@ def grabar_pedidos(request):
 		plazoentrega = request.POST.get('plazoentrega')
 		fechamaximaentrega = request.POST.get('fechamaximaentrega')
 		precio_cliente = request.POST.get('precio_cliente')
-
+		almacen = request.POST.get('almacen')
 		# convierte la fecha a formato adecuado para poder ser grabada en base de datos		
 		if fechamaximaentrega is not None:
 			f_convertida = datetime.strptime(fechamaximaentrega, "%d/%m/%Y").date()
@@ -1168,7 +1168,8 @@ def grabar_pedidos(request):
 		raise Http404
 		
 
-# ELIMINACION DE ARTICULOS DE LA TABLA TEMPORAL DE PEDIDOS.
+# ELIMINACION DE
+ ARTICULOS DE LA TABLA TEMPORAL DE PEDIDOS.
 
 def eli_reg_tmp(request):
 
@@ -10842,7 +10843,7 @@ def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' d
 	cursor.close()
 
 
-	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':num_socio,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':3,'is_staff':is_staff,'tipo':tipo,}
+	context = {'form':form,'nombre_socio':nombre_socio,'num_socio':3,'tipo_servicio':tipo_servicio,'vias_solicitud':vias_solicitud,'id_sucursal':3,'is_staff':is_staff,'tipo':tipo,}
 	return render(request,'pedidos/articulos_no_solicitados.html',context,)
 	
 
