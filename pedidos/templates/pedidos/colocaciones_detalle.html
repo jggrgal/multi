@@ -94,7 +94,7 @@
                         <td>{% if "1901" in item.FechaMaximaEntrega %} NO ESP.{% endif %}
                             {{item.FechaMaximaEntrega | date:'d/m/y'  }}</td>
                     {% endlocalize %}
-                    <td>{{item.OpcionCompra}}</td>
+                    <td {% if item.OpcionCompra != '1ra.' %} style='background:red;' {% else %} style='background:white;'{% endif %} >{{item.OpcionCompra}}</td>
                     <td name="encontrado">
 		                 <select class="select form-control sel_encontrado" id="id_encontrado" >
 		                 	

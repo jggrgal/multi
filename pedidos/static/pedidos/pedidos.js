@@ -2124,7 +2124,10 @@ $(".btn_cancela_pedido").prop('disabled',true)
         
         precio_cliente = $('#id_precio').val();
 
-         if (num_socio == 3){
+        console.log("el numero de socio es:")
+        console.log(num_socio)
+
+        if (num_socio == 3){
 
           almacen = $('#id_almacen').val();
         }
@@ -2571,7 +2574,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                     url: '/pedidos/procesar_recepcion/',
                     type: 'POST',
-                    data: {'TableData':TableData,'almacen':almacen,'nueva_fecha_llegada':nueva_fecha_llegada,'marcartodo_nollego':marcartodo_nollego,'cierre':cierre},
+                    data: {'TableData':TableData,'almacen':almacen,'nueva_fecha_llegada':nueva_fecha_llegada,'marcartodo_nollego':marcartodo_nollego,'cierre':cierre,'usr_id':$('#usr_id_pedidos_recepcionar').val(),},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){

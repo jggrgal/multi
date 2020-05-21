@@ -23,8 +23,9 @@
                     <th>Color</th>
                     <th>Talla</th>
                     <th>Precio</th>
+                    <th>Bodega</th>
                     <!--<th>Sucursal</th>
-                    <th>Bodega_encontro</th>
+                    
                     <th>Socio_num</th>
                     <th>Socio_nombre</th>-->
 
@@ -46,7 +47,7 @@
                 		<td>{% if item.talla == 'NE' %} {{item.observaciones}} {% else %} {{item.talla}} {% endif %}</td>
                         
                 		<td>{{item.precio}}</td>
-                		
+                		<td>{{ item.RazonSocial }}</td>
                 	</tr>
                 {% endfor %}
                 </tbody>

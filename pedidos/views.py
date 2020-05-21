@@ -600,7 +600,7 @@ def crea_pedidos(request):
 
 	form = PedidosForm(request)
 	mensaje = "Entrando de nuevo a la forma"
-	return render(request,'pedidos/crea_pedidos.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,'tipo':tipo,})	
+	return render(request,'pedidos/crea_pedidos.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,'tipo':tipo,'num_socio':0,})	
 
 #  LOGICA PARA COMBO DE TEMPORADAS
 
@@ -1083,7 +1083,9 @@ def grabar_pedidos(request):
 		plazoentrega = request.POST.get('plazoentrega')
 		fechamaximaentrega = request.POST.get('fechamaximaentrega')
 		precio_cliente = request.POST.get('precio_cliente')
-		almacen = request.POST.get('almacen')
+		almacen = request.POST.get('almacen') # Almacen del cliente, se agrega para recibir 
+											  # el almacen seleccionado solamente en pantalla de piezas no solicitadas (proveedor 3)
+											  # para pedidos normales, esta campo trae un valor de cero que se asigna en pedidos.js
 		# convierte la fecha a formato adecuado para poder ser grabada en base de datos		
 		if fechamaximaentrega is not None:
 			f_convertida = datetime.strptime(fechamaximaentrega, "%d/%m/%Y").date()
@@ -1135,14 +1137,22 @@ def grabar_pedidos(request):
 
 				#Selecciona el precio dependiendo de si se es socio o cliente:
 
-				precio_cliente = precio_opcional[0]
+				try:
+
+					precio_cliente = precio_opcional[0] # en ocaciones precio[0] trae un None por eso se maneja esta excepcion.
+
+				except TypeError:
+
+					precio_cliente = num_art[1]
+
+
 				precio_final = num_art[1] if EsSocio else precio_cliente
 	
 				try:
 					#pdb.set_trace()
 
 														
-					cursor.execute("INSERT INTO pedidos_pedidos_tmp (session_key,idproveedor,idproducto,catalogo,precio,temporada,tallaalt,opcioncompra,plazoentrega,fechamaximaentrega) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (session_id,id_prov,num_art[0],id_cat,precio_final,id_temp,id_tallaalt,opcioncompra,plazoentrega,f_convertida))
+					cursor.execute("INSERT INTO pedidos_pedidos_tmp (session_key,idproveedor,idproducto,catalogo,precio,temporada,tallaalt,opcioncompra,plazoentrega,fechamaximaentrega,almacen_prov) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (session_id,id_prov,num_art[0],id_cat,precio_final,id_temp,id_tallaalt,opcioncompra,plazoentrega,f_convertida,almacen,))
 					
 					cursor.execute("SELECT id FROM pedidos_pedidos_tmp ORDER BY id DESC LIMIT 1")
 					id_rec = cursor.fetchone()
@@ -1168,8 +1178,7 @@ def grabar_pedidos(request):
 		raise Http404
 		
 
-# ELIMINACION DE
- ARTICULOS DE LA TABLA TEMPORAL DE PEDIDOS.
+# ELIMINACION DE ARTICULOS DE LA TABLA TEMPORAL DE PEDIDOS.
 
 def eli_reg_tmp(request):
 
@@ -1488,7 +1497,7 @@ def procesar_pedido(request):
 			anticipo = 0
 			viasolicitud = 3
 			tiposervicio = request.POST.get('tiposervicio')
-
+			status_a_asignar='Por Confirmar'
 		
 		# trae el numero de sucursal donde se recogera el pedido
 		lsuc = request.POST.get('lsuc')
@@ -1558,7 +1567,7 @@ def procesar_pedido(request):
 
 			#Selecciona registro por registro de la tabla temporal (delimitada por la sesion en curso) y actualiza el detalle del pedido.
 			
-			cursor.execute("SELECT idproducto,catalogo, precio,temporada,tallaalt,opcioncompra FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])
+			cursor.execute("SELECT idproducto,catalogo, precio,temporada,tallaalt,opcioncompra,almacen_prov FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])
 			datos = namedtuplefetchall(cursor)
 
 			count = 1
@@ -1586,7 +1595,13 @@ def procesar_pedido(request):
 				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,status_a_asignar,0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
 				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,status_a_asignar,datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
-				cursor.execute("INSERT INTO pedidos_encontrados(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,FechaEncontrado,BodegaEncontro,FechaProbable,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,encontrado,id_cierre,causadevprov,observaciones) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,'19010101',0,'19010101','','','','','','','','','','',0,0,''])
+				
+				#Si el socio es 3 se crea un registro con status de 'Aqui', esto para que puedan los productos no solicitados 
+				# imprimirse en reportes de devoluciones al proveedor. 
+				if socio_a_validar ==3:
+					cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,'Aqui',datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
+
+				cursor.execute("INSERT INTO pedidos_encontrados(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,FechaEncontrado,BodegaEncontro,FechaProbable,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,encontrado,id_cierre,causadevprov,observaciones) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,'19010101',datos[count-1].almacen_prov,'19010101','','','','','','','','','','',0,0,''])
 				cursor.execute("INSERT INTO pedidos_notas(EmpresaNo,Pedido,ProductoNo,Catalogo,NoLinea,Observaciones) VALUES (%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,''])
 				
 				count = count + 1
@@ -4363,8 +4378,8 @@ def procesar_recepcion(request):
 		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
 		datos = json.loads(TableData)
 
-		capturista = request.session['socio_zapcat']
-		
+		#capturista = request.session['socio_zapcat'] Esta linea se cambio por la que sigue..porque no se grababa el usuario que hacia la operacion.
+		capturista =  request.POST.get('usr_id')
 
 		almacen = request.POST.get('almacen')
 		almacen = almacen.encode('latin_1')
@@ -10878,8 +10893,8 @@ def rpte_piezas_no_solicitadas(request):
 			proveedor = form.cleaned_data['proveedor']
 			fechainicial = form.cleaned_data['fechainicial']
 			fechafinal = form.cleaned_data['fechafinal']
-			#op = form.cleaned_data['op']
-			op='Pantalla'
+			op = form.cleaned_data['op']
+			#op='Pantalla'
 			cursor=connection.cursor()
 
 			
@@ -10887,10 +10902,10 @@ def rpte_piezas_no_solicitadas(request):
 
 			if proveedor != u'0':
 				
-				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,proveedor,))
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal,e.BodegaEncontro,alm.RazonSocial FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) INNER JOIN pedidos_encontrados e ON (l.empresano=e.empresano and l.pedido=e.pedido and l.productono=e.productono and l.catalogo=e.catalogo and l.nolinea=e.nolinea) INNER JOIN almacen alm on (alm.empresano=a.empresano and alm.proveedorno=a.idproveedor and alm.almacen=e.bodegaencontro) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,proveedor,))
 			else:
 				
-				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal FROM pedidoslines l INNER JOIN   pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (l.EmpresaNo=a.EmpresaNo and l.ProductoNo=a.codigoarticulo and l.Catalogo=a.catalogo) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s order by (a.idproveedor,p.fechapedido);",(fechainicial,fechafinal,))
+				cursor.execute("SELECT l.Pedido,l.ProductoNo,l.Catalogo,l.Nolinea,p.fechapedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,if(a.talla='NE',l.observaciones,a.talla) as talla,l.precio,a.idProveedor,p.idSucursal,e.BodegaEncontro,alm.RazonSocial FROM pedidoslines l INNER JOIN pedidos_encontrados e ON (l.EmpresaNo=e.EmpresaNo and l.Pedido=e.Pedido and l.ProductoNo=e.ProductoNo and l.Catalogo=e.Catalogo and l.NoLinea=e.NoLinea) INNER JOIN pedidosheader p ON (l.EmpresaNo= p.EmpresaNo and l.Pedido=p.PedidoNo) INNER JOIN articulo a ON (e.EmpresaNo=a.EmpresaNo and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN almacen alm on (alm.empresano=a.empresano and alm.proveedorno=a.idproveedor and alm.almacen=e.bodegaencontro) WHERE l.empresano=1 and l.status='RecepEnDevol' and  p.fechapedido>=%s and p.fechapedido<=%s order by a.idmarca,p.fechapedido;",(fechainicial,fechafinal,))
 
 			 
 			lista_pedidos = dictfetchall(cursor)
@@ -10930,12 +10945,12 @@ def rpte_piezas_no_solicitadas(request):
 					response['Content-Disposition'] = 'attachment; filename="piezas_no_solicitadas.csv"'
 
 					writer = csv.writer(response)
-					writer.writerow(['PEDIDO','FECHA_PEDIDO','PROVEEDOR','MARCA','ESTILO','COLOR','TALLA','PRECIO'])
+					writer.writerow(['PEDIDO','FECHA_PEDIDO','MARCA','ESTILO','COLOR','TALLA','PRECIO','BODEGA'])
 					
 					for registro in lista_pedidos:
 						print registro
 						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
-						llaves_a_mostrar = ['Pedido','fechapedido','provnom','idmarca','idestilo','idcolor','talla','precio'] 
+						llaves_a_mostrar = ['Pedido','fechapedido','idmarca','idestilo','idcolor','talla','precio','RazonSocial'] 
 						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
 						lista = [registro[x] for x in llaves_a_mostrar]					
 						writer.writerow(lista)

@@ -2956,7 +2956,7 @@ class RpteArtNoSolicitadosForm(forms.Form):
 		
 
 	opciones_rpte = (('Pantalla','Pantalla',),('Archivo_Excel','Archivo_Excel',),)
-	#op = forms.ChoiceField(label='Dirigir a:',initial='Pantalla',choices=opciones_rpte,required=False)
+	op = forms.ChoiceField(label='Dirigir a:',initial='Pantalla',choices=opciones_rpte,required=False)
 
 
 	error_messages = {
