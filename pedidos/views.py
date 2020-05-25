@@ -398,7 +398,7 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from Asociado limit 20;')
+	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
 	asociados = dictfetchall(cursor)
 	for a in asociados:
 		print a
@@ -10963,5 +10963,116 @@ def rpte_piezas_no_solicitadas(request):
 		form = RpteArtNoSolicitadosForm()
 	return render(request,'pedidos/rpte_piezas_no_solicitadas_form.html',{'form':form,})
 	
+
+
+
+def edita_socio(request,asociadono):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	
+
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = DatosAsociadoForm(request.POST)
+		if form.is_valid():
+			asociadoo = form.cleaned_data['asociadono']
+			nombre = form.cleaned_data['nombre']
+			appaterno = form.cleaned_data['appaterno']
+			apmaterno = form.cleaned_data['apmaterno']
+			direccion = form.cleaned_data['direccion']
+			colonia = form.cleaned_data['colonia']
+			ciudad = form.cleaned_data['ciudad']
+			estado = form.cleaned_data['estado']
+			pais = form.cleaned_data['pais']
+			codigopostal = form.cleaned_data['codigopostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			direccionelectronica = form.cleaned_data['direccionelectronica']
+			usr_id = form.cleaned_data['usr_id']
+			essocio = form.cleaned_data['essocio']
+			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
+			numeroweb = form.cleaned_data['numeroweb']
+			
+
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('UPDATE asociado SET nombre = %s,\
+				apmaterno = %s,\
+				appaterno = %s,\
+				Direccion = %s,\
+				Colonia = %s,\
+				Ciudad = %s,\
+				Estado = %s,\
+				Pais = %s,\
+				CodigoPostal = %s,\
+				telefono1 = %s,\
+				telefono2 = %s,\
+				fax = %s,\
+				cel = %s,\
+				radio = %s,\
+				direccionelectronica= %s,\
+				essocio = %s,\
+				forzarcobroanticipo = %s,\
+				num_web = %s,\
+				WHERE asociadono=%s;',(nombre.upper(),appaterno.upper(),apmaterno.uper(),Direccion.upper(),Colonia.upper(),Ciudad.upper(),Estado.upper(),Pais.upper(),CodigoPostal,telefono1,telefono2,fax,cel,radio,direccionelectronica.lower(),forzarcobroanticipo,numeroweb,asociadono,))
+			
+				cursor.execute("UPDATE ProvConfBono SET BaseParaBono=%s WHERE proveedorno=%s;",(baseparabono,proveedorno,))
+				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:asociados'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+			pass
+	else:	
+
+		form = DatosProveedorForm()
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT 	p.asociadono,\
+								p.nombre,\
+								p.appaterno,\
+								p.apmaterno,\
+								p.Direccion,\
+								p.Colonia,\
+								p.Ciudad,\
+								p.Estado,\
+								p.Pais,\
+								p.CodigoPostal,\
+								p.telefono1,\
+								p.telefono2,\
+								p.fax,\
+								p.cel,\
+								p.radio,\
+								p.direccionelectronica,\
+								p.FechaAta,\
+								p.FechaBaja,\
+								p.UsuarioQueDioAlta,\
+								p.Usuaroi,\
+								p.manejar_desc,\
+								k.BaseParaBono\
+								from proveedor p inner join ProvConfBono k on (k.empresano= 1 and p.proveedorno=k.proveedorno) where p.proveedorno=%s;",(proveedorno,))
+		proveedor = cursor.fetchone()
+
+		form = DatosProveedorForm(initial={'ProveedorNo':proveedor[0],'RazonSocial':proveedor[1],'Direccion':proveedor[2],'Colonia':proveedor[3],'Ciudad':proveedor[4],'Estado':proveedor[5],'Pais':proveedor[6],'CodigoPostal':proveedor[7],'telefono1':proveedor[8],'telefono2':proveedor[9],'fax':proveedor[10],'celular':proveedor[11],'radio':proveedor[12],'email':proveedor[13],'FechaAlta':proveedor[14],'maneja_desc':1 if proveedor[18]=='\x01' else 0,'baseparabono':True if proveedor[19] else False,})
+					
+	return render(request,'pedidos/edita_proveedor.html',{'form':form,'proveedorno':proveedorno,})
 
 

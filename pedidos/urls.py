@@ -6,6 +6,7 @@ urlpatterns = [
 	url(r'^index/$',views.index,name='index'),
 	url(r'^acceso/$',views.acceso,name='acceso'),
 	url(r'^asociados/$',views.lista_asociados,name='lista_asociados'),
+	url(r'^edita_socio/(?P<asociadono>[0-9]{1,8})/$',views.edita_socio,name='edita_socio'),
 	url(r'^busca_pedidos/$',views.busca_pedidos,name='busca_pedidos'),
 	url(r'^lista_pedidos/$',views.lista_pedidos,name='lista_pedidos'),
 	url(r'^crea_pedidos/$',views.crea_pedidos,name='crea_pedidos'),

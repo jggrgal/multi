@@ -2992,3 +2992,170 @@ class RpteArtNoSolicitadosForm(forms.Form):
 		
 
 		return self.cleaned_data
+
+
+class DatosAsociadoForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosAsociadoForm, self).__init__(*args,**kwargs)
+
+		self.fields['asociadoNo'].widget.attrs['readonly'] = True
+
+
+	asociadono = forms.IntegerField(label='Socio Num.',required=True)
+	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
+	appaterno = forms.CharField(label='Apellido Paterno',required=True,max_length=45)	
+	apmaterno = forms.CharField(label='Apellido Materno',required=True,max_length=45)	
+	direccion = forms.CharField(label='Direccion',required=True,max_length=45)
+	colonia = forms.CharField(label='Colonia',required=True,max_length=45)
+	ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
+	estado = forms.CharField(label='Estado',required=True,max_length=45)
+	pais = forms.CharField(label='Pais',required=True,max_length=11)
+	codigopostal = forms.IntegerField(label='C.P.',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
+	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
+	fax = forms.CharField(label='Fax',required=True,max_length=15)
+	celular = forms.CharField(label='Celular',required=True,max_length=15)
+	radio = forms.CharField(label='radio',required=True,max_length=15)
+	direccionelectronica = forms.EmailField(label='email',required=True,max_length=100)
+	essocio = forms.ChoiceField(widget=forms.Select(),
+			label='Es socio',choices =((1,'Si'),(0,'No')),required='True' )
+	forzarcobroanticipo = forms.ChoiceField(widget=forms.Select(),
+			label='Forzar el cobro de anticipo',choices =((1,'Si'),(0,'No')),required='True' )
+	numeroweb = forms.IntegerField(label='Numero Web',required=False)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	
+	
+	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
+					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
+					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
+					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+
+
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosAsociadoForm,self).clean()
+	
+		asociadono = cleaned_data.get('asociadono')
+		nombre = cleaned_data.get('nombre')
+		appaterno = cleaned_data.get('appaterno')
+		apmaterno = cleaned_data.get('apmaterno')
+		direccion = cleaned_data.get('direccion')
+		colonia = cleaned_data.get('colonia')
+		ciudad = cleaned_data.get('ciudad')
+		estado = cleaned_data.get('num_socio')
+		pais = cleaned_data.get('pais')
+		codigopostal = cleaned_data.get('codigopostal')
+		telefono1 = cleaned_data.get('telefono1')
+		telefono2 = cleaned_data.get('telefono2')
+		fax = cleaned_data.get('fax')
+		celular = cleaned_data.get('celular')
+		radio = cleaned_data.get('radio')
+		direccionelectronica = cleaned_data.get('direccionelectronica')
+		essocio = cleaned_data.get('essocio')
+		forzarcobroanticipo = cleaned_data.get('forzarcobroanticipo')
+		numeroweb = cleaned_data.get('numeroweb')
+		usr_id = cleaned_data.get('usr_id')
+		if  not (telefono1 and telefono2 and fax and celular) is None:
+			
+			# elimina espacios al inicio
+
+			telefono1=telefono1.strip()
+			telefono2=telefono2.strip()
+			fax=fax.strip()
+			celular=celular.strip()
+
+			if not(telefono1.isdigit()):
+				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
+			elif not(telefono2.isdigit()): 
+				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
+			elif not(fax.isdigit()): 
+				raise forms.ValidationError(self.error_messages['fax'],code='fax')
+			elif not(celular.isdigit()):
+				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			else:
+				pass
+		else:
+			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
+
+				
+
+
+		return self.cleaned_data
+
+""" FORMA PARA CREAR PROVEEDOR """
+
+class CreaAsociadoForm(forms.Form):
+
+	
+	RazonSocial = forms.CharField(label='Nombre',required=True,max_length=45)	
+	Direccion = forms.CharField(label='Direccion',required=True,max_length=45)
+	Colonia = forms.CharField(label='Colonia',required=True,max_length=45)
+	Ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
+	Estado = forms.CharField(label='Estado',required=True,max_length=45)
+	Pais = forms.CharField(label='Pais',required=True,max_length=45)
+	CodigoPostal = forms.IntegerField(label='C.P.',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
+	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
+	fax = forms.CharField(label='Fax',required=True,max_length=15)
+	celular = forms.CharField(label='Celular',required=True,max_length=15)
+	radio = forms.CharField(label='radio',required=True,max_length=15)
+	email = forms.EmailField(label='email',required=True,max_length=100)
+	maneja_desc = forms.ChoiceField(widget=forms.Select(),
+			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+	baseparabono = forms.BooleanField(label='Base para bono',required=False)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+			
+
+	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
+					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
+					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
+					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+
+
+
+
+	def clean(self):
+
+		cleaned_data = super(CreaProveedorForm,self).clean()
+	
+		
+		RazonSocial = cleaned_data.get('RazonSocial')
+		Direccion = cleaned_data.get('Direccion')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		Estado = cleaned_data.get('num_socio')
+		Pais = cleaned_data.get('Pais')
+		CodigoPostal = cleaned_data.get('CodigoPostal')
+		telefono1 = cleaned_data.get('telefono1')
+		telefono2 = cleaned_data.get('telefono2')
+		fax = cleaned_data.get('fax')
+		celular = cleaned_data.get('celular')
+		radio = cleaned_data.get('radio')
+		email = cleaned_data.get('email')
+		maneja_desc = cleaned_data.get('maneja_desc')
+		baseparabono = cleaned_data.get('baseparabono')
+		usr_id = cleaned_data.get('usr_id')
+		if  not (telefono1 and telefono2 and fax and celular) is None:
+			if not(telefono1.isdigit()):
+				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
+			elif not(telefono2.isdigit()): 
+				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
+			elif not(fax.isdigit()): 
+				raise forms.ValidationError(self.error_messages['fax'],code='fax')
+			elif not(celular.isdigit()):
+				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			else:
+				pass
+		else:
+			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
+
+		return self.cleaned_data		
+
+
+
+

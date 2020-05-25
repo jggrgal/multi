@@ -5,35 +5,49 @@
 <h1>{{mensaje}}</h1>
 
 <div class="row">
-  <div class="col-md-3"><h3>Catalgo de Socios</h3></div>
-  <div class="col-md-3"></div>
-  <div class="col-md-3"></div>
+  <h3 style="text-align: center;color:#7f7b38;">Catalogo de Socios</h3>
+  
 </div>
     <div class="table-responsive">
         
     	<table class='table table-hover table-bordered table-condensed'>
         	<tr class='success'>
         		<th>id</th>
-            	<th>Nombre</th>
-            	<th>Ap Paterno</th>
-            	<th>Ap Materno</th>
-            	<th>Telefono</th>
+            	<th>Apellido Paterno</th>
+            	<th>Apellido Materno</th>
+                <th>Nombre</th>
+                <th>Telefono casa</th>
+                <th>Catalogos</th>
               
         	</tr>
         	{% for item in asociados %}
         		<tr>
-        			<td>{{ item.asociadono }}</td>
-        			<td>{{ item.nombre }}</td>
-            		<td>{{ item.appaterno }}</td>
-            		<td>{{item.apmaterno}}</td>
-            		<td>{{item.telefono1}}</td>
-                    
+        			<td><a href="{% url 'pedidos:edita_socio' item.asociadono %}">{{ item.asociadono }}</a></td>
+        			<td>{{ item.appaterno }}</td>
+                    <td>{{ item.apmaterno }}</td>
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.telefono1}}</td>
+                    <td><form id="imp_pedido_form" action="/pedidos/lista_asociados/{{item.proveedorno}}" method="GET">
+                        <input id="idpedido" name="p_num_pedido" class="btn-success-btn-lg" type="submit" value="Catalogos...">
+                    </form></td>
+            		                    
             	</tr>
             {% endfor %}
             
     	</table>
     </div>
-
+    <div class='row'>
+        <div class='col-md-4'>
+            <p align="left">
+                          <a href="{% url 'pedidos:crea_proveedor' %}" id="crea_proveedor" class="btn btn-success" role="button">Nuevo </a>
+                        </p>
+        </div>
+        <div class='col-md-4'></div>
+        <div class='col-md-4'></div>
+        <div class='col-md-4'></div>
+        
+        
+    </div>
 
 
 
@@ -45,7 +59,7 @@
 
 <!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
 
-<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ? </div>
 
 
 
