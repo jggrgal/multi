@@ -5,16 +5,14 @@
 {% load l10n %}
 <div class='row'>
     <div class='col-md-4'>
-         <h4> Estilos encontrados: </h4>       
+         <h2> Estilos encontrados: </h2>       
     </div>
     <div class='col-md-4'>
     </div>
     <div class='col-md-4'>
-        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}</h4>   
-        
+       <h4> {{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}</h4>
     </div>
 </div>
-
      <div class="table-responsive">
     	<table id="lista_estilos" class='display table table-hover table-bordered table-condensed'>
                 	
@@ -25,6 +23,7 @@
                 <th>Sucursal</th>>
                 <th>Bodega</th>
                 <th>Fecha Pedido</th>
+                <th>Fecha mvto </th>
                 <th>Socio Num</th>
                 <th>Nombre</th>
                 <th>Status</th>
@@ -45,6 +44,9 @@
                     <td>{{item.nom_alm}}</td>
                     {% localize on %}
                         <td>{{item.fechacreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    {% localize on %}
+                        <td>{{item.fechamvto | date:'d/M/Y'}}</td>
                     {% endlocalize %}
                     <td>{{item.asociadono}}</td>
                     <td>{{item.nombre}}</td>

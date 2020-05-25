@@ -8673,14 +8673,15 @@ def recepcion_dev_prov(request):
 										l.status,h.AsociadoNo,
 										h.FechaPedido,h.fechaultimamodificacion,
 										a.codigoarticulo,a.catalogo,a.idmarca,
-										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,al.razonsocial
+										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,al.razonsocial,
+										psf.fechamvto as fechadevuelto
 										from pedidoslines l
 										 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
 										 inner join articulo a on
 										(a.empresano=1 and 
 										 l.productono=a.codigoarticulo
 										and l.catalogo=a.catalogo)
-										inner join pedidos_status_fechas psf
+										left join pedidos_status_fechas psf
 										on (l.empresano=psf.empresano and l.pedido=psf.pedido
 										and l.productono=psf.productono
 										and l.catalogo=psf.catalogo
@@ -8697,7 +8698,7 @@ def recepcion_dev_prov(request):
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
 										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
 										where h.idsucursal=%s and (l.status='Devuelto' or l.status='Por Devolver')
-										and psf.fechamvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+										and psf.fechamvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,concat(a.idmarca,a.idestilo));"""
 					parms =(sucursal,ordenarpor)
 
 				else:
@@ -8707,14 +8708,15 @@ def recepcion_dev_prov(request):
 										l.status,h.AsociadoNo,
 										h.FechaPedido,h.fechaultimamodificacion,
 										a.codigoarticulo,a.catalogo,a.idmarca,
-										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,al.razonsocial
+										a.idestilo,a.idcolor,a.talla,l.Observaciones,h.idSucursal,psf1.fechamvto,al.razonsocial,
+										psf.fechamvto as fechadevuelto
 										from pedidoslines l
 										 inner join pedidosheader h on (h.empresano=l.empresano and l.pedido=h.pedidono)
 										 inner join articulo a on
 										(a.empresano=1 and 
 										 l.productono=a.codigoarticulo
 										and l.catalogo=a.catalogo)
-										inner join pedidos_status_fechas psf
+										left join pedidos_status_fechas psf
 										on (l.empresano=psf.empresano and l.pedido=psf.pedido
 										and l.productono=psf.productono
 										and l.catalogo=psf.catalogo
@@ -8731,7 +8733,7 @@ def recepcion_dev_prov(request):
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
 										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
 										where (l.status='Devuelto' or l.status='Por Devolver') and h.idsucursal>=1 and h.idsucursal<=999
-										and psf.fechaMvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,a.idmarca);"""
+										and psf.fechaMvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,concat(a.idmarca,a.idestilo));"""
 					parms =(ordenarpor,)
 
 
@@ -10570,7 +10572,7 @@ def busca_estilo(request):
 				h.asociadono,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),\
 				' ',trim(aso.apmaterno)) as nombre,l.status,\
 				a.idmarca,a.idestilo,a.idcolor,a.talla,\
-				l.precio,l.Observaciones,suc.nombre as nom_suc,alm.RazonSocial as nom_alm FROM pedidoslines l \
+				l.precio,l.Observaciones,suc.nombre as nom_suc,alm.RazonSocial as nom_alm,psf.fechamvto FROM pedidoslines l \
 				 inner join pedidosheader h on (h.empresano=l.empresano and h.pedidono=l.pedido)\
 				 inner join asociado aso on (h.empresano=aso.empresano and h.asociadono=aso.asociadono)\
 				 inner join articulo a on (l.empresano=a.empresano and l.productono=a.codigoarticulo\
@@ -10582,7 +10584,8 @@ def busca_estilo(request):
 				 and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)\
                  left join almacen alm on (alm.EmpresaNo=h.Empresano\
                  and alm.ProveedorNo=a.idproveedor and alm.Almacen=pe.BodegaEncontro)\
-				 WHERE h.fechacreacion>=%s and h.fechacreacion<=%s and a.idestilo like %s;",(vfechainicial,vfechafinal,string_buscar,) )
+                 inner join pedidos_status_fechas psf on (psf.empresano=l.empresano and psf.pedido=l.pedido and psf.productono=l.productono and psf.catalogo=l.catalogo and psf.nolinea=l.nolinea and psf.status=l.status)\
+                 WHERE h.fechacreacion>=%s and h.fechacreacion<=%s and a.idestilo like %s;",(vfechainicial,vfechafinal,string_buscar,) )
 			
 			reg_encontrados = dictfetchall(cursor)
 
@@ -10863,18 +10866,6 @@ def piezas_no_solicitadas(request): # el parametro 'tipo' toma los valores 'P' d
 	
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # REPORTE DE ARTICULOS NO SOLICITADOS ORDENADO POR MARCA 
 
 
@@ -10963,5 +10954,5 @@ def rpte_piezas_no_solicitadas(request):
 		form = RpteArtNoSolicitadosForm()
 	return render(request,'pedidos/rpte_piezas_no_solicitadas_form.html',{'form':form,})
 	
-
+ 
 
