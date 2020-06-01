@@ -402,10 +402,9 @@ def lista_asociados(request):
 	cursor=connection.cursor()
 	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from asociado where empresano=1;')
 	asociados = dictfetchall(cursor)
-	
+	cursor.close()
 	context = {'asociados': asociados}
 	return render(request, 'pedidos/asociados.html', context)	
-		
 def ok(request):
 	
 	return render(request, 'pedidos/autencitacion_exitosa.html')	
@@ -10999,7 +10998,8 @@ def edita_asociado(request,asociadono):
 			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
 			numeroweb = form.cleaned_data['numeroweb']
 			
-
+			if numeroweb is None:
+				numeroweb =0
 
 			cursor =  connection.cursor()
 			try:
@@ -11104,6 +11104,9 @@ def crea_asociado(request):
 			numeroweb = form.cleaned_data['numeroweb']
 			
 
+			if numeroweb is None:
+				numeroweb =0
+
 
 			cursor =  connection.cursor()
 			try:
@@ -11115,7 +11118,7 @@ def crea_asociado(request):
 
 
 
-				cursor.execute('INSERT INTO asociado(asociadono,nombre,\
+				cursor.execute('INSERT INTO asociado(empresano,asociadono,nombre,\
 				apmaterno,\
 				appaterno,\
 				Direccion,\
@@ -11138,7 +11141,7 @@ def crea_asociado(request):
 				sucursalno,\
 				creditodisponible,\
 				nocontrol) \
-				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(ultimo_socio[0]+1,nombre.upper(),appaterno.upper(),apmaterno.upper(),direccion.upper(),colonia.upper(),ciudad.upper(),estado.upper(),pais.upper(),telefono1,telefono2,fax,cel,radio,direccionelectronica.lower(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,' '))
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper(),appaterno.upper(),apmaterno.upper(),direccion.upper(),colonia.upper(),ciudad.upper(),estado.upper(),pais.upper(),telefono1,telefono2,fax,cel,radio,direccionelectronica.lower(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,' '))
 					
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 				cursor.execute("COMMIT;")
