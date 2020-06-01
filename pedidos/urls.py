@@ -5,8 +5,9 @@ from django.contrib.auth.views import password_reset,password_reset_done,passwor
 urlpatterns = [
 	url(r'^index/$',views.index,name='index'),
 	url(r'^acceso/$',views.acceso,name='acceso'),
-	url(r'^asociados/$',views.lista_asociados,name='lista_asociados'),
-	url(r'^edita_socio/(?P<asociadono>[0-9]{1,8})/$',views.edita_socio,name='edita_socio'),
+	url(r'^asociados/$',views.lista_asociados,name='asociados'),
+	url(r'^edita_asociado/(?P<asociadono>[0-9]{1,8})/$',views.edita_asociado,name='edita_asociado'),
+	url(r'^crea_asociado/$',views.crea_asociado,name='crea_asociado'),
 	url(r'^busca_pedidos/$',views.busca_pedidos,name='busca_pedidos'),
 	url(r'^lista_pedidos/$',views.lista_pedidos,name='lista_pedidos'),
 	url(r'^crea_pedidos/$',views.crea_pedidos,name='crea_pedidos'),
@@ -120,5 +121,7 @@ urlpatterns = [
 	url(r'^busca_estilo/$',views.busca_estilo,name='busca_estilo'),
 	url(r'^piezas_no_solicitadas/$',views.piezas_no_solicitadas,name='piezas_no_solicitadas'),
 	url(r'^rpte_piezas_no_solicitadas/$',views.rpte_piezas_no_solicitadas,name='rpte_piezas_no_solicitadas'),
+	url(r'^filtrocatalogosasociado/(?P<asociadono>[0-9]{1,8})/$',views.filtrocatalogosasociado,name='filtrocatalogosasociado'),
+
 
 	]

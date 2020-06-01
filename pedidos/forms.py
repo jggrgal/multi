@@ -3001,10 +3001,10 @@ class DatosAsociadoForm(forms.Form):
 		
 		super(DatosAsociadoForm, self).__init__(*args,**kwargs)
 
-		self.fields['asociadoNo'].widget.attrs['readonly'] = True
+		self.fields['asociadono'].widget.attrs['readonly'] = True
 
 
-	asociadono = forms.IntegerField(label='Socio Num.',required=True)
+	asociadono = forms.IntegerField(label='Socio Num.',required=False)
 	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
 	appaterno = forms.CharField(label='Apellido Paterno',required=True,max_length=45)	
 	apmaterno = forms.CharField(label='Apellido Materno',required=True,max_length=45)	
@@ -3077,6 +3077,8 @@ class DatosAsociadoForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['fax'],code='fax')
 			elif not(celular.isdigit()):
 				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			elif numeroweb > 32767:
+				 raise forms.ValidationError("Numero web debe ser menor a 32767")	
 			else:
 				pass
 		else:
@@ -3157,5 +3159,147 @@ class CreaAsociadoForm(forms.Form):
 		return self.cleaned_data		
 
 
+
+class FiltroSocioCatalogoForm(forms.Form):
+
+	lprov = lista_Proveedores()
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(FiltroSocioCatalogoForm, self).__init__(*args,**kwargs)
+
+
+		
+
+		def genera_tupla_anios():
+			li =[]
+			le =[]
+			for j in range(2010,2050):
+
+				for z in range(1,2):
+					li.append(j)
+					li.append(j)
+				li=tuple(li)
+				le.append(li)
+				li=[]
+			le=tuple(le)
+			return(le)	
+
+		l = genera_tupla_anios()	
+
+		#self.fields['ProveedorNo'].widget.attrs['readonly'] = True
+		
+		#self.fields['Anio'].widget.attrs['readonly'] = True
+		#self.fields['ClaseArticulo'].widget.attrs['readonly'] = True
+		self.fields['Periodo'] = forms.ChoiceField(widget=forms.Select(),
+		label='Año',choices = l,required='True' )
+		#self.fields['Periodo'].widget.attrs['readonly'] = True
+			
+
+	ProveedorNo = forms.ChoiceField(label='Proveedor Num.',choices=lprov,required=True)
+	Anio = forms.ChoiceField(label='Temporada',choices=((1,'Primavera/Verano'),(2,'Otoño/Invierno')),initial=1,required=True)
+	Periodo = forms.ChoiceField(widget=forms.Select(),
+			label='Año',required='True' )	
+	#ClaseArticulo = forms.CharField(label='Catalogo',required=True)
+	
+	error_messages = {'error_clase':'Los primeros 4 digitos del catalogo son para el año y debe ser un valor mayor al 2020 !',}
+					
+
+
+
+	def clean(self):
+
+		cleaned_data = super(FiltroSocioCatalogoForm,self).clean()
+	
+		ProveedorNo = cleaned_data.get('ProveedorNo')
+		Anio = cleaned_data.get('Anio')
+		Periodo = cleaned_data.get('Periodo')
+		#ClaseArticulo =cleaned_data.get('ClaseArticulo')
+		'''
+		try:
+			ClaseArticulo = int(ClaseArticulo[0:4])
+		except TypeError as e:
+
+			raise forms.ValidationError(self.error_messages['error_clase'],code='error_clase')
+
+
+		if (not ClaseArticulo >=2000):
+			raise forms.ValidationError(self.error_messages['error_clase'],code='error_clase')'''
+		return self.cleaned_data
+
+
+class AFiltroDatosCatalogoForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosCatalogoForm, self).__init__(*args,**kwargs)
+
+		def genera_tupla_anios():
+			li =[]
+			le =[]
+			for j in range(2010,2050):
+
+				for z in range(1,2):
+					li.append(j)
+					li.append(j)
+				li=tuple(li)
+				le.append(li)
+				li=[]
+			le=tuple(le)
+			return(le)	
+
+		l = genera_tupla_anios()	
+
+		self.fields['ProveedorNo'].widget.attrs['readonly'] = True
+		
+		self.fields['Anio'].widget.attrs['readonly'] = True
+		self.fields['ClaseArticulo'].widget.attrs['readonly'] = True
+		self.fields['Periodo'] = forms.ChoiceField(widget=forms.Select(),
+		label='Año',choices = l,required='True' )
+		self.fields['Periodo'].widget.attrs['readonly'] = True
+			
+
+	ProveedorNo = forms.IntegerField(label='Proveedor Num.',required=True)
+	Anio = forms.ChoiceField(label='Temporada',choices=((1,'Primavera/Verano'),(2,'Otoño/Invierno')),initial=1,required=True)
+	Periodo = forms.ChoiceField(widget=forms.Select(),
+			label='Año',required='True' )	
+	ClaseArticulo = forms.CharField(label='Catalogo',required=True)
+	Activo = forms.ChoiceField(widget=forms.Select(),
+			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
+	no_maneja_descuentos = forms.ChoiceField(widget=forms.Select(),
+			label='No maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+	catalogo_promociones = forms.ChoiceField(widget=forms.Select(),
+			label='Catalogo de promociones',choices =((1,'Si'),(0,'No')),required='True' )
+	
+
+	error_messages = {'error_clase':'Los primeros 4 digitos del catalogo son para el año y debe ser un valor mayor al 2020 !',}
+					
+
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosCatalogoForm,self).clean()
+	
+		ProveedorNo = cleaned_data.get('ProveedorNo')
+		Anio = cleaned_data.get('Anio')
+		Periodo = cleaned_data.get('Periodo')
+		ClaseArticulo =cleaned_data.get('ClaseArticulo')
+		Activo = cleaned_data.get('Activo')
+		no_maneja_descuentos = cleaned_data.get('no_maneja_descuentos')
+		catalogo_promociones = cleaned_data.get('catalogo_promociones')
+
+		try:
+			ClaseArticulo = int(ClaseArticulo[0:4])
+		except TypeError as e:
+
+			raise forms.ValidationError(self.error_messages['error_clase'],code='error_clase')
+
+
+		if (not ClaseArticulo >=2000):
+			raise forms.ValidationError(self.error_messages['error_clase'],code='error_clase')
+		return self.cleaned_data
 
 

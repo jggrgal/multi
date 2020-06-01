@@ -1,0 +1,81 @@
+ {% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+<h5>{{mensaje}}</h5>
+
+<div class="row">
+  <div class="col-md-4">
+  </div>
+
+  <div class="col-md-4">
+    <div class="panel panel-success">
+        <div class='panel-heading'><h4 align='left'>Filtra catalogos del socio<h4></div>
+        <div class='panel-body'>
+            
+           
+             
+            <form id="documentos_form" action="{% url 'pedidos:filtrocatalogosasociado' asociadono %}" method="POST">
+              <!--  <div class="alert alert-danger" role="alert">
+              
+            {{form.non_field_errors}}
+            </div>-->
+
+                <div class="form" >
+                    {% csrf_token %}
+                  
+                    <div class="form-group" >
+                        {{ form | crispy }}
+                       
+                    </div>
+                    
+                    
+                    
+                    <!--<a class="btn btn-success btn-lg btn-space" id="btn_trae_colocaciones" href="#" role="button"> Traer pedidos...</a>
+                    <br> 
+                    <input  class="btn btn-default" style="display: none;  type="submit" value="Enviar" /> -->  
+               
+                  
+                    <input  class="btn btn-default" id="btn_documentos" type="submit" value="Enviar" /> -
+                
+
+                    
+                </div>
+            </form>
+
+        </div>
+       
+
+    </div>  
+   
+  </div>
+      
+    
+    
+  </div>
+  <div class="col-md-4">
+    
+  </div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

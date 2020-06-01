@@ -1,0 +1,84 @@
+ {% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+
+<div class="row">
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-4">
+
+      
+  </div>
+  <div class="col-md-4">
+    <div class="panel panel-success">
+
+        <div class='panel-heading'><h4 align='left'>Edita asociado<h4></div>
+        <div class='panel-body'>
+              
+            {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
+
+            
+            <form action="{% url 'pedidos:edita_asociado' asociadono %}" method="POST">
+                
+                    <!--<div class="alert alert-danger" role="alert">
+                      {% for error in form.non_field_errors %}
+                        {{ error }}
+                      {% endfor %}
+
+                     </div>-->
+               
+               
+                    {% csrf_token %}
+
+
+                    {{ form | crispy }}
+
+
+                
+                    <input  id='btn_crea_asociado' class="btn btn-default"  type="submit" value="Enviar" />
+                
+
+                    
+                
+             
+            </form>
+
+          <!-- 
+          <form id="imp_venta_form"  method= 'GET' role="button" {% if  form.doc_tipodedocumento == 'Remision' or  form.doc_tipodedocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if form.doc_tipodedocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{ NoDocto }}>
+          </form> -->           
+
+
+
+
+
+        </div><br>
+ <div class="col-md-4">
+
+
+  <br><p align="left">
+                          <a href="{% url 'pedidos:asociados' %}" id="regresar" class="btn btn-success" role="button">Regresar </a>
+                        </p>
+
+
+ </div>     
+ 
+  </div>
+        
+
+
+
+
+
+
+  <script>
+    var is_staff = "{{ is_staff }}";
+    var ca = "{{ forzarcobroanticipo }}"
+    console.log('cobroanticipo')
+    console.log(ca)
+  </script>  
+
+
+{% endblock content %}
