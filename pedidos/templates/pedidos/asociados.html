@@ -7,7 +7,7 @@
 <div class="row">
   <h3 style="text-align: center;color:#7f7b38;">Catalogo de Socios</h3>
   
-</div>
+
     <div class="table-responsive">
         
     	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
@@ -39,25 +39,23 @@
             	</tr>
            {% endfor %}
            </tbody>
-           <tfoot>
-           
-            </tfoot>
+          
             
     	</table>
     </div>
-    <div class='row'>
-        <div class='col-md-4'>
-            <p align="left">
-                          <a href="{% url 'pedidos:crea_asociado' %}" id="crea_asociado" class="btn btn-success " role="button">Nuevo </a>
-                        </p>
-        </div>
-        <div class='col-md-4'></div>
-        <div class='col-md-4'></div>
-        <div class='col-md-4'></div>
-        
-        
+</div>
+<div class='row'>
+    <div class='col-md-3'>
+        <p align="left">
+                      <a href="{% url 'pedidos:crea_asociado' %}" id="crea_asociado" class="btn btn-success " role="button">Nuevo </a>
+                    </p>
     </div>
-
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    
+    
+</div>
 
 
 

@@ -400,7 +400,7 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from asociado where empresano=1;')
+	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
 	asociados = dictfetchall(cursor)
 	cursor.close()
 	context = {'asociados': asociados}
@@ -10977,7 +10977,7 @@ def edita_asociado(request,asociadono):
 
 		form = DatosAsociadoForm(request.POST)
 		if form.is_valid():
-			asociadoo = form.cleaned_data['asociadono']
+			asociado = form.cleaned_data['asociadono']
 			nombre = form.cleaned_data['nombre']
 			appaterno = form.cleaned_data['appaterno']
 			apmaterno = form.cleaned_data['apmaterno']
@@ -11091,7 +11091,7 @@ def crea_asociado(request):
 			ciudad = form.cleaned_data['ciudad']
 			estado = form.cleaned_data['estado']
 			pais = form.cleaned_data['pais']
-			codigopostal = form.cleaned_data['codigopostal']
+			#codigopostal = form.cleaned_data['codigopostal']
 			telefono1 = form.cleaned_data['telefono1']
 			telefono2 = form.cleaned_data['telefono2']
 			fax = form.cleaned_data['fax']

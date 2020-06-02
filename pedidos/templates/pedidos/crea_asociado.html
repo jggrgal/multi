@@ -7,16 +7,14 @@
 
 
 <div class="row">
-<!-- <div class="col-md-3"></div>-->
-  <div class="col-md-4">
 
-      
-  </div>
-  <div class="col-md-4">
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-12 ">
     <div class="panel panel-success">
 
         <div class='panel-heading'><h4 align='left'>Nuevo socio<h4></div>
-        <div class='panel-body'>
+        
+          <div class='panel-body'>
               
             {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
 
@@ -27,22 +25,87 @@
                       {% for error in form.non_field_errors %}
                         {{ error }}
                       {% endfor %}
-
+            
                      </div>-->
+                      {% csrf_token %}   
+              <div class='form-row'> 
+
+                
+                  <div class='col-md-4'>
+                    {{ form.nombre | as_crispy_field }}
+                  </div>
+                  <div class='col-md-4'>
+                    {{ form.appaterno | as_crispy_field }}
+                   
+                  </div>
+                  <div class='col-md-4'>
+                    
+                    {{ form.apmaterno | as_crispy_field }}
+                  </div>
+              </div>
+
+              <div class='form-row'>  
+            
+                  <div class='col-md-12'>
+                    {{ form.direccion | as_crispy_field }}
+                    {{ form.colonia | as_crispy_field }}
+                    {{ form.ciudad | as_crispy_field }}
+
+                  </div>
+                  <div class='col-md-6'>
+                    {{ form.estado | as_crispy_field }}
+                  </div> 
+                  <div class='col-md-6'> 
+                    {{ form.pais | as_crispy_field }}
+                   
+                  </div>
+              
+              </div>
+
+              <div class='form-row'>
+                <div class='col-md-4'>
+                  {{ form.telefono1 | as_crispy_field }}
+                </div> 
+                <div class='col-md-4'> 
+                  {{ form.telefono2 | as_crispy_field }}
+                   
+                 </div>
+                 <div class='col-md-4'> 
+                   {{ form.fax | as_crispy_field }}
+                </div>
+              </div>
+              
+              <div class='form-row'>
+                <div class='col-md-6'>
+                  {{ form.celular | as_crispy_field }}
+                </div> 
+                <div class='col-md-6'> 
+                  {{ form.radio | as_crispy_field }}
                
-               
-                    {% csrf_token %}
+                </div>
+                  
+              </div>
+              <div class='col-md-12'>
+                {{ form.direccionelectronica | as_crispy_field  }}
+              </div>
 
+              <div class='col-md-3'>
+                {{ form.essocio | as_crispy_field  }}
+              </div>
+              <div class='col-md-3'>
+                {{ form.forzarcobroanticipo | as_crispy_field  }}
+              </div>
+              <div class='col-md-3'>
+                {{ form.numeroweb| as_crispy_field  }}
+              </div>
+              <div class='col-md-3'>
+                {{ form.usr_id | as_crispy_field  }}
+              </div>
+                 
+              <div class='form-row col-md-12'>
+                       <input  id='btn_crea_asociado' class="btn btn-default"  type="submit" value="Enviar" />              
+              </div>  
 
-                    {{ form | crispy }}
-
-
-                
-                    <input  id='btn_crea_asociado' class="btn btn-default"  type="submit" value="Enviar" />
-                
-
-                     
-                
              
             </form>
 
@@ -54,31 +117,26 @@
 
 
 
-        </div><br>
- <div class="col-md-4">
+          </div><br>
 
 
+
+ 
+
+
+ 
+  </div>
   <br><p align="left">
                           <a href="{% url 'pedidos:asociados' %}" id="regresar" class="btn btn-success" role="button">Regresar </a>
                         </p>
+</div>        
 
-
- </div>     
- 
-  </div>
-        
-
-
-
-
-
-
-  <script>
-    var is_staff = "{{ is_staff }}";
-    var ca = "{{ forzarcobroanticipo }}"
-    console.log('cobroanticipo')
-    console.log(ca)
-  </script>  
+<script>
+  var is_staff = "{{ is_staff }}";
+  var ca = "{{ forzarcobroanticipo }}"
+  console.log('cobroanticipo')
+  console.log(ca)
+</script>  
 
 
 {% endblock content %}

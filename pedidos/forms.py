@@ -3013,7 +3013,7 @@ class DatosAsociadoForm(forms.Form):
 	ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
 	estado = forms.CharField(label='Estado',required=True,max_length=45)
 	pais = forms.CharField(label='Pais',required=True,max_length=11)
-	codigopostal = forms.IntegerField(label='C.P.',required=True)
+	#codigopostal = forms.IntegerField(label='C.P.',required=True)
 	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
 	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
 	fax = forms.CharField(label='Fax',required=True,max_length=15)
