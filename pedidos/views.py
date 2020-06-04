@@ -57,7 +57,9 @@ from . forms import (AccesoForm,\
 					PiezasNoSolicitadasForm,
 					DatosAsociadoForm,
 					RpteArtNoSolicitadosForm,
-					FiltroSocioCatalogoForm)
+					FiltroSocioCatalogoForm,
+					FiltroProveedorForm,
+					CreaAlmacenForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -11013,7 +11015,7 @@ def edita_asociado(request,asociadono):
 				essocio = %s,\
 				forzarcobroanticipo = %s,\
 				num_web = %s\
-				WHERE asociadono=%s;',(nombre.upper(),appaterno.upper(),apmaterno.upper(),direccion.upper(),colonia.upper(),ciudad.upper(),estado.upper(),pais.upper(),telefono1,telefono2,fax,cel,radio,direccionelectronica.lower(),essocio,forzarcobroanticipo,numeroweb,asociadono,))
+				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,asociadono,))
 			
 							
 				cursor.execute("COMMIT;")
@@ -11132,7 +11134,7 @@ def crea_asociado(request):
 				sucursalno,\
 				creditodisponible,\
 				nocontrol) \
-				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper(),appaterno.upper(),apmaterno.upper(),direccion.upper(),colonia.upper(),ciudad.upper(),estado.upper(),pais.upper(),telefono1,telefono2,fax,cel,radio,direccionelectronica.lower(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,' '))
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,' '))
 					
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 				cursor.execute("COMMIT;")
@@ -11191,3 +11193,115 @@ def filtrocatalogosasociado(request,asociadono):
 
 
 
+def filtroproveedor_almacen(request):
+
+	if request.method=='POST':
+
+		form = FiltroProveedorForm(request.POST)
+		
+		if form.is_valid():
+			
+			proveedor = form.cleaned_data['proveedor']
+
+			cursor = connection.cursor()
+
+			cursor.execute('SELECT Almacen,RazonSocial,Direccion,Telefono1 FROM almacen WHERE EmpresaNO=1 and ProveedorNo=%s;',(proveedor,))
+			registros = dictfetchall(cursor)	
+			
+			cursor.execute('SELECT razonsocial FROM proveedor WHERE empresano=1 and proveedorno=%s',(proveedor,))
+			prov_nom = cursor.fetchone()
+
+			return render(request,'pedidos/lista_almacenes.html',{'registros':registros,'prov_nom':prov_nom[0],'proveedorno':proveedor,})		
+
+	form = FiltroProveedorForm()
+	return render(request,'pedidos/filtro_proveedor_almacen.html',{'form':form,})
+
+
+
+
+
+def crea_almacen(request,proveedorno):
+
+	msg = ''
+
+	hoy = date.today()
+
+	if request.method == 'POST':
+
+		form = CreaAlmacenForm(request.POST)
+		if form.is_valid():
+			razonsocial = form.cleaned_data['RazonSocial']
+			direccion = form.cleaned_data['Direccion']
+			colonia = form.cleaned_data['Colonia']
+			ciudad = form.cleaned_data['Ciudad']
+			estado = form.cleaned_data['Estado']
+			pais = form.cleaned_data['Pais']
+			#codigopostal = form.cleaned_data['codigopostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			direccionelectronica = form.cleaned_data['direccionelectronica']
+			usr_id = form.cleaned_data['usr_id']
+			
+
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute("SELECT almacen FROM almacen ORDER BY almacen desc limit 1;")
+				ultimo_almacen = cursor.fetchone()	
+
+
+
+				cursor.execute('INSERT INTO almacen(empresano,proveedorno,almacen,RazonSocial,\
+				Direccion,\
+				Colonia,\
+				Ciudad,\
+				Estado,\
+				Pais,\
+				telefono1,\
+				telefono2,\
+				fax,\
+				celular,\
+				radio,\
+				direccionelectronica,\
+				fechaalta,\
+				fechabaja) \
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,proveedorno,ultimo_almacen[0]+1,razonsocial.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),'19010101','19010101'))
+				'''	
+				cursor.execute("COMMIT;")
+
+				cursor = connection.cursor()
+
+				cursor.execute('SELECT Almacen,RazonSocial,Direccion,Telefono1 FROM almacen WHERE EmpresaNO=1 and ProveedorNo=%s;',(proveedorno,))
+				registros = dictfetchall(cursor)	
+				
+				cursor.execute('SELECT razonsocial FROM proveedor WHERE empresano=1 and proveedorno=%s',(proveedorno,))
+				prov_nom = cursor.fetchone()
+
+				return render(request,'pedidos/lista_almacenes.html',{'registros':registros,'prov_nom':prov_nom[0],'proveedorno':proveedorno,})'''		
+
+
+				return HttpResponseRedirect(reverse('pedidos:filtroproveedor_almacen'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+			pass
+	else:	
+
+		form = CreaAlmacenForm()
+		
+					
+	return render(request,'pedidos/crea_almacen.html',{'form':form,'proveedorno':proveedorno})

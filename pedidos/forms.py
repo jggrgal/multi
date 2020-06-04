@@ -3303,3 +3303,92 @@ class AFiltroDatosCatalogoForm(forms.Form):
 		return self.cleaned_data
 
 
+class FiltroProveedorForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		super(FiltroProveedorForm, self).__init__(*args,**kwargs)
+
+
+		lprov = lista_Proveedores()
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label='Proveedor',choices = lprov,initial='0',required='True' )
+	'''proveedor = forms.ChoiceField(label='Proveedor Num.',required=True)'''
+
+	
+
+
+	def clean(self):
+
+		cleaned_data = super(FiltroProveedorForm,self).clean()
+
+		proveedor = self.cleaned_data.get('proveedor')
+
+		return(self.cleaned_data)
+
+
+
+
+class CreaAlmacenForm(forms.Form):
+
+	
+	RazonSocial = forms.CharField(label='Nombre',required=True,max_length=45)	
+	Direccion = forms.CharField(label='Direccion',required=True,max_length=45)
+	Colonia = forms.CharField(label='Colonia',required=True,max_length=45)
+	Ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
+	Estado = forms.CharField(label='Estado',required=True,max_length=45)
+	Pais = forms.CharField(label='Pais',required=True,max_length=45)
+	#CodigoPostal = forms.IntegerField(label='C.P.',required=True)
+	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
+	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
+	fax = forms.CharField(label='Fax',required=True,max_length=15)
+	celular = forms.CharField(label='Celular',required=True,max_length=15)
+	radio = forms.CharField(label='radio',required=True,max_length=15)
+	direccionelectronica = forms.EmailField(label='email',required=True,max_length=100)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+			
+
+	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
+					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
+					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
+					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+
+
+
+
+	def clean(self):
+
+		cleaned_data = super(CreaAlmacenForm,self).clean()
+	
+		
+		RazonSocial = cleaned_data.get('RazonSocial')
+		Direccion = cleaned_data.get('Direccion')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		Estado = cleaned_data.get('num_socio')
+		Pais = cleaned_data.get('Pais')
+		#CodigoPostal = cleaned_data.get('CodigoPostal')
+		telefono1 = cleaned_data.get('telefono1')
+		telefono2 = cleaned_data.get('telefono2')
+		fax = cleaned_data.get('fax')
+		celular = cleaned_data.get('celular')
+		radio = cleaned_data.get('radio')
+		direccionelectronica = cleaned_data.get('direccionelectronica')
+		
+		usr_id = cleaned_data.get('usr_id')
+		if  not (telefono1 and telefono2 and fax and celular) is None:
+			if not(telefono1.isdigit()):
+				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
+			elif not(telefono2.isdigit()): 
+				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
+			elif not(fax.isdigit()): 
+				raise forms.ValidationError(self.error_messages['fax'],code='fax')
+			elif not(celular.isdigit()):
+				raise forms.ValidationError(self.error_messages['celular'],code='celular')
+			else:
+				pass
+		else:
+			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
+
+		return self.cleaned_data		

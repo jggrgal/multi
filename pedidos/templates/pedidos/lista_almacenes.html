@@ -1,0 +1,108 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %} 
+
+{% load l10n %}
+
+<h2> Catalogo de almacenes</h2>
+
+<h4>Proveedor: {{ prov_nom }}</h4>
+
+<h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
+
+    <div class="table-responsive">
+    	<table id="coloc_detail_table" class='display table table-hover table-bordered  table-condensed clase_tabla'>
+        <thead>
+        	<tr class='success'>
+                
+              
+                <th>Num. Almacen</th>
+                <th>Nombre</th>
+                <th>Direccion</th>
+                <th>Telefono </th>  
+                <!--<th>Activo ?</th>-->
+        		
+                
+                
+        	</tr>
+        </thead>
+        <tbody>
+        	{% for item in registros %}
+                
+        		<tr>
+        			
+                    
+        			<td> {{item.Almacen}}</td>
+        			<td> {{item.RazonSocial}}</td>
+                    <td> {{item.Direccion}}</td>
+                    <td> {{item.Telefono1}}</td>
+        			<!--<td> {{ item.activo }}</td>-->
+    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado
+    				
+                    <td><form id="imp_hojadev_form" action="/pedidos/imprime_hoja_devolucion/" method="GET">
+                        <input id="id_imp_hoja_dev" name="id" class="btn-success-btn-lg" type="submit" value="{{item.id}}">
+                    </form></td>-->
+                                                          
+            	</tr>
+            {% endfor %}
+        </tbody>    
+    	</table>
+    </div>
+    <div class="row">
+        <!--<div class="col-md-6">
+            <h3>Articulos solicitados: <span id="col_art_encont" class="label label-primary">{{reg_encontrados}}</span></h3>
+        </div>-->
+
+    
+        <div class="col-md-12" >
+
+            <p align="left">
+                      <a href="{% url 'pedidos:crea_almacen' proveedorno %}" id="crea_almacen" class="btn btn-success " role="button">Nuevo </a>
+                    </p>
+           <!-- <h3>Articulos  recibidos: <span id="total_recibidos" class="label label-primary">0</span></h3>
+        </div>-->
+    </div>
+
+
+    <div class="row">
+        <div class='col-md-3'>
+            <!--
+            <label for="usr_id">Usuario_id:</label> 
+            <input id="usr_id_pedidos_recepcionar" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0> -->
+   
+
+        </div>
+        <div class ='col-md-3'>
+          <!--  
+          <form id="imp_venta_form" action="{% url 'pedidos:imprime_credito' %}" method="GET" >
+                        <input id ='id_nuevo_credito' name ='p_num_credito' class="btn-success-btn" type="submit"  value="000000" />
+
+            </form> -->
+  
+
+
+        </div>
+        <div class='col-md-3'>
+    	    
+        </div>
+        <!--
+        <div class='col-md-3'>
+            <p align='right'>
+                <button id='imprimir_devolucion_socio' class="btn btn-default" href="/pedidos/filtro_dev_prov" role="button">Regresar</button>
+            </p>    	    
+
+            
+
+        </div>-->
+    	   
+    </div>
+	
+	<!-- El siguiente script no se definio dentro de pedidos.js ya que este ultimo se carga primero que las variables de manejadas dentro del request de django, asi puest, el script asigna variables recibidas en request  a variables visibles por JQuery -->
+	
+	<script>
+	var reg_encontrados = "{{ reg_encontrados }}";
+	var almacen = "{{ almacen }}";
+	</script>
+
+
+{% endblock %}	
