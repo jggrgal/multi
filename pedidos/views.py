@@ -11272,9 +11272,11 @@ def crea_almacen(request,proveedorno):
 				fechaalta,\
 				fechabaja) \
 				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,proveedorno,ultimo_almacen[0]+1,razonsocial.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),'19010101','19010101'))
-				'''	
+				
+
 				cursor.execute("COMMIT;")
 
+				'''				
 				cursor = connection.cursor()
 
 				cursor.execute('SELECT Almacen,RazonSocial,Direccion,Telefono1 FROM almacen WHERE EmpresaNO=1 and ProveedorNo=%s;',(proveedorno,))
@@ -11305,3 +11307,99 @@ def crea_almacen(request,proveedorno):
 		
 					
 	return render(request,'pedidos/crea_almacen.html',{'form':form,'proveedorno':proveedorno})
+
+
+def edita_almacen(request,proveedorno,almacenno):
+	#pdb.set_trace()
+	msg = ''
+
+	hoy = date.today()
+
+	cursor =  connection.cursor()
+
+
+	if request.method == 'POST':
+
+		form = CreaAlmacenForm(request.POST)
+		if form.is_valid():
+			razonsocial = form.cleaned_data['RazonSocial']
+			direccion = form.cleaned_data['Direccion']
+			colonia = form.cleaned_data['Colonia']
+			ciudad = form.cleaned_data['Ciudad']
+			estado = form.cleaned_data['Estado']
+			pais = form.cleaned_data['Pais']
+			#codigopostal = form.cleaned_data['codigopostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			direccionelectronica = form.cleaned_data['direccionelectronica']
+			usr_id = form.cleaned_data['usr_id']
+			
+
+
+			try:
+
+				cursor.execute('START TRANSACTION')
+
+			
+				cursor.execute('UPDATE almacen SET RazonSocial=%s,\
+				Direccion=%s,\
+				Colonia=%s,\
+				Ciudad=%s,\
+				Estado=%s,\
+				Pais=%s,\
+				telefono1=%s,\
+				telefono2=%s,\
+				fax=%s,\
+				celular=%s,\
+				radio=%s,\
+				direccionelectronica=%s,\
+				fechaalta=%s,\
+				fechabaja=%s\
+				WHERE empresano=%s and proveedorno=%s and almacen=%s;',(razonsocial.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),'19010101','19010101',1,proveedorno,almacenno))
+
+				cursor.execute("COMMIT;")
+				cursor.close()
+
+				'''	
+				cursor.execute("COMMIT;")
+
+				cursor = connection.cursor()
+
+				cursor.execute('SELECT Almacen,RazonSocial,Direccion,Telefono1 FROM almacen WHERE EmpresaNO=1 and ProveedorNo=%s;',(proveedorno,))
+				registros = dictfetchall(cursor)	
+				
+				cursor.execute('SELECT razonsocial FROM proveedor WHERE empresano=1 and proveedorno=%s',(proveedorno,))
+				prov_nom = cursor.fetchone()
+
+				return render(request,'pedidos/lista_almacenes.html',{'registros':registros,'prov_nom':prov_nom[0],'proveedorno':proveedorno,})'''		
+
+
+
+				return HttpResponseRedirect(reverse('pedidos:filtroproveedor_almacen'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+			pass
+	else:	
+
+		cursor.execute('SELECT * FROM almacen where proveedorno=%s and almacen=%s limit 1;',(proveedorno,almacenno))
+		alm =cursor.fetchone()
+
+
+		form = CreaAlmacenForm(initial={'RazonSocial':alm[3],'Direccion':alm[4],'Colonia':alm[5],'Ciudad':alm[6],'Estado':alm[7],'Pais':alm[8],'telefono1':alm[9],'telefono2':alm[10],'fax':alm[11],'celular':alm[12],'radio':alm[13],'direccionelectronica':alm[14],})
+		
+					
+	return render(request,'pedidos/edita_almacen.html',{'form':form,'proveedorno':proveedorno,'almacenno':almacenno,})
+
+

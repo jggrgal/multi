@@ -124,7 +124,5 @@ urlpatterns = [
 	url(r'^filtrocatalogosasociado/(?P<asociadono>[0-9]{1,8})/$',views.filtrocatalogosasociado,name='filtrocatalogosasociado'),
 	url(r'^filtroproveedor_almacen/$',views.filtroproveedor_almacen,name='filtroproveedor_almacen'),
 	url(r'^crea_almacen/(?P<proveedorno>[0-9]{1,8})/$',views.crea_almacen,name='crea_almacen'),
-
-
-
+	url(r'^edita_almacen/(?P<proveedorno>[0-9]{1,8})/(?P<almacenno>[0-9]{1,8})/$',views.edita_almacen,name='edita_almacen'),
 	]

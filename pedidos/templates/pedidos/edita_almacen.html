@@ -1,0 +1,125 @@
+ {% extends 'pedidos/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+
+<div class="row">
+
+<!-- <div class="col-md-3"></div>-->
+  <div class="col-md-12 ">
+    <div class="panel panel-success">
+
+        <div class='panel-heading'><h4 align='left'>Edita almacen<h4></div>
+        
+          <div class='panel-body'>
+              
+            {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
+
+            
+            <form action="{% url 'pedidos:edita_almacen' proveedorno almacenno %}" method="POST">
+                
+                    <div class="alert alert-danger" role="alert">
+                      {% for error in form.non_field_errors %}
+                        {{ error }}
+                      {% endfor %}
+            
+                     </div>
+                      {% csrf_token %}   
+              <div class='form-row'> 
+
+                
+                  <div class='col-md-12'>
+                    {{ form.RazonSocial | as_crispy_field }}
+                  </div>
+                  
+              </div>
+
+              <div class='form-row'>  
+            
+                  <div class='col-md-12'>
+                    {{ form.Direccion | as_crispy_field }}
+                    {{ form.Colonia | as_crispy_field }}
+                    {{ form.Ciudad | as_crispy_field }}
+
+                  </div>
+                  <div class='col-md-6'>
+                    {{ form.Estado | as_crispy_field }}
+                  </div> 
+                  <div class='col-md-6'> 
+                    {{ form.Pais | as_crispy_field }}
+                   
+                  </div>
+              
+              </div>
+
+              <div class='form-row'>
+                <div class='col-md-4'>
+                  {{ form.telefono1 | as_crispy_field }}
+                </div> 
+                <div class='col-md-4'> 
+                  {{ form.telefono2 | as_crispy_field }}
+                   
+                 </div>
+                 <div class='col-md-4'> 
+                   {{ form.fax | as_crispy_field }}
+                </div>
+              </div>
+              
+              <div class='form-row'>
+                <div class='col-md-6'>
+                  {{ form.celular | as_crispy_field }}
+                </div> 
+                <div class='col-md-6'> 
+                  {{ form.radio | as_crispy_field }}
+               
+                </div>
+                  
+              </div>
+              <div class='col-md-12'>
+                {{ form.direccionelectronica | as_crispy_field  }}
+              </div>
+
+              
+              <div class='col-md-3'>
+                {{ form.usr_id | as_crispy_field  }}
+              </div>
+                 
+              <div class='form-row col-md-12'>
+                       <input  id='btn_crea_almacen' class="btn btn-default"  type="submit" value="Enviar" />              
+              </div>  
+
+             
+            </form>
+
+          <!-- 
+          <form id="imp_venta_form"  method= 'GET' role="button" {% if  form.doc_tipodedocumento == 'Remision' or  form.doc_tipodedocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if form.doc_tipodedocumento == 'Remision'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{ NoDocto }}>
+          </form> -->           
+
+
+
+
+
+          </div><br>
+
+
+
+ 
+
+
+ 
+  </div>
+  <br><p align="left">
+                          <a href="{% url 'pedidos:filtroproveedor_almacen' %}" id="regresar" class="btn btn-success" role="button">Regresar </a>
+                        </p>
+</div>        
+
+<script>
+  var is_staff = "{{ is_staff }}";
+  
+</script>  
+
+
+{% endblock content %}
