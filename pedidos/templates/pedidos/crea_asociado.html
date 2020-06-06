@@ -30,15 +30,19 @@
                       {% csrf_token %}   
               <div class='form-row'> 
 
+                <div class='col-md-3'>
+                    {{ form.numcontrol | as_crispy_field }}
+                  </div>
+
                 
-                  <div class='col-md-4'>
+                  <div class='col-md-3'>
                     {{ form.nombre | as_crispy_field }}
                   </div>
-                  <div class='col-md-4'>
+                  <div class='col-md-3'>
                     {{ form.appaterno | as_crispy_field }}
                    
                   </div>
-                  <div class='col-md-4'>
+                  <div class='col-md-3'>
                     
                     {{ form.apmaterno | as_crispy_field }}
                   </div>

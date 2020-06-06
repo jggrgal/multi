@@ -56,10 +56,12 @@ from . forms import (AccesoForm,\
 					BuscaEstiloForm,
 					PiezasNoSolicitadasForm,
 					DatosAsociadoForm,
+					EditaDescuentoAsociadoForm,
+					CreaDescuentoAsociadoForm,
 					RpteArtNoSolicitadosForm,
 					FiltroSocioCatalogoForm,
 					FiltroProveedorForm,
-					CreaAlmacenForm)
+					CreaAlmacenForm,)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -402,11 +404,33 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
+	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
 	asociados = dictfetchall(cursor)
 	cursor.close()
 	context = {'asociados': asociados}
-	return render(request, 'pedidos/asociados.html', context)	
+	return render(request, 'pedidos/asociados.html', context)
+
+def asociado_proveedor(request,asociadono):
+	#pdb.set_trace()
+	cursor=connection.cursor()
+	
+	cursor.execute('SELECT sd.idsocio as asociadono, sd.idproveedor as proveedorno,p.razonsocial,sd.descuento_porc from socio_descuento sd INNER JOIN proveedor p on (p.empresano=1 and sd.idproveedor=p.proveedorno) where sd.idsocio=%s;',(asociadono,))
+	asociado_proveedor = dictfetchall(cursor)
+
+	cursor.execute("SELECT nombre,appaterno,apmaterno from asociado where asociadono=%s;",(asociadono,))
+	nombre_socio = cursor.fetchone()
+	k=0
+	ns=str(asociadono)+''
+	while k<=2:
+		ns=ns+' '+nombre_socio[k]
+		k+=1	
+	#nombre_socio[0].strip()+' '+socio_nombre[1].strip()+' 'socio_nombre[2].strip()
+
+	cursor.close()
+	context = {'asociado_proveedor': asociado_proveedor,'asociadono':asociadono,'nombre_socio':ns,}
+	return render(request, 'pedidos/asociado_proveedor.html', context)	
+
+
 def ok(request):
 	
 	return render(request, 'pedidos/autencitacion_exitosa.html')	
@@ -10971,6 +10995,7 @@ def edita_asociado(request,asociadono):
 		form = DatosAsociadoForm(request.POST)
 		if form.is_valid():
 			asociado = form.cleaned_data['asociadono']
+			numcontrol=form.cleaned_data['numcontrol']
 			nombre = form.cleaned_data['nombre']
 			appaterno = form.cleaned_data['appaterno']
 			apmaterno = form.cleaned_data['apmaterno']
@@ -10979,7 +11004,7 @@ def edita_asociado(request,asociadono):
 			ciudad = form.cleaned_data['ciudad']
 			estado = form.cleaned_data['estado']
 			pais = form.cleaned_data['pais']
-			codigopostal = form.cleaned_data['codigopostal']
+			#codigopostal = form.cleaned_data['codigopostal']
 			telefono1 = form.cleaned_data['telefono1']
 			telefono2 = form.cleaned_data['telefono2']
 			fax = form.cleaned_data['fax']
@@ -11014,8 +11039,9 @@ def edita_asociado(request,asociadono):
 				direccionelectronica= %s,\
 				essocio = %s,\
 				forzarcobroanticipo = %s,\
-				num_web = %s\
-				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,asociadono,))
+				num_web = %s,\
+				nocontrol=%s\
+				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,asociadono,numcontrol.upper().lstrip(),))
 			
 							
 				cursor.execute("COMMIT;")
@@ -11060,7 +11086,7 @@ def edita_asociado(request,asociadono):
 								from asociado p where p.asociadono=%s;",(asociadono,))
 		asociado = cursor.fetchone()
 		
-		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'nocontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],})
+		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'numcontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],})
 					
 	return render(request,'pedidos/edita_asociado.html',{'form':form,'asociadono':asociadono,})
 
@@ -11076,6 +11102,7 @@ def crea_asociado(request):
 		form = DatosAsociadoForm(request.POST)
 		if form.is_valid():
 			asociadoo = form.cleaned_data['asociadono']
+			numcontrol = form.cleaned_data['numcontrol']
 			nombre = form.cleaned_data['nombre']
 			appaterno = form.cleaned_data['appaterno']
 			apmaterno = form.cleaned_data['apmaterno']
@@ -11134,7 +11161,7 @@ def crea_asociado(request):
 				sucursalno,\
 				creditodisponible,\
 				nocontrol) \
-				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,' '))
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,numcontrol))
 					
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 				cursor.execute("COMMIT;")
@@ -11169,22 +11196,23 @@ def filtrocatalogosasociado(request,asociadono):
 
 		if form.is_valid():
 
-			proveedor = form.cleaned_data['ProveedorNo']
+			#proveedor = form.cleaned_data['ProveedorNo']
 			#catalogo = form.cleaned_data['ClaseArticulo']
 			periodo = form.cleaned_data['Periodo']	
 			anio = form.cleaned_data['Anio']
 
 			cursor = connection.cursor()
-			cursor.execute('SELECT c.clasearticulo,if(c.activo,"Si","No") as activo,c.nodocto from sociocatalogostemporada c WHERE c.proveedorno=%s and c.asociadono=%s and c.periodo=%s and c.anio=%s;',(proveedor,asociadono,periodo,anio,))
+
+
+			cursor.execute('SELECT p.razonsocial,c.clasearticulo,if(c.activo,"Si","No") as activo,c.nodocto from sociocatalogostemporada c INNER JOIN proveedor p on (p.empresano=1 and p.proveedorno=c.proveedorno) WHERE c.asociadono=%s and c.periodo=%s and c.anio=%s;',(asociadono,periodo,anio,))
 			registros = dictfetchall(cursor)
-			
-			cursor.execute('SELECT razonsocial from proveedor WHERE empresano=1 and proveedorno=%s;',(proveedor,))
-			nom_prov = cursor.fetchone()
+				
+				
 
 			'''cursor.execute('SELECT razonsocial as nom_almacen from almacen where empresano=1 and proveedorno=%s and almacen=%s;',(proveedor,almacen))
 			nom_almacen = cursor.fetchone()'''
-
-			return render(request,'pedidos/lista_catalogos_socio.html',{'registros':registros,'nom_prov':nom_prov[0],})
+			cursor.close()
+			return render(request,'pedidos/lista_catalogos_socio.html',{'registros':registros,'anio':'Primavera/Verano' if anio==u'1' else 'Otoño/Invierno','periodo':periodo,})
 
 	form = FiltroSocioCatalogoForm()
 	return render (request,'pedidos/filtro_asociado_catalogos.html',{'form':form,'asociadono':asociadono,})		
@@ -11403,3 +11431,93 @@ def edita_almacen(request,proveedorno,almacenno):
 	return render(request,'pedidos/edita_almacen.html',{'form':form,'proveedorno':proveedorno,'almacenno':almacenno,})
 
 
+def asociado_edita_descuento(request,proveedorno,asociadono):
+
+	#pdb.set_trace()
+	cursor =  connection.cursor()
+
+	if request.method=='POST':
+
+		form=EditaDescuentoAsociadoForm(request.POST)
+
+		if form.is_valid():
+
+			descuento =form.cleaned_data['descuento']	
+	
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("UPDATE socio_descuento SET descuento_porc = %s\
+				WHERE idsocio=%s and idproveedor=%s;",(descuento,asociadono,proveedorno,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:asociado_proveedor',args=(asociadono,)))
+				
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+
+
+
+	else:
+	
+		cursor.execute('SELECT descuento_porc FROM socio_descuento where idsocio=%s and idproveedor=%s limit 1;',(asociadono,proveedorno,))
+		alm =cursor.fetchone()
+
+
+		form = EditaDescuentoAsociadoForm(initial={'descuento':alm[0],})
+
+	return render(request,'pedidos/edita_socio_descuento.html',{'form':form,'proveedorno':proveedorno,'asociadono':asociadono,})				
+
+
+
+
+def asociado_nuevo_descuento(request,asociadono):
+
+	#pdb.set_trace()
+	cursor =  connection.cursor()
+
+	if request.method=='POST':
+
+		form=CreaDescuentoAsociadoForm(request.POST)
+
+		if form.is_valid():
+
+			proveedorno=form.cleaned_data['proveedor']
+			descuento =form.cleaned_data['descuento']	
+	
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("INSERT INTO socio_descuento(idproveedor,idsocio,descuento_porc) VALUES(%s,%s,%s);",(proveedorno,asociadono,descuento,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:asociado_proveedor',args=(asociadono,)))
+				
+
+			except IntegrityError as error_msg:
+
+				context={'error_msg':"Actualmente ya existe un descuento para este proveedor, si desea puede editarlo y modificarlo pero no crear otro !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+				
+				
+	else:
+		
+
+		form = CreaDescuentoAsociadoForm()
+
+	return render(request,'pedidos/crea_socio_descuento.html',{'form':form,'asociadono':asociadono,})				

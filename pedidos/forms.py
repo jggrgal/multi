@@ -3005,6 +3005,7 @@ class DatosAsociadoForm(forms.Form):
 
 
 	asociadono = forms.IntegerField(label='Socio Num.',required=False)
+	numcontrol = forms.CharField(label='Numero de control',required=True,max_length=12)
 	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
 	appaterno = forms.CharField(label='Apellido Paterno',required=True,max_length=45)	
 	apmaterno = forms.CharField(label='Apellido Materno',required=True,max_length=45)	
@@ -3093,7 +3094,7 @@ class DatosAsociadoForm(forms.Form):
 
 class CreaAsociadoForm(forms.Form):
 
-	
+	NoControl = forms.CharField(label='Numero de control',required=True,max_length=12)
 	RazonSocial = forms.CharField(label='Nombre',required=True,max_length=45)	
 	Direccion = forms.CharField(label='Direccion',required=True,max_length=45)
 	Colonia = forms.CharField(label='Colonia',required=True,max_length=45)
@@ -3197,7 +3198,7 @@ class FiltroSocioCatalogoForm(forms.Form):
 		#self.fields['Periodo'].widget.attrs['readonly'] = True
 			
 
-	ProveedorNo = forms.ChoiceField(label='Proveedor Num.',choices=lprov,required=True)
+	#ProveedorNo = forms.ChoiceField(label='Proveedor Num.',choices=lprov,required=True)
 	Anio = forms.ChoiceField(label='Temporada',choices=((1,'Primavera/Verano'),(2,'Otoño/Invierno')),initial=1,required=True)
 	Periodo = forms.ChoiceField(widget=forms.Select(),
 			label='Año',required='True' )	
@@ -3392,3 +3393,40 @@ class CreaAlmacenForm(forms.Form):
 			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
 
 		return self.cleaned_data		
+
+
+class EditaDescuentoAsociadoForm(forms.Form):
+
+	descuento = forms.DecimalField(label='Porcentaje de descuento',initial=0)
+
+	def clean(self):
+
+		cleaned_data = super(EditaDescuentoAsociadoForm,self).clean()
+
+		descuento = self.cleaned_data.get('descuento')
+
+		return(self.cleaned_data)
+
+
+class CreaDescuentoAsociadoForm(forms.Form):
+
+	lprov = lista_Proveedores()
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(CreaDescuentoAsociadoForm, self).__init__(*args,**kwargs)
+
+	#self.fields['ProveedorNo'].widget.attrs['readonly'] = True
+	
+	proveedor = forms.ChoiceField(label='Proveedor',choices=lprov,initial=0)
+	descuento = forms.DecimalField(label='Porcentaje de descuento',initial=0)
+
+	def clean(self):
+
+		cleaned_data = super(CreaDescuentoAsociadoForm,self).clean()
+
+		descuento = self.cleaned_data.get('descuento')
+
+		return(self.cleaned_data)
+

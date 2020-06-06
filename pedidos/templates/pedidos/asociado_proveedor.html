@@ -11,8 +11,8 @@ console.log(x)
 
 
  </script>
-<h3>Año: {{ periodo }}</h3>
-<h4>Periodo: {{ anio }}</h4>
+<h3>Descuentos del socio:{{nombre_socio}}</h3>
+
 
 <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>
 
@@ -22,8 +22,8 @@ console.log(x)
         	<tr class='success'>
                 
                 <th>Proveedor</th>
-                <th>Catalogo</th>
-                <th>No documento</th>
+                <th>Descuento (%)</th>
+                
                 <!--<th>Activo ?</th>-->
         		
                 
@@ -31,13 +31,13 @@ console.log(x)
         	</tr>
         </thead>
         <tbody>
-        	{% for item in registros %}
+        	{% for item in asociado_proveedor %}
                 
         		<tr>
         			
-                    <td>{{ item.razonsocial }}</td>
-        			<td> {{ item.clasearticulo }}</td>
-        			<td> {{ item.nodocto }}</td>
+                    <td><a href="/pedidos/asociado_edita_descuento/{{item.proveedorno}}/{{item.asociadono}}">{{ item.razonsocial }}</td>
+        			<td>{{ item.descuento_porc }}</td>
+        			
         			<!--<td> {{ item.activo }}</td>-->
     				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado
     				
@@ -57,6 +57,11 @@ console.log(x)
 
     
         <div class="col-md-12" >
+            <p align="left">
+                      
+                      <a href="/pedidos/asociado_nuevo_descuento/{{asociadono}}" id="crea_descuento_asociado" class="btn btn-success " role="button">Nuevo </a>
+
+                    </p>
            <!-- <h3>Articulos  recibidos: <span id="total_recibidos" class="label label-primary">0</span></h3>
         </div>-->
     </div>
@@ -97,15 +102,5 @@ console.log(x)
 	
 	<!-- El siguiente script no se definio dentro de pedidos.js ya que este ultimo se carga primero que las variables de manejadas dentro del request de django, asi puest, el script asigna variables recibidas en request  a variables visibles por JQuery -->
 	
-	<script>
-	var reg_encontrados = "{{ reg_encontrados }}";
-	var almacen = "{{ almacen }}";
-	var nueva_fecha_llegada = "{{ nueva_fecha_llegada }}";
-    var marcartodo_nollego ="{{ marcartodo_nollego }}"
-    var cierre = "{{ cierre }}"
-    var socio = "{{ socio }}";
-    var tipoconsulta ="{{ tipoconsulta }}"
-    </script>
-
-
+	
 {% endblock %}	
