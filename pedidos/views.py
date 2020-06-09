@@ -204,12 +204,6 @@ def actualiza_preciooriginal():
 
 
 
-
-
-
-
-
-
 '''VISTA_4 CONTINUA ACCESO AL SISTEMA'''
 def acceso(request):
 
@@ -5178,7 +5172,7 @@ def crea_documento(request):
 	return render(request,'pedidos/crea_documento.html',{'form':form,})
 
 
-def calcula_descuento(p_socio,p_idproveedor):
+def calcula_descuento(p_socio,p_idproveedor,p_socio_total_compras_mes_anterior):
 	#pdb.set_trace() 
 
 	factor_descuento = 0
@@ -5204,7 +5198,7 @@ def calcula_descuento(p_socio,p_idproveedor):
 
 	# Determina el total de la venta del socio
 
-	
+	'''
 	cursor.execute("SELECT SUM(p.precio) AS total\
 	 FROM pedidos_status_fechas f  INNER JOIN pedidoslines p \
 	  ON (p.EmpresaNo= f.EmpresaNo\
@@ -5220,23 +5214,29 @@ def calcula_descuento(p_socio,p_idproveedor):
 	           and p.Status='Facturado' and h.asociadono=%s\
 	            and a.idProveedor=%s;",(fecha_inicial,fecha_final,socio,proveedor,))
 
-	total_vta_xsocio_tupla = cursor.fetchone() # obtiene el resultado en forma de tupla 
+	total_vta_xsocio_tupla = cursor.fetchone() # obtiene el resultado en forma de tupla '''
 
-	if total_vta_xsocio_tupla[0] is None:
+	
+	'''if total_vta_xsocio_tupla[0] is None:
+
 		
 		total_vta_xsocio_var = 0
 	else:
 
-		total_vta_xsocio_var = total_vta_xsocio_tupla[0]	
+		total_vta_xsocio_var = total_vta_xsocio_tupla[0]'''	
 
 
-
+	# **********  CALCULA EL PORCENTAJE DE DESCUENTO   ********	
+	
 	# Determina el porcentaje de dscto que corresponde
 	# segun el total de la venta 
 
+	# (modif.) Se cambia la variable total_vta_xsocio_var por p_socio_total_compras_mes_anterior
+	# esto a raiz de que la base de las compras que hizo el socio  (antes ventas que se hicieron al socio) no contemplan las devolucioones.
+
 	cursor.execute("SELECT porcentaje from prov_tarifas_desc\
 	 where prove=%s and %s>=lim_inf and %s<=lim_sup;",\
-	 (proveedor,total_vta_xsocio_var,total_vta_xsocio_var,))
+	 (proveedor,p_socio_total_compras_mes_anterior,p_socio_total_compras_mes_anterior,))
 
 	porc_desc_variable_tupla = cursor.fetchone()
 
@@ -5284,6 +5284,8 @@ def trae_inf_venta(request,num_socio):
 
 	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 
+
+	hoy = date.today()
 	ejercicio_vigente =request.session['cnf_ejercicio_vigente']
 	periodo_vigente = request.session['cnf_periodo_vigente']
 
@@ -5324,7 +5326,7 @@ def trae_inf_venta(request,num_socio):
 							WHERE l.status='Aqui' and  h.asociadono=%s and h.idsucursal=%s;",(num_socio,id_sucursal,))
 	ventas = dictfetchall(cursor)
 
-	
+		
 	
 	''' Como se va a modificar un registro de la lista de diccionarios,se crea
 	esta lista temporal'''
@@ -5341,7 +5343,31 @@ def trae_inf_venta(request,num_socio):
 		
 			venta['precio_dscto']=p_precio
 		else:
-			p_porcentaje_descuento = Decimal(calcula_descuento(num_socio,p_idproveedor),2)
+			
+			#pdb.set_trace()		
+			#  CALCULA LA BASE PARA COMPRAS DEL MES ANTERIOR
+
+			fi,ff = traePrimerUltimoDiasMesAnterior()
+			compras =calcula_compras_socio_por_proveedor(num_socio,hoy,2,p_idproveedor,fi,ff)
+
+			for compra in compras:
+				
+				if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
+					'''
+					p.drawString(20,linea,str(compra['nombreprov'])[:7])
+					p.drawString(55,linea,str(compra['ventabruta']-compra['descuento']))
+					p.drawString(86,linea,str(compra['devoluciones'] if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
+					p.drawString(117,linea,str((compra['ventabruta']-compra['descuento']-compra['devoluciones']) if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
+					linea-=10
+					'''
+					compras_mes_ant = compra['ventabruta']-compra['descuento']-compra['devoluciones']
+				else:
+					compras_mes_ant = 0
+
+			#   CALCULA EL PORCENTAJE DE DESCUENTO
+
+			p_porcentaje_descuento = Decimal( calcula_descuento(num_socio,p_idproveedor,compras_mes_ant))
+
 
 			venta['precio_dscto']= p_precio - p_precio * p_porcentaje_descuento # agrega el precio de descuento al diccionario
 			venta['precio_dscto']=round(venta['precio_dscto'],2)
@@ -6660,8 +6686,10 @@ def imprime_venta(request):
 			p.drawString(125,paso -100,'$'+str(0 if datos_documento[5]-importe_a_pagar<=0 else datos_documento[5]-importe_a_pagar))
 
 
-		compras = calcula_compras_socio_por_proveedor(datos_documento[0],datos_documento[8])	
-		
+		compras = calcula_compras_socio_por_proveedor(datos_documento[0],datos_documento[8],1,0,'19010101','19010101')	
+		#pdb.set_trace()
+
+		print "RASTREANDO EN RUTINA DE IMPRESION VEENTA"
 		#p.setFont("Helvetica",6)	
 
 
@@ -10624,14 +10652,54 @@ def busca_estilo(request):
 			
 
 
-def calcula_compras_socio_por_proveedor(sociono,fechavta):
+def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fechainicial='19010101',p_fechafinal='19010101'):
+
+	#pdb.set_trace()
+
+	'''   DEFINICION DE PARAMETROS
+
+	sociono:  Numero de socio al que se le calcularan las compras
+
+	fechavta: Fecha en la que se hace la venta,
+
+	p_opt:  Opcion para calculo:
+
+	1. El calculo se hara para el historial de compras netas del mes del socio
+
+	2.- El calculo se hara para el historial de compras netas del mes anterior a la venta.
+
+	 
+	p_idprov: El numero de proveedor con el cual se hara el calculo, si este trae un valor
+	          tiene efecto solo para llamados de la rutina de calcular_descuento (en registro de la venta)    
+			  de lo contrario se asume que el calculo es para el desglose de compras en el ticket. 
+	 '''
+
+
+
+
+
 	''' Inicializa Variables '''
 	#pdb.set_trace()
 
 	sucursal = '0'
-	fechainicial = fechavta.replace(day=1)
 
-	fechafinal = fechavta 
+	if p_opt == 1:    # Para calculo de desglose de historial de compras en ticket
+
+		fechainicial = fechavta.replace(day=1)
+
+		fechafinal = fechavta
+
+		prov_ini=1
+		prov_fin=999
+
+
+	else:             # Para calculo de base para descuento al momento de la venta
+
+		fechainicial = p_fechainicial
+		fechafinal = p_fechafinal
+		prov_ini =	p_idprov
+		prov_fin = p_idprov
+
 
 	cursor=connection.cursor()
 
@@ -10677,9 +10745,9 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
 		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 		where f.fechamvto>=%s and f.fechamvto<=%s\
-		and h.asociadono=%s\
+		and h.asociadono=%s and a.idproveedor>=%s and a.idproveedor<=%s\
 		group by a.idproveedor ; ",\
-		(fechainicial,fechafinal,sociono))
+		(fechainicial,fechafinal,sociono,prov_ini,prov_fin,))
 
 	
 	registros_venta = dictfetchall(cursor)
@@ -10687,7 +10755,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
 	
 	elementos = len(registros_venta)
 	#TRAE DEVOLUCIONES GRAL
-	cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
+	'''cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
 	 from (SELECT psf.empresano,psf.pedido,\
 	 psf.productono,\
 	 psf.nolinea,\
@@ -10705,7 +10773,24 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta):
      INNER JOIN articulo as art\
      on (art.empresano= t3.empresano and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
      WHERE t3.status='Facturado'\
-     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono))
+     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono))'''
+	cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
+	from (SELECT psf.empresano,psf.pedido,\
+	psf.productono,\
+	psf.nolinea,\
+	psf.catalogo,\
+	psf.fechamvto from\
+	pedidos_status_fechas as psf \
+	INNER JOIN pedidosheader as h \
+	ON h.empresano=psf.empresano and h.pedidono=psf.pedido WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s and h.asociadono=%s) as t2\
+	INNER JOIN pedidoslines as l\
+	on (t2.empresano=l.empresano and l.pedido=t2.pedido and l.productono=t2.productono\
+	and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
+	INNER JOIN articulo as art\
+	on (art.empresano= t2.empresano and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
+	WHERE (l.status='Devuelto' or l.status='Dev a Prov' or l.status='RecepEnDevol') and art.idproveedor>=%s and art.idproveedor<=%s\
+	GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono,prov_ini,prov_fin,))
+
 
 	registros_devgral = dictfetchall(cursor)
 
