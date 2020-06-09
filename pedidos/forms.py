@@ -3398,12 +3398,15 @@ class CreaAlmacenForm(forms.Form):
 class EditaDescuentoAsociadoForm(forms.Form):
 
 	descuento = forms.DecimalField(label='Porcentaje de descuento',initial=0)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
 
 	def clean(self):
 
 		cleaned_data = super(EditaDescuentoAsociadoForm,self).clean()
 
 		descuento = self.cleaned_data.get('descuento')
+
+		usr_id = self.cleaned_data.get('usr_id')
 
 		return(self.cleaned_data)
 
@@ -3421,12 +3424,14 @@ class CreaDescuentoAsociadoForm(forms.Form):
 	
 	proveedor = forms.ChoiceField(label='Proveedor',choices=lprov,initial=0)
 	descuento = forms.DecimalField(label='Porcentaje de descuento',initial=0)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
 
 	def clean(self):
 
 		cleaned_data = super(CreaDescuentoAsociadoForm,self).clean()
 
 		descuento = self.cleaned_data.get('descuento')
+		usr_id = self.cleaned_data.get('usr_id')
 
 		return(self.cleaned_data)
 

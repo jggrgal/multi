@@ -404,7 +404,7 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
+	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado limit 100;')
 	asociados = dictfetchall(cursor)
 	cursor.close()
 	context = {'asociados': asociados}
@@ -1916,7 +1916,7 @@ def con_pedidos_por_socio_status(request):
 
 
 			if numpedido != 0:
-				cursor.execute("SELECT l.s,l.productono,l.catalogo,l.precio,l.status,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) inner join pedidos_status_fechas psf on (psf.empresano=l.empresano and psf.pedido=l.pedido and psf.productono=l.productono and psf.catalogo=l.catalogo and psf.nolinea=l.nolinea and psf.status=l.status) where h.pedidono=%s;",[numpedido])
+				cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) inner join pedidos_status_fechas psf on (psf.empresano=l.empresano and psf.pedido=l.pedido and psf.productono=l.productono and psf.catalogo=l.catalogo and psf.nolinea=l.nolinea and psf.status=l.status) where h.pedidono=%s;",[numpedido])
 				socio = 0 # Si acaso el usuario asigno un numero de socio,  este se hace cero para mas delante 
 						  # asignar el socio que  nos arroja la consulta por pedido. 
 			else :
@@ -11443,8 +11443,28 @@ def asociado_edita_descuento(request,proveedorno,asociadono):
 		if form.is_valid():
 
 			descuento =form.cleaned_data['descuento']	
-	
+
+			usr_id =form.cleaned_data['usr_id']
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			
 			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,30)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute("UPDATE socio_descuento SET descuento_porc = %s\
@@ -11460,10 +11480,17 @@ def asociado_edita_descuento(request,proveedorno,asociadono):
 				print e
 				
 				cursor.execute('ROLLBACK;')
-				msg = 'Error en base de datos !'
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+				error_msg = 'Ha ocurrido un error en base de datos !'
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)
 
+			except ValueError:		
 
+				error_msg ="Usuario no registrado o bien sin los derechos para operar en descuentos al socios !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)	
 
 
 	else:
@@ -11475,6 +11502,7 @@ def asociado_edita_descuento(request,proveedorno,asociadono):
 		form = EditaDescuentoAsociadoForm(initial={'descuento':alm[0],})
 
 	return render(request,'pedidos/edita_socio_descuento.html',{'form':form,'proveedorno':proveedorno,'asociadono':asociadono,})				
+
 
 
 
@@ -11492,8 +11520,25 @@ def asociado_nuevo_descuento(request,asociadono):
 
 			proveedorno=form.cleaned_data['proveedor']
 			descuento =form.cleaned_data['descuento']	
-	
+			usr_id = form.cleaned_data['usr_id']
+			
+			usr_existente=0
+			permiso_exitoso=0
+
 			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,30)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute("INSERT INTO socio_descuento(idproveedor,idsocio,descuento_porc) VALUES(%s,%s,%s);",(proveedorno,asociadono,descuento,))
@@ -11513,7 +11558,12 @@ def asociado_nuevo_descuento(request,asociadono):
 				context={'error_msg':error_msg,}
 				cursor.execute('ROLLBACK;')
 				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para operar en descuentos al socios !"
+				context={'error_msg':error_msg,}
 				
+				return render(request, 'pedidos/error.html',context)		
 				
 	else:
 		
