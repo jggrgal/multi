@@ -398,7 +398,7 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado limit 100;')
+	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
 	asociados = dictfetchall(cursor)
 	cursor.close()
 	context = {'asociados': asociados}
@@ -5294,7 +5294,7 @@ def trae_inf_venta(request,num_socio):
 	cursor = connection.cursor()
 
 
-
+	compras_mes_ant = 0
 
 
 	# trae pedidos que estan aqui
@@ -10791,11 +10791,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 	WHERE (l.status='Devuelto' or l.status='Dev a Prov' or l.status='RecepEnDevol') and art.idproveedor>=%s and art.idproveedor<=%s\
 	GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono,prov_ini,prov_fin,))
 
-
 	registros_devgral = dictfetchall(cursor)
-
-
-
 
 	if not registros_venta:
 
