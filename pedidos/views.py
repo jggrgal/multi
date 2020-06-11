@@ -398,7 +398,7 @@ def crea_tabla_pedidos_temporal():
 
 def lista_asociados(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1 from asociado;')
+	cursor.execute('SELECT nocontrol as numcontrol,asociadono,nombre,appaterno,apmaterno,telefono1,celular,direccionelectronica from asociado;')
 	asociados = dictfetchall(cursor)
 	cursor.close()
 	context = {'asociados': asociados}
@@ -3058,7 +3058,7 @@ def imprime_ticket(request):
 		#p.setFont("Helvetica",8)
 		i,paso=1,linea-10
 		for elemento in pedido_detalle:
-
+			print(paso)
 			if elemento['talla'] != 'NE':
 				talla = elemento['talla']
 			else:
@@ -11122,7 +11122,7 @@ def edita_asociado(request,asociadono):
 				forzarcobroanticipo = %s,\
 				num_web = %s,\
 				nocontrol=%s\
-				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,asociadono,numcontrol.upper().lstrip(),))
+				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,numcontrol.upper().lstrip(),asociadono,))
 			
 							
 				cursor.execute("COMMIT;")

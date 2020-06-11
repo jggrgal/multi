@@ -32,11 +32,11 @@
                
             	
             	<th>Concepto</th>
-            	<th>Monto</th>
-                <th>Venta</th>
+            	<th>Venta</th>
                 <th>Saldo / Credito aplic</th>
                 <th>Cargos</th>
                 <th>Descuento</th>
+                <th>Monto</th>
                 <th>St</th>
                 
                 <th> Cancelar</th>
@@ -57,11 +57,14 @@
                     
                    
         			<td>{{ item.concepto }}</td> 
-            		<td  >{{ item.monto }}</td>
+            		
             		<td>{{item.venta}}</td>
                     <td>{{item.saldo}}</td>
                     <td>{{item.comisiones}}</td>
                     <td>{{item.DescuentoAplicado}}</td>
+
+                    <td>{% if item.monto > 0 %}{{ item.monto }}{% else %} 0 {% endif %}</td>
+
                     <!--<td>{% if item.Cancelado == '1' %} {{item.Cancelado}} {% else %} ACTIVO {% endif %} <td>-->
                     <td>{{item.Cancelado}}</td>
                   
