@@ -128,4 +128,5 @@ urlpatterns = [
 	url(r'^filtroproveedor_almacen/$',views.filtroproveedor_almacen,name='filtroproveedor_almacen'),
 	url(r'^crea_almacen/(?P<proveedorno>[0-9]{1,8})/$',views.crea_almacen,name='crea_almacen'),
 	url(r'^edita_almacen/(?P<proveedorno>[0-9]{1,8})/(?P<almacenno>[0-9]{1,8})/$',views.edita_almacen,name='edita_almacen'),
+	url(r'^lista_usuarios/$',views.lista_usuarios,name='lista_usuarios'),
 	]

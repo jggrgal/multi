@@ -3068,7 +3068,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['subtotal']
 			else:
 				precio_imprimir = elemento['precio']	
-
+			pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
 			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
@@ -3842,7 +3842,7 @@ def procesar_colocaciones(request):
 					error_msg = "Error desconocido"
 					data = {'status_operacion':'fail','error':error_msg,}
 					error = True
-
+						
 		cursor.close()
 
 		# Si no hay error, nos devolvera la lista de pedidos cambiados
@@ -5175,7 +5175,7 @@ def crea_documento(request):
 def calcula_descuento(p_socio,p_idproveedor,p_socio_total_compras_mes_anterior):
 	#pdb.set_trace() 
 
-	factor_descuento = 0
+	factor_descuento = 0.0
 	
 	#if request.is_ajax()  and request.method == 'GET':
 		# Pasa a una variable la tabla  recibida en json string
@@ -5409,6 +5409,7 @@ def trae_inf_venta(request,num_socio):
 	cursor.close()
 
 	return (ventas,creditos,cargos,porconfs_confs)
+
 
 
 
@@ -6382,7 +6383,15 @@ def verifica_derechos_usr(num_usr_valido,usr_derecho):
 
 def valida_usr(request):
 	#pdb.set_trace()
-	socio_zapcat = request.session['socio_zapcat']	
+
+	try:	
+		socio_zapcat = request.session['socio_zapcat']	
+	except KeyError as e:
+		error_msg ="Error  1001: Error al validar el usuario en session, aparentemente su sesión se perdió, cierre completamente su navegador, reabralo y accese nuevamente al sistema !"
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+
 	tiene_derecho = 0 # asume que no tiene derecho
 	usr_id = request.GET.get('usr_id')
 	usr_derecho = int(request.GET.get('usr_derecho').encode('latin_1'))
@@ -11652,3 +11661,12 @@ def asociado_nuevo_descuento(request,asociadono):
 		form = CreaDescuentoAsociadoForm()
 
 	return render(request,'pedidos/crea_socio_descuento.html',{'form':form,'asociadono':asociadono,})				
+
+
+def lista_usuarios(request):
+	cursor=connection.cursor()
+	cursor.execute('SELECT usuariono,nombre,fechacreacion,activo,usuario from usuarios;')
+	usuarios = dictfetchall(cursor)
+	cursor.close()
+	context = {'usuarios': usuarios}
+	return render(request, 'pedidos/usuarios.html', context)
