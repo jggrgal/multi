@@ -7279,7 +7279,7 @@ def calcula_bono(request):
 			registros_devgral = dictfetchall(cursor)'''
 
 			#TRAE DEVOLUCIONES GRAL
-			
+			''' esto este mal 
 			cursor.execute("SELECT ph.asociadono,'',TRUNCATE(sum(l.precio),2) as devgral,0\
 			 from (SELECT psf.pedido,\
 			 psf.productono,\
@@ -7288,8 +7288,8 @@ def calcula_bono(request):
 			 psf.fechamvto from\
 			 pedidos_status_fechas as psf USE INDEX (indice_2)\
 			 INNER JOIN pedidosheader as h\
-			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
-			 INNER JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
+			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+			 left JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
 			 (t3.empresano=1 and t2.pedido=t3.pedido and t2.productono=t3.productono\
 			 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
 	         INNER JOIN pedidoslines as l\
@@ -7299,7 +7299,47 @@ def calcula_bono(request):
 	         on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
 	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
 	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
-	         where t3.status='Facturado' and pcb.BaseParaBono>0\
+	         where (l.status='Devuelto' or l.status='Dev a Prov' or l.status='RecepEnDevol') and pcb.BaseParaBono>0\
+	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,)) '''
+		
+			''' malo 2
+
+			cursor.execute("SELECT ph.asociadono,'',TRUNCATE(sum(l.precio),2) as devgral,0\
+			 from (SELECT psf.pedido,\
+			 psf.productono,\
+			 psf.nolinea,\
+			 psf.catalogo,\
+			 psf.fechamvto from\
+			 pedidos_status_fechas as psf USE INDEX (indice_2)\
+			 INNER JOIN pedidosheader as h\
+			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+			 INNER JOIN pedidoslines as l\
+	         on (l.empresano=1 and l.pedido=t2.pedido and l.productono=t2.productono\
+	         and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
+	         INNER JOIN articulo as art\
+	         on (art.empresano=1 and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
+	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
+	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
+	         where (l.status='Devuelto' or l.status='Dev a Prov' or l.status='RecepEnDevol') and pcb.BaseParaBono>0\
+	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))'''
+
+			cursor.execute("SELECT ph.asociadono,'',TRUNCATE(sum(l.precio),2) as devgral,0\
+			 from (SELECT psf.pedido,\
+			 psf.productono,\
+			 psf.nolinea,\
+			 psf.catalogo,\
+			 psf.fechamvto from\
+			 pedidos_status_fechas as psf USE INDEX (indice_2)\
+			 INNER JOIN pedidosheader as h\
+			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+			 INNER JOIN pedidoslines as l\
+	         on (l.empresano=1 and l.pedido=t2.pedido and l.productono=t2.productono\
+	         and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
+	         INNER JOIN articulo as art\
+	         on (art.empresano=1 and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
+	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
+	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
+	         where pcb.BaseParaBono>0\
 	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))
 
 			registros_devgral = dictfetchall(cursor)
@@ -10782,13 +10822,13 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 	psf.fechamvto from\
 	pedidos_status_fechas as psf \
 	INNER JOIN pedidosheader as h \
-	ON h.empresano=psf.empresano and h.pedidono=psf.pedido WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s and h.asociadono=%s) as t2\
+	ON h.empresano=psf.empresano and h.pedidono=psf.pedido WHERE (psf.status='Devuelto') and psf.fechamvto>= %s and psf.fechamvto<= %s and h.asociadono=%s) as t2\
 	INNER JOIN pedidoslines as l\
 	on (t2.empresano=l.empresano and l.pedido=t2.pedido and l.productono=t2.productono\
 	and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
 	INNER JOIN articulo as art\
 	on (art.empresano= t2.empresano and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
-	WHERE (l.status='Devuelto' or l.status='Dev a Prov' or l.status='RecepEnDevol') and art.idproveedor>=%s and art.idproveedor<=%s\
+	WHERE art.idproveedor>=%s and art.idproveedor<=%s\
 	GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono,prov_ini,prov_fin,))
 
 	registros_devgral = dictfetchall(cursor)
