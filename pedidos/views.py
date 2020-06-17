@@ -1470,7 +1470,8 @@ def procesar_pedido(request):
 	if request.is_ajax() and request.method =='POST':
 
 
-		total = request.POST.get('total')
+		total = request.POST.get('total') # Este total esta mal redondeado, se cambia por el de la siguiete linea v_total
+		v_total = Decimal(0.0,2) # Lo convierte a decimal para que pueda acumular las ctds de precio en pedidoslines ( que las trae de la bd como tipo decimal)
 
 		if request.session['is_staff']:
 
@@ -1611,7 +1612,8 @@ def procesar_pedido(request):
 				
 					raise ValueError("Hay un valor invalido para el campo 'precio' no se grabara la transaccion !")
 
-		
+				v_total = v_total + datos[count-1].precio # acumula el total del pedido para grabarlo en pedidosheader
+				
 				cursor.execute("INSERT INTO pedidoslines (EmpresaNo,Pedido,ProductoNo,CantidadSolicitada,precio,subtotal,PrecioOriginal,Status,RemisionNo,NoNotaCreditoPorPedido,NoNotaCreditoPorDevolucion,NoRequisicionAProveedor,NoNotaCreditoPorDiferencia,catalogo,NoLinea,plazoentrega,OpcionCompra,FechaMaximaEntrega,FechaTentativaLLegada,FechaMaximaRecoger,Observaciones,AplicarDcto) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [1,PedidoNuevo,datos[count-1].idproducto,1,datos[count-1].precio,datos[count-1].precio,datos[count-1].precio,status_a_asignar,0,nuevo_docto,0,0,0,datos[count-1].catalogo,count,2,opcioncompra,'19010101','19010101','19010101',datos[count-1].tallaalt,0])
 				cursor.execute("INSERT INTO pedidoslinestemporada (EmpresaNo,Pedido,ProductoNo,catalogo,NoLinea,Temporada) VALUES(%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,datos[count-1].catalogo,count,datos[count-1].temporada])
 				cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,PedidoNuevo,datos[count-1].idproducto,status_a_asignar,datos[count-1].catalogo,count,fecha_hoy,hora_hoy,capturista])
@@ -1626,8 +1628,9 @@ def procesar_pedido(request):
 				
 				count = count + 1
 
+			# La siguiente linea se agrega para actualizar la vta totalcorrectamenteya que el valor que se trea del browser no es correcto, esta mal redondeado.	
+			cursor.execute("UPDATE pedidosheader SET vtatotal=%s WHERE pedidono=%s;",(v_total,PedidoNuevo,))	
 
-			
 			cursor.execute("DELETE FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])	
 			
 			# Graba cambios.
@@ -2921,6 +2924,7 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 		
 def imprime_ticket(request):
 	#pdb.set_trace()
+	tot_art = 0
 	try:
 		is_staff = request.session['is_staff']
 	except KeyError:
@@ -2970,6 +2974,8 @@ def imprime_ticket(request):
 					talla = elem['talla']
 				else:
 					talla = elem['Observaciones']
+				tot_art = tot_art + 1
+
 
 		cursor.execute("SELECT usuario from usuarios where usuariono=%s;",[pedido_header[3]])
 		
@@ -3075,10 +3081,14 @@ def imprime_ticket(request):
 			paso -= 30
 			
 		p.drawString(20,paso-10,"Total ==>")
-		p.drawString(130,paso-10,'$ '+str(pedido_header[6]))
-		p.drawString(20,paso-40,"Para sugerencias o quejas")
-		p.drawString(20,paso-50,"llame al 867 132 9697")
-		linea = paso-110
+		p.drawString(130,paso-10,'$ '+str(round(pedido_header[6],0)))
+		
+		p.drawString(20,paso-20,'Ctd. articulos => ')
+		p.drawString(130,paso-20,str(tot_art))
+
+		p.drawString(20,paso-50,"Para sugerencias o quejas")
+		p.drawString(20,paso-60,"llame al 867 132 9697")
+		linea = paso-120
 	#pdb.set_trace()	
 	if NotaCredito != 0:
 		imprime_documento(NotaCredito,'Credito',False,request.session['cnf_razon_social'],request.session['cnf_direccion'],request.session['cnf_colonia'],request.session['cnf_ciudad'],request.session['cnf_estado'],p,buffer,response,True,linea,request)
