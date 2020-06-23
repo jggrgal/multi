@@ -40,6 +40,7 @@
                 <th>Status</th>
                 <th>Fecha llegada <small>(Puede cambiar)</small></th>
                 <th>Fecha Maxima Entrega</th>
+                <th>Notas</th>
                 <th> Cancel ?</th>
                 <th> Imp </th>
         	</tr>
@@ -47,7 +48,7 @@
             <tbody>
         	{% for item in pedidos %}
                 
-        		<tr>
+        		<tr {% if 'No llegó' in item.notas %} style="background-color:#ffbf00"{% endif %}>
                     <td>{{item.pedido}} </td>
                     <td style="display:none">{{item.productono}}</td>
                     <td style="display:none">{{item.catalogo}}</td>
@@ -71,6 +72,7 @@
                         {% if "1901" in item.FechaMaximaEntrega %} NO ESP.{% endif %}
                             {{item.FechaMaximaEntrega | date:'d/M/Y'  }}
                     {% endlocalize %}</td>
+                    <td>{{item.notas}}</td>
                     <!--<td><p align="left">
                           <a id="btn_cancela_pedido" class="btn btn-danger btn-sm " href="/pedidos/cancelarpedidoadvertencia/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
                         </p></td>-->
