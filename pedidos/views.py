@@ -188,7 +188,7 @@ def actualiza_preciooriginal():
 		
 	hoy = date.today()
 	
-	fechainicial = hoy - timedelta(days=15)
+	fechainicial = hoy - timedelta(days=120)
 
 	cursor = connection.cursor()
 	
@@ -11663,10 +11663,219 @@ def asociado_nuevo_descuento(request,asociadono):
 	return render(request,'pedidos/crea_socio_descuento.html',{'form':form,'asociadono':asociadono,})				
 
 
+
+
 def lista_usuarios(request):
 	cursor=connection.cursor()
-	cursor.execute('SELECT usuariono,nombre,fechacreacion,activo,usuario from usuarios;')
+	cursor.execute('SELECT usuariono,nombre,fechacreacion,if(activo,"SI","NO") as esta_activo,usuario from usuarios;')
 	usuarios = dictfetchall(cursor)
 	cursor.close()
 	context = {'usuarios': usuarios}
 	return render(request, 'pedidos/usuarios.html', context)
+
+
+# EDITA USUARIO
+
+
+def edita_usuario(request,usuariono):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	
+
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = DatosUsuarioForm(request.POST)
+		if form.is_valid():
+			asociado = form.cleaned_data['asociadono']
+			numcontrol=form.cleaned_data['numcontrol']
+			nombre = form.cleaned_data['nombre']
+			appaterno = form.cleaned_data['appaterno']
+			apmaterno = form.cleaned_data['apmaterno']
+			direccion = form.cleaned_data['direccion']
+			colonia = form.cleaned_data['colonia']
+			ciudad = form.cleaned_data['ciudad']
+			estado = form.cleaned_data['estado']
+			pais = form.cleaned_data['pais']
+			#codigopostal = form.cleaned_data['codigopostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			direccionelectronica = form.cleaned_data['direccionelectronica']
+			usr_id = form.cleaned_data['usr_id']
+			essocio = form.cleaned_data['essocio']
+			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
+			numeroweb = form.cleaned_data['numeroweb']
+			
+			if numeroweb is None:
+				numeroweb =0
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute('UPDATE asociado SET nombre = %s,\
+				apmaterno = %s,\
+				appaterno = %s,\
+				Direccion = %s,\
+				Colonia = %s,\
+				Ciudad = %s,\
+				Estado = %s,\
+				Pais = %s,\
+				telefono1 = %s,\
+				telefono2 = %s,\
+				fax = %s,\
+				celular = %s,\
+				radio = %s,\
+				direccionelectronica= %s,\
+				essocio = %s,\
+				forzarcobroanticipo = %s,\
+				num_web = %s,\
+				nocontrol=%s\
+				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,numcontrol.upper().lstrip(),asociadono,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:asociados'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+			pass
+	else:	
+
+		form = DatosAsociadoForm()
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT 	p.asociadono,\
+								p.nombre,\
+								p.appaterno,\
+								p.apmaterno,\
+								p.Direccion,\
+								p.Colonia,\
+								p.Ciudad,\
+								p.Estado,\
+								p.Pais,\
+								p.telefono1,\
+								p.telefono2,\
+								p.fax,\
+								p.celular,\
+								p.radio,\
+								p.direccionelectronica,\
+								p.NoControl,\
+								p.EsSocio,\
+								p.ForzarCobroAnticipo,\
+								p.num_web\
+								from asociado p where p.asociadono=%s;",(asociadono,))
+		asociado = cursor.fetchone()
+		
+		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'numcontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],})
+					
+	return render(request,'pedidos/edita_asociado.html',{'form':form,'asociadono':asociadono,})
+
+
+def crea_asociado(request):
+
+	msg = ''
+
+	hoy = date.today()
+
+	if request.method == 'POST':
+
+		form = DatosAsociadoForm(request.POST)
+		if form.is_valid():
+			asociadoo = form.cleaned_data['asociadono']
+			numcontrol = form.cleaned_data['numcontrol']
+			nombre = form.cleaned_data['nombre']
+			appaterno = form.cleaned_data['appaterno']
+			apmaterno = form.cleaned_data['apmaterno']
+			direccion = form.cleaned_data['direccion']
+			colonia = form.cleaned_data['colonia']
+			ciudad = form.cleaned_data['ciudad']
+			estado = form.cleaned_data['estado']
+			pais = form.cleaned_data['pais']
+			#codigopostal = form.cleaned_data['codigopostal']
+			telefono1 = form.cleaned_data['telefono1']
+			telefono2 = form.cleaned_data['telefono2']
+			fax = form.cleaned_data['fax']
+			cel = form.cleaned_data['celular']
+			radio = form.cleaned_data['radio']
+			direccionelectronica = form.cleaned_data['direccionelectronica']
+			usr_id = form.cleaned_data['usr_id']
+			essocio = form.cleaned_data['essocio']
+			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
+			numeroweb = form.cleaned_data['numeroweb']
+			
+
+			if numeroweb is None:
+				numeroweb =0
+
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute("SELECT asociadono FROM asociado ORDER BY asociadono desc limit 1;")
+				ultimo_socio = cursor.fetchone()	
+
+
+
+				cursor.execute('INSERT INTO asociado(empresano,asociadono,nombre,\
+				apmaterno,\
+				appaterno,\
+				Direccion,\
+				Colonia,\
+				Ciudad,\
+				Estado,\
+				Pais,\
+				telefono1,\
+				telefono2,\
+				fax,\
+				celular,\
+				radio,\
+				direccionelectronica,\
+				essocio,\
+				forzarcobroanticipo,\
+				num_web,\
+				fechaalta,\
+				fechabaja,\
+				pathfoto,\
+				sucursalno,\
+				creditodisponible,\
+				nocontrol) \
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,numcontrol))
+					
+				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:asociados'))
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				msg = 'Error en base de datos !'
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			
+			pass
+	else:	
+
+		form = DatosAsociadoForm()
+		
+					
+	return render(request,'pedidos/crea_asociado.html',{'form':form,})
