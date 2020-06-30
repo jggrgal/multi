@@ -3435,3 +3435,64 @@ class CreaDescuentoAsociadoForm(forms.Form):
 
 		return(self.cleaned_data)
 
+# FORMA REMISIONES ESPECIALES
+
+
+class remisionesespecialesForm(forms.Form):
+
+
+	
+	
+	def __init__(self,*args,**kwargs):
+
+
+		super(remisionesespecialesForm, self).__init__(*args,**kwargs)
+
+		lprov = lista_Sucursales()
+
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		self.fields['sucursal'] = forms.ChoiceField(widget=forms.Select(),
+			label='Sucursal',choices = lprov,initial='0',required='True' )
+
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+
+		
+
+
+		t = datetime.now
+		
+	error_messages = {
+	
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+		}
+
+	def clean(self):
+
+		
+		cleaned_data = super(remisionesespecialesForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+
+		
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		
+		return self.cleaned_data
+
+
+
+
+
+

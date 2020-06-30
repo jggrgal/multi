@@ -61,7 +61,8 @@ from . forms import (AccesoForm,\
 					RpteArtNoSolicitadosForm,
 					FiltroSocioCatalogoForm,
 					FiltroProveedorForm,
-					CreaAlmacenForm,)
+					CreaAlmacenForm,
+					remisionesespecialesForm,)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -188,7 +189,7 @@ def actualiza_preciooriginal():
 		
 	hoy = date.today()
 	
-	fechainicial = hoy - timedelta(days=15)
+	fechainicial = hoy - timedelta(days=150)
 
 	cursor = connection.cursor()
 	
@@ -200,6 +201,8 @@ def actualiza_preciooriginal():
 	
 
 	return
+
+
 
 
 
@@ -4971,6 +4974,13 @@ def crea_documento(request):
 
 	capturista = request.session['socio_zapcat']
 	id_sucursal = request.session['sucursal_activa']
+
+	test_suc = int(id_sucursal)
+	
+	if test_suc < 1:
+		error_msg='Se perdió parte de la información de su sesión, para asegurar que todo vaya bien por favor cierre su navegador completamete y vuelva a entrar al sistema..'
+		return render(request,pedidos/error.html,{'error_msg':error_msg,}) 
+
 
 	if request.method == 'POST':
 		form = CreaDocumentoForm(request.POST)
@@ -11713,3 +11723,246 @@ def asociado_nuevo_descuento(request,asociadono):
 		form = CreaDescuentoAsociadoForm()
 
 	return render(request,'pedidos/crea_socio_descuento.html',{'form':form,'asociadono':asociadono,})				
+
+
+
+# REPORTE DE REMISIONES ESPECIALES
+
+def rpte_remisiones_especiales(request):
+
+
+	#pdb.set_trace()
+	''' Inicializa Variables '''
+	
+	TotalVta = 0.0
+	TotalVtaBruta= 0.0
+
+	a=''
+	b=''
+	hoy,hora = trae_fecha_hora_actual(a,b)
+
+
+
+	# INICIALIZA REPORTLAB PARA REPORTE
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
+
+    # Create a file-like buffer to receive PDF data.
+	buffer = io.BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+	p = canvas.Canvas(buffer,pagesize=letter)
+	#p.setPageSize("inch")
+
+	p.setFont("Helvetica",10)
+	#p.drawString(1,linea,inicializa_imp)
+
+	mensaje =''
+	if request.method == 'POST':
+
+		form = remisionesespecialesForm(request.POST)
+
+		if form.is_valid():
+
+			sucursal = form.cleaned_data['sucursal']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+
+			cursor=connection.cursor()
+
+			if sucursal == '0':
+				sucursalinicial =1
+				sucursalfinal = 9999
+				sucursal_nombre ='GENERAL'
+			else:
+				sucursalinicial =  sucursal
+				sucursalfinal =  sucursal
+				cursor.execute("SELECT nombre from sucursal WHERE EmpresaNo=1 and SucursalNo=%s;",(sucursal))
+				sucursalencontrada = cursor.fetchone()
+				sucursal_nombre = sucursalencontrada[0]
+			
+			cursor.execute("SELECT d.nodocto,d.concepto,d.monto,d.Asociado,a.ApPaterno,a.ApMaterno,a.Nombre,d.Cancelado,d.vtadecatalogo,d.idsucursal,d.FechaCreacion, suc.nombre as nom_suc from documentos d inner join asociado a on (d.empresano=a.empresano and d.asociado=a.asociadono) inner join sucursal suc on (suc.empresano=d.empresano and suc.sucursalno=d.idsucursal) where d.tipodedocumento='Remision' and not(d.cancelado) and not(d.vtadecatalogo) and d.fechacreacion>=%s and d.fechacreacion<=%s and d.idsucursal>=%s and d.idsucursal<=%s and d.nodocto not in (select p.remisionno from pedidoslines p) order by d.idsucursal,d.nodocto;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
+
+			#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
+			
+			
+
+			registros_venta = dictfetchall(cursor)
+
+			elementos = len(registros_venta)
+
+			
+
+
+			"""cursor.execute("SELECT p.razonsocial,a.razonsocial from proveedor p inner join almacen a on (p.empresano=a.empresano and p.proveedorno=a.proveedorno) where p.proveedorno=%s;",(ped['prov_id'],))
+			
+			prov_alm = cursor.fetchone()"""
+
+			if not registros_venta:
+				mensaje = 'No se encontraron registros !'
+				return render(request,'pedidos/lista_ventas.html',{'mensaje':mensaje,})
+
+			else:
+
+				
+				for docto in registros_venta:
+										
+					if (docto['Cancelado'] == '\x00'):  # pregunta si cancelado es '0' en hex o bien falso
+						
+						TotalVtaBruta = TotalVtaBruta + float(docto['monto'])
+						
+						
+				mensaje ="Registros encontrados == > "
+
+				#linea = 800
+				
+				
+				
+			    # Draw things on the PDF. Here's where the PDF generation happens.
+			    # See the ReportLab documentation for the full list of functionality.
+				#p.drawString(20,810,mensaje)
+				li,ls=0,85
+				contador_registros_impresos =0	
+				for j in range(1,1000):
+					
+					#p.translate(0.0,0.0)    # define a large font							
+
+					linea = 800
+									 
+					p.drawString(250,linea, request.session['cnf_razon_social'])
+					linea -=20
+					p.setFont("Helvetica",9)
+					p.drawString(200,linea, " ----- REMISIONES ESPECIALES ------")
+					p.drawString(240,linea-10, "       "+sucursal_nombre+" ")
+
+					p.setFont("Helvetica",6)
+					p.drawString(230,linea-20, "Entre el "+fechainicial.strftime("%Y-%m-%d")+" y el " +fechafinal.strftime("%Y-%m-%d"))
+						
+					linea -=25
+					
+					p.drawString(80,linea,request.session['sucursal_direccion'])
+					p.drawString(430,linea,"FECHA: "+hoy)
+					
+
+					linea -= 8
+					p.drawString(80,linea,"COL. "+request.session['sucursal_colonia'])
+					p.drawString(430,linea,"HORA:  "+hora)
+
+					linea -= 8
+					p.drawString(80,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+					linea -= 20
+					
+					p.setFont("Helvetica",6)
+
+
+
+					p.drawString(80,linea,"Sucursal")
+					p.drawString(120,linea,"")
+					p.drawString(160,linea,"Fecha")
+					p.drawString(200,linea,"Socio")
+					p.drawString(220,linea,"Nombre")
+					p.drawString(290,linea,"Remision")
+					p.drawString(330,linea,"Monto")
+					p.drawString(370,linea,"Concepto")
+					p.drawString(410,linea,"")
+					p.drawString(450,linea,"")
+
+					linea -= 10
+					p.drawString(80,linea,"-"*200)
+					linea -= 10
+					#p.setFont("Helvetica",8)
+					i,paso=0,linea-5
+		
+					
+					for elemento in registros_venta[li:ls]:
+
+
+						p.drawString(80,paso,str(elemento['nom_suc']))
+						#p.drawString(120,paso,str(elemento['nodocto']))
+						p.drawString(160,paso,elemento['FechaCreacion'].strftime("%d-%m-%Y"))		
+						p.drawString(200,paso,str(elemento['Asociado']))
+						p.drawString(220,paso,(elemento['Nombre']+' '+elemento['ApPaterno']+' '+elemento['ApMaterno'])[0:15])
+						p.drawString(290,paso,str(elemento['nodocto']))			
+						p.drawString(330,paso,str(elemento['monto']))				
+						p.drawString(370,paso,str(elemento['concepto']))				
+						#p.drawString(200,paso,talla)'''		
+						paso -= 8
+						i+=1
+						contador_registros_impresos+=1
+
+					if registros_venta[li:ls]:
+						p.showPage()						
+
+					li=ls
+					ls=85*j	
+					
+					if contador_registros_impresos==elementos:
+					
+						paso=780
+						p.translate(0.0,0.0)
+
+						
+
+						p.setFont("Helvetica",8)
+
+						p.drawString(10,paso,"")
+
+						paso-=5
+
+						#p.drawString(10,paso,27*'_')
+
+						paso-=10
+
+						p.setFont("Helvetica",12)
+						locale.setlocale( locale.LC_ALL, '' )
+						p.drawString(10,paso,"Total: ")
+						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
+
+
+
+						p.showPage()
+						p.save()
+
+
+						pdf = buffer.getvalue()
+						buffer.close()
+
+						response.write(pdf)
+
+						return response
+
+
+
+
+				context = {'form':form,'mensaje':mensaje,'registros_venta':registros_venta,'TotalRegistros':TotalRegistros,'sucursal_nombre':sucursal_nombre,'TotalCreditos':TotalCreditos,'TotalCargos':TotalCargos,'TotalDescuentos':TotalDescuentos,'VentaCalzado':VentaCalzado,'TotalVtaCatalogos':TotalVtaCatalogos,'TotalVtaBruta':TotalVtaBruta,'TotalVtaNeta':TotalVtaNeta,'TotalVtaProductos':TotalVtaProductos}	
+			
+				#return render(request,'pedidos/lista_ventas.html',context)
+				''' OJO CON LO SIGUIENTE
+				response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="piezas_no_solicitadas.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['PEDIDO','FECHA_PEDIDO','MARCA','ESTILO','COLOR','TALLA','PRECIO','BODEGA'])
+					
+					for registro in lista_pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['Pedido','fechapedido','idmarca','idestilo','idcolor','talla','precio','RazonSocial'] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response'''			
+
+		
+	else:
+
+		form = remisionesespecialesForm()
+	return render(request,'pedidos/rpte_remisiones_especiales_form.html',{'form':form,})
+
+
+
+
+
+
+
