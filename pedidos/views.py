@@ -11743,18 +11743,6 @@ def rpte_remisiones_especiales(request):
 
 
 
-	# INICIALIZA REPORTLAB PARA REPORTE
-	response = HttpResponse(content_type='application/pdf')
-	response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
-
-    # Create a file-like buffer to receive PDF data.
-	buffer = io.BytesIO()
-
-    # Create the PDF object, using the buffer as its "file."
-	p = canvas.Canvas(buffer,pagesize=letter)
-	#p.setPageSize("inch")
-
-	p.setFont("Helvetica",10)
 	#p.drawString(1,linea,inicializa_imp)
 
 	mensaje =''
@@ -11767,6 +11755,7 @@ def rpte_remisiones_especiales(request):
 			sucursal = form.cleaned_data['sucursal']
 			fechainicial = form.cleaned_data['fechainicial']
 			fechafinal = form.cleaned_data['fechafinal']
+			op = form.cleaned_data['op']
 
 			cursor=connection.cursor()
 
@@ -11821,115 +11810,154 @@ def rpte_remisiones_especiales(request):
 			    # Draw things on the PDF. Here's where the PDF generation happens.
 			    # See the ReportLab documentation for the full list of functionality.
 				#p.drawString(20,810,mensaje)
-				li,ls=0,85
-				contador_registros_impresos =0	
-				for j in range(1,1000):
-					
-					#p.translate(0.0,0.0)    # define a large font							
+			
+				if op == 'Pantalla':
 
-					linea = 800
-									 
-					p.drawString(250,linea, request.session['cnf_razon_social'])
-					linea -=20
-					p.setFont("Helvetica",9)
-					p.drawString(200,linea, " ----- REMISIONES ESPECIALES ------")
-					p.drawString(240,linea-10, "       "+sucursal_nombre+" ")
+					# INICIALIZA REPORTLAB PARA REPORTE
+					response = HttpResponse(content_type='application/pdf')
+					response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
 
-					p.setFont("Helvetica",6)
-					p.drawString(230,linea-20, "Entre el "+fechainicial.strftime("%Y-%m-%d")+" y el " +fechafinal.strftime("%Y-%m-%d"))
+				    # Create a file-like buffer to receive PDF data.
+					buffer = io.BytesIO()
+
+				    # Create the PDF object, using the buffer as its "file."
+					p = canvas.Canvas(buffer,pagesize=letter)
+					#p.setPageSize("inch")
+
+					p.setFont("Helvetica",10)
+	
+					li,ls=0,85
+					contador_registros_impresos =0	
+					for j in range(1,1000):
 						
-					linea -=25
+						#p.translate(0.0,0.0)    # define a large font							
+
+						linea = 800
+										 
+						p.drawString(250,linea, request.session['cnf_razon_social'])
+						linea -=20
+						p.setFont("Helvetica",9)
+						p.drawString(200,linea, " ----- REMISIONES ESPECIALES ------")
+						p.drawString(240,linea-10, "       "+sucursal_nombre+" ")
+
+						p.setFont("Helvetica",6)
+						p.drawString(230,linea-20, "Entre el "+fechainicial.strftime("%Y-%m-%d")+" y el " +fechafinal.strftime("%Y-%m-%d"))
+							
+						linea -=25
+						
+						p.drawString(80,linea,request.session['sucursal_direccion'])
+						p.drawString(430,linea,"FECHA: "+hoy)
+						
+
+						linea -= 8
+						p.drawString(80,linea,"COL. "+request.session['sucursal_colonia'])
+						p.drawString(430,linea,"HORA:  "+hora)
+
+						linea -= 8
+						p.drawString(80,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+						linea -= 20
+						
+						p.setFont("Helvetica",6)
+
+
+
+						p.drawString(80,linea,"Sucursal")
+						p.drawString(120,linea,"")
+						p.drawString(160,linea,"Fecha")
+						p.drawString(200,linea,"Socio")
+						p.drawString(220,linea,"Nombre")
+						p.drawString(290,linea,"Remision")
+						p.drawString(330,linea,"Monto")
+						p.drawString(370,linea,"Concepto")
+						p.drawString(410,linea,"")
+						p.drawString(450,linea,"")
+
+						linea -= 10
+						p.drawString(80,linea,"-"*200)
+						linea -= 10
+						#p.setFont("Helvetica",8)
+						i,paso=0,linea-5
+			
+						
+						for elemento in registros_venta[li:ls]:
+
+
+							p.drawString(80,paso,str(elemento['nom_suc']))
+							#p.drawString(120,paso,str(elemento['nodocto']))
+							p.drawString(160,paso,elemento['FechaCreacion'].strftime("%d-%m-%Y"))		
+							p.drawString(200,paso,str(elemento['Asociado']))
+							p.drawString(220,paso,(elemento['Nombre']+' '+elemento['ApPaterno']+' '+elemento['ApMaterno'])[0:15])
+							p.drawString(290,paso,str(elemento['nodocto']))			
+							p.drawString(330,paso,str(elemento['monto']))				
+							p.drawString(370,paso,str(elemento['concepto']))				
+							#p.drawString(200,paso,talla)'''		
+							paso -= 8
+							i+=1
+							contador_registros_impresos+=1
+
+						if registros_venta[li:ls]:
+							p.showPage()						
+
+						li=ls
+						ls=85*j	
+						
+						if contador_registros_impresos==elementos:
+						
+							paso=780
+							p.translate(0.0,0.0)
+
+							
+
+							p.setFont("Helvetica",8)
+
+							p.drawString(10,paso,"")
+
+							paso-=5
+
+							#p.drawString(10,paso,27*'_')
+
+							paso-=10
+
+							p.setFont("Helvetica",12)
+							locale.setlocale( locale.LC_ALL, '' )
+							p.drawString(10,paso,"Total: ")
+							p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
+
+
+
+							p.showPage()
+							p.save()
+
+
+							pdf = buffer.getvalue()
+							buffer.close()
+
+							response.write(pdf)
+
+							return response
+
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="remisiones_especiales.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['SUCURSAL','FECHA_CREACION','NUM_SOCIO','NOMBRE','AP_PATERNO','AP_MATERNO','NUM_REMISION','MONTO','CONCEPTO'])
 					
-					p.drawString(80,linea,request.session['sucursal_direccion'])
-					p.drawString(430,linea,"FECHA: "+hoy)
-					
+					for registro in registros_venta:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['nom_suc','FechaCreacion','Asociado','Nombre','ApPaterno','ApMaterno','nodocto','monto','concepto'] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
 
-					linea -= 8
-					p.drawString(80,linea,"COL. "+request.session['sucursal_colonia'])
-					p.drawString(430,linea,"HORA:  "+hora)
-
-					linea -= 8
-					p.drawString(80,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
-					linea -= 20
-					
-					p.setFont("Helvetica",6)
-
-
-
-					p.drawString(80,linea,"Sucursal")
-					p.drawString(120,linea,"")
-					p.drawString(160,linea,"Fecha")
-					p.drawString(200,linea,"Socio")
-					p.drawString(220,linea,"Nombre")
-					p.drawString(290,linea,"Remision")
-					p.drawString(330,linea,"Monto")
-					p.drawString(370,linea,"Concepto")
-					p.drawString(410,linea,"")
-					p.drawString(450,linea,"")
-
-					linea -= 10
-					p.drawString(80,linea,"-"*200)
-					linea -= 10
-					#p.setFont("Helvetica",8)
-					i,paso=0,linea-5
 		
-					
-					for elemento in registros_venta[li:ls]:
-
-
-						p.drawString(80,paso,str(elemento['nom_suc']))
-						#p.drawString(120,paso,str(elemento['nodocto']))
-						p.drawString(160,paso,elemento['FechaCreacion'].strftime("%d-%m-%Y"))		
-						p.drawString(200,paso,str(elemento['Asociado']))
-						p.drawString(220,paso,(elemento['Nombre']+' '+elemento['ApPaterno']+' '+elemento['ApMaterno'])[0:15])
-						p.drawString(290,paso,str(elemento['nodocto']))			
-						p.drawString(330,paso,str(elemento['monto']))				
-						p.drawString(370,paso,str(elemento['concepto']))				
-						#p.drawString(200,paso,talla)'''		
-						paso -= 8
-						i+=1
-						contador_registros_impresos+=1
-
-					if registros_venta[li:ls]:
-						p.showPage()						
-
-					li=ls
-					ls=85*j	
-					
-					if contador_registros_impresos==elementos:
-					
-						paso=780
-						p.translate(0.0,0.0)
-
-						
-
-						p.setFont("Helvetica",8)
-
-						p.drawString(10,paso,"")
-
-						paso-=5
-
-						#p.drawString(10,paso,27*'_')
-
-						paso-=10
-
-						p.setFont("Helvetica",12)
-						locale.setlocale( locale.LC_ALL, '' )
-						p.drawString(10,paso,"Total: ")
-						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
 
 
 
-						p.showPage()
-						p.save()
-
-
-						pdf = buffer.getvalue()
-						buffer.close()
-
-						response.write(pdf)
-
-						return response
 
 
 

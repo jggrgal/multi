@@ -3461,6 +3461,8 @@ class remisionesespecialesForm(forms.Form):
 	
 		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
 
+		self.opciones_rpte = (('Pantalla','Pantalla',),('Archivo_Excel','Archivo_Excel',),)
+		self.fields['op'] = forms.ChoiceField(label='Dirigir a:',initial='Pantalla',choices=self.opciones_rpte,required=False)
 		
 
 
@@ -3480,6 +3482,7 @@ class remisionesespecialesForm(forms.Form):
 		fechainicial = cleaned_data.get('fechainicial')
 		fechafinal = cleaned_data.get('fechafinal')
 
+		op = cleaned_data.get('op')
 		
 		if fechainicial is not None and fechafinal is not None:
 			
