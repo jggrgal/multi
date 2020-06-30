@@ -4979,7 +4979,7 @@ def crea_documento(request):
 	
 	if test_suc < 1:
 		error_msg='Se perdió parte de la información de su sesión, para asegurar que todo vaya bien por favor cierre su navegador completamete y vuelva a entrar al sistema..'
-		return render(request,pedidos/error.html,{'error_msg':error_msg,}) 
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,}) 
 
 
 	if request.method == 'POST':
