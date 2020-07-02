@@ -10,7 +10,7 @@
            <h1> <i class="fa fa-users"></i>   </h1>
         </div>
         <div class='col-md-4'>
-                  <h3 style="text-align: center;color:#7f7b38;">Catalogo de Usuarios (Empleados)</h3>
+                  <h3 style="text-align: center;color:#7f7b38;">Derechos del usuario {{ usr_nombre }}</h3>
 
         </div>
         <div class='col-md-4'>
@@ -25,25 +25,22 @@
             
             
         	<tr class='success'>
-                <th>Numero Usuario</th>
-        		<th>Nombre</th>
-            	<th>Fecha Creacion</th>
-                <th>Activo</th>
-                <th>Nombre corto</th>
-                <th>Derechos</th>
+                <th>Derecho num</th>
+        		<th>Descripcion</th>
+            	
+                <th></th>
+                
               
         	</tr>
             </thead>
             <tbody>
-        	{% for item in usuarios %}
+        	{% for item in derechos %}
         		<tr>
-        			<td><a href="{% url 'pedidos:edita_usuario' item.usuariono %}">num_usr</a></td>
+        			<td>{{item.derechono}}</td>
                    
-        			<td>{{ item.nombre }}</td>
-                    <td>{{ item.fechacreacion }}</td>
-                    <td>{{ item.esta_activo }}</td>
-                    <td>{{ item.usuario}}</td>
-                    <td><a href="{% url 'pedidos:lista_usuario_derechos' item.usuariono %}" id="lista_usuario_derecho" class="btn btn-success " role="button">Derechos...</a></td>
+        			<td>{{ item.DESCRIPCION }}</td>
+                    <td><a href="{% url 'pedidos:eliminar_usuario_derecho' usuariono item.derechono %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Eliminar</a></td>
+                    
                                         
             	</tr>
            {% endfor %}
@@ -56,7 +53,7 @@
 <div class='row'>
     <div class='col-md-3'>
         <p align="left">
-                      <a href="{% url 'pedidos:crea_usuario' %}" id="crea_usuario" class="btn btn-success " role="button">Nuevo </a>
+                      <a href="{% url 'pedidos:agregar_usuario_derecho' usuariono  %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Nuevo </a>
                     </p>
     </div>
     <div class='col-md-3'></div>

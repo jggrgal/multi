@@ -61,7 +61,9 @@ from . forms import (AccesoForm,\
 					RpteArtNoSolicitadosForm,
 					FiltroSocioCatalogoForm,
 					FiltroProveedorForm,
-					CreaAlmacenForm,)
+					CreaAlmacenForm,
+					DatosUsuarioForm,
+					DerechosFaltantesUsuarioForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -11688,59 +11690,26 @@ def edita_usuario(request,usuariono):
 
 		form = DatosUsuarioForm(request.POST)
 		if form.is_valid():
-			asociado = form.cleaned_data['asociadono']
-			numcontrol=form.cleaned_data['numcontrol']
+			usuariono = form.cleaned_data['usuariono']
 			nombre = form.cleaned_data['nombre']
-			appaterno = form.cleaned_data['appaterno']
-			apmaterno = form.cleaned_data['apmaterno']
-			direccion = form.cleaned_data['direccion']
-			colonia = form.cleaned_data['colonia']
-			ciudad = form.cleaned_data['ciudad']
-			estado = form.cleaned_data['estado']
-			pais = form.cleaned_data['pais']
-			#codigopostal = form.cleaned_data['codigopostal']
-			telefono1 = form.cleaned_data['telefono1']
-			telefono2 = form.cleaned_data['telefono2']
-			fax = form.cleaned_data['fax']
-			cel = form.cleaned_data['celular']
-			radio = form.cleaned_data['radio']
-			direccionelectronica = form.cleaned_data['direccionelectronica']
 			usr_id = form.cleaned_data['usr_id']
-			essocio = form.cleaned_data['essocio']
-			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
-			numeroweb = form.cleaned_data['numeroweb']
+			activo = form.cleaned_data['activo']
+			usuario = form.cleaned_data['usuario']
 			
-			if numeroweb is None:
-				numeroweb =0
-
+			activo = int(activo)
 			cursor =  connection.cursor()
 			try:
 
 				cursor.execute('START TRANSACTION')
-				cursor.execute('UPDATE asociado SET nombre = %s,\
-				apmaterno = %s,\
-				appaterno = %s,\
-				Direccion = %s,\
-				Colonia = %s,\
-				Ciudad = %s,\
-				Estado = %s,\
-				Pais = %s,\
-				telefono1 = %s,\
-				telefono2 = %s,\
-				fax = %s,\
-				celular = %s,\
-				radio = %s,\
-				direccionelectronica= %s,\
-				essocio = %s,\
-				forzarcobroanticipo = %s,\
-				num_web = %s,\
-				nocontrol=%s\
-				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,numcontrol.upper().lstrip(),asociadono,))
+				cursor.execute('UPDATE usuarios SET nombre = %s,\
+				activo = %s,\
+				usuario=%s\
+				WHERE usuariono=%s;',(nombre.upper().lstrip(),activo,usuario,usuariono,))
 			
 							
 				cursor.execute("COMMIT;")
 
-				return HttpResponseRedirect(reverse('pedidos:asociados'))
+				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
 
 
 			except DatabaseError as e:
@@ -11755,37 +11724,22 @@ def edita_usuario(request,usuariono):
 			pass
 	else:	
 
-		form = DatosAsociadoForm()
+		form = DatosUsuarioForm()
 		
 		cursor=connection.cursor()
-		cursor.execute("SELECT 	p.asociadono,\
+		cursor.execute("SELECT 	p.usuariono,\
 								p.nombre,\
-								p.appaterno,\
-								p.apmaterno,\
-								p.Direccion,\
-								p.Colonia,\
-								p.Ciudad,\
-								p.Estado,\
-								p.Pais,\
-								p.telefono1,\
-								p.telefono2,\
-								p.fax,\
-								p.celular,\
-								p.radio,\
-								p.direccionelectronica,\
-								p.NoControl,\
-								p.EsSocio,\
-								p.ForzarCobroAnticipo,\
-								p.num_web\
-								from asociado p where p.asociadono=%s;",(asociadono,))
-		asociado = cursor.fetchone()
+								p.activo,\
+								p.usuario\
+								from usuarios p where p.usuariono=%s;",(usuariono,))
+		usuario = cursor.fetchone()
 		
-		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'numcontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],})
+		form = DatosUsuarioForm(initial={'usuariono':usuario[0],'nombre':usuario[1],'activo':1 if usuario[2]==1 else 0,'usuario':usuario[3],})
 					
-	return render(request,'pedidos/edita_asociado.html',{'form':form,'asociadono':asociadono,})
+	return render(request,'pedidos/edita_usuario.html',{'form':form,'usuariono':usuariono,})
 
 
-def crea_asociado(request):
+def crea_usuario(request):
 
 	msg = ''
 
@@ -11793,74 +11747,41 @@ def crea_asociado(request):
 
 	if request.method == 'POST':
 
-		form = DatosAsociadoForm(request.POST)
+		form = DatosUsuarioForm(request.POST)
 		if form.is_valid():
-			asociadoo = form.cleaned_data['asociadono']
-			numcontrol = form.cleaned_data['numcontrol']
-			nombre = form.cleaned_data['nombre']
-			appaterno = form.cleaned_data['appaterno']
-			apmaterno = form.cleaned_data['apmaterno']
-			direccion = form.cleaned_data['direccion']
-			colonia = form.cleaned_data['colonia']
-			ciudad = form.cleaned_data['ciudad']
-			estado = form.cleaned_data['estado']
-			pais = form.cleaned_data['pais']
-			#codigopostal = form.cleaned_data['codigopostal']
-			telefono1 = form.cleaned_data['telefono1']
-			telefono2 = form.cleaned_data['telefono2']
-			fax = form.cleaned_data['fax']
-			cel = form.cleaned_data['celular']
-			radio = form.cleaned_data['radio']
-			direccionelectronica = form.cleaned_data['direccionelectronica']
-			usr_id = form.cleaned_data['usr_id']
-			essocio = form.cleaned_data['essocio']
-			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
-			numeroweb = form.cleaned_data['numeroweb']
 			
+			usuariono = form.cleaned_data['usuariono']
+			nombre = form.cleaned_data['nombre']
+			usr_id = form.cleaned_data['usr_id']
+			activo = form.cleaned_data['activo']
+			usuario = form.cleaned_data['usuario']
+			
+			activo =int(activo)
 
-			if numeroweb is None:
-				numeroweb =0
-
-
+			
 			cursor =  connection.cursor()
 			try:
 
 				cursor.execute('START TRANSACTION')
 
-				cursor.execute("SELECT asociadono FROM asociado ORDER BY asociadono desc limit 1;")
-				ultimo_socio = cursor.fetchone()	
+				cursor.execute("SELECT usuariono FROM usuarios ORDER BY usuariono desc limit 1;")
+				ultimo_usuario = cursor.fetchone()	
 
 
 
-				cursor.execute('INSERT INTO asociado(empresano,asociadono,nombre,\
-				apmaterno,\
-				appaterno,\
-				Direccion,\
-				Colonia,\
-				Ciudad,\
-				Estado,\
-				Pais,\
-				telefono1,\
-				telefono2,\
-				fax,\
-				celular,\
-				radio,\
-				direccionelectronica,\
-				essocio,\
-				forzarcobroanticipo,\
-				num_web,\
-				fechaalta,\
-				fechabaja,\
-				pathfoto,\
-				sucursalno,\
-				creditodisponible,\
-				nocontrol) \
-				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,numcontrol))
+				cursor.execute('INSERT INTO usuarios(empresano,usuariono,nombre,\
+				fechacreacion,\
+				fechamodificacion,\
+				password,\
+				activo,\
+				nivel,\
+				usuario) \
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_usuario[0]+1,nombre.upper().lstrip(),hoy,hoy,' ',activo,0,usuario.upper().lstrip()))
 					
-				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
+				#cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 				cursor.execute("COMMIT;")
 
-				return HttpResponseRedirect(reverse('pedidos:asociados'))
+				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
 
 
 			except DatabaseError as e:
@@ -11875,7 +11796,97 @@ def crea_asociado(request):
 			pass
 	else:	
 
-		form = DatosAsociadoForm()
+		form = DatosUsuarioForm()
 		
 					
-	return render(request,'pedidos/crea_asociado.html',{'form':form,})
+	return render(request,'pedidos/crea_usuario.html',{'form':form,})
+
+
+def lista_usuario_derechos(request,usuariono):
+	cursor=connection.cursor()
+
+	cursor.execute('SELECT ud.derechono,d.DESCRIPCION,ud.usuariono,if(ud.`Activo?`,"SI","NO") as derecho_activo from usuario_derechos ud inner join derechos d on (ud.empresano=1 and ud.derechono=d.id) where ud.usuariono=%s;',(usuariono,))
+	derechos = dictfetchall(cursor)
+	
+	cursor.execute('SELECT usuario from usuarios WHERE usuariono=%s;',(usuariono,))
+	usr_nombre = cursor.fetchone()
+	usr_nombre = usr_nombre[0]
+
+
+	cursor.close()
+	context = {'derechos': derechos,'usuariono':usuariono,'usr_nombre':usr_nombre,}
+	return render(request, 'pedidos/usuario_derechos.html', context)
+
+
+def agregar_usuario_derecho(request,usuariono):
+
+
+	if request.method == 'POST':
+
+		form = DerechosFaltantesUsuarioForm(request.POST,usuariono=usuariono)
+
+		if form.is_valid():
+			
+			derecho = form.cleaned_data['derecho']
+			usr_id = form.cleaned_data['usr_id']
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,33)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("INSERT INTO usuario_derechos(empresaNo,UsuarioNo,DerechoNo,`Activo?`) VALUES(%s,%s,%s,%s);",(1,usuariono,derecho,1,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuario_derechos',args=(usuariono,)))
+				
+
+			except IntegrityError as error_msg:
+
+				context={'error_msg':"Error de integridad !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para a su vez asignar derechos a otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+	else:
+
+		form=DerechosFaltantesUsuarioForm(usuariono=usuariono)
+
+	return render(request,'pedidos/crea_usuario_derecho.html',{'form':form,'usuariono':usuariono,})
+
+
+
+
+
+
+
+def eliminar_usuario_derecho(request,usuariono,derechono):
+	return
+

@@ -174,6 +174,7 @@ def lista_almacenes(proveedor):
 '''   LISTA DE USUARIOS '''
 
 def lista_usuarios():
+			pdb.set_trace()
 			cursor=connection.cursor()
 			cursor.execute('SELECT UsuarioNo,usuario from usuarios where activo;')
 	
@@ -204,20 +205,45 @@ def lista_usuarios():
 			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
 			lprov = tuple(tuple(x) for x in y)
 
-			
-			
 			return (lprov)
 
+# FUNCION PARA GENERAR UNA LISTA DE LOS DERECHOS AUN NO ASIGNADOS A UN USUARIO
 
 
+def lista_derechos_no_asignados(usr):
+			cursor=connection.cursor()
+			#cursor.execute('SELECT id,descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT us.id from usuario_derechos us where us.usuariono=%s));'(usr,))
+			cursor.execute('SELECT r.id,r.descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT ud.derechono from usuario_derechos ud where ud.usuariono=%s)) as r',(usr,))
+			#cursor.execute('SELECT id,descripcion from derechos;')
 
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'GENERAL ') + pr
+			
 
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
 
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
 
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
 
-
-
-
+			return (lprov)
 
 
 f_inicial_init =  date.today()
@@ -3436,7 +3462,7 @@ class CreaDescuentoAsociadoForm(forms.Form):
 		return(self.cleaned_data)
 
 
-# FORMA PARA EDITAR  USUARIO
+# FORMA PARA EDITAR/CREAR  USUARIO
 
 class DatosUsuarioForm(forms.Form):
 
@@ -3445,91 +3471,68 @@ class DatosUsuarioForm(forms.Form):
 		
 		super(DatosUsuarioForm, self).__init__(*args,**kwargs)
 
-		self.fields['usuariono'].widget.attrs['hidden'] = True
+		self.fields['usuariono'].widget.attrs['readonly'] = True
 
 
-	asociadono = forms.IntegerField(label='Socio Num.',required=False)
-	numcontrol = forms.CharField(label='Numero de control',required=True,max_length=12)
+	usuariono = forms.IntegerField(label='Num. Usuario',required=False)
 	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
-	appaterno = forms.CharField(label='Apellido Paterno',required=True,max_length=45)	
-	apmaterno = forms.CharField(label='Apellido Materno',required=True,max_length=45)	
-	direccion = forms.CharField(label='Direccion',required=True,max_length=45)
-	colonia = forms.CharField(label='Colonia',required=True,max_length=45)
-	ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
-	estado = forms.CharField(label='Estado',required=True,max_length=45)
-	pais = forms.CharField(label='Pais',required=True,max_length=11)
-	#codigopostal = forms.IntegerField(label='C.P.',required=True)
-	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
-	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
-	fax = forms.CharField(label='Fax',required=True,max_length=15)
-	celular = forms.CharField(label='Celular',required=True,max_length=15)
-	radio = forms.CharField(label='radio',required=True,max_length=15)
-	direccionelectronica = forms.EmailField(label='email',required=True,max_length=100)
-	essocio = forms.ChoiceField(widget=forms.Select(),
-			label='Es socio',choices =((1,'Si'),(0,'No')),required='True' )
-	forzarcobroanticipo = forms.ChoiceField(widget=forms.Select(),
-			label='Forzar el cobro de anticipo',choices =((1,'Si'),(0,'No')),required='True' )
-	numeroweb = forms.IntegerField(label='Numero Web',required=False)
+	activo = forms.ChoiceField(widget=forms.Select(),
+			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
+	usuario = forms.CharField(label='Usuario',required=True,max_length=15)	
 	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosUsuarioForm,self).clean()
 	
-	
-	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
-					'telefono2':'Valor incorrecto para telefono2, ingrese unicamente numeros !',
-					'fax':'Valor incorrecto para fax, ingrese unicamente numeros !',
-					'celular':'Valor incorrecto para celular, ingrese unicamente numeros !'}
+		usuariono = cleaned_data.get('usuariono')
+		nombre = cleaned_data.get('nombre')
+		activo = cleaned_data.get('activo')
+		usuario = cleaned_data.get('usuario')
+		usr_id = cleaned_data.get('usr_id')
+		
+		return self.cleaned_data
+
+
+class DerechosFaltantesUsuarioForm(forms.Form):
+	#pdb.set_trace()
+
+	#lista_derechos = ()
+	#lprov=()
+
+	def __init__(self,*args,**kwargs):
+		#pdb.set_trace()
+		usr = kwargs.pop('usuariono')
+
+		
+		super(DerechosFaltantesUsuarioForm, self).__init__(*args,**kwargs)
+
+		
+
+		lprov = lista_derechos_no_asignados(usr)	
+
+		#derecho = forms.ChoiceField(widget=forms.Select(),
+		#		label='Derecho',choices =lprov,required='True' )
+		self.fields['derecho'] = forms.ChoiceField(widget=forms.Select(),
+		label='Derecho',choices = lprov,required='True' )	
+ 
+		#usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+	derecho = forms.ChoiceField(widget=forms.Select(),
+		label='Derecho',required='True' )
+
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
 
 
 
 
 	def clean(self):
 
-		cleaned_data = super(DatosAsociadoForm,self).clean()
+		cleaned_data = super(DerechosFaltantesUsuarioForm,self).clean()
 	
-		asociadono = cleaned_data.get('asociadono')
-		nombre = cleaned_data.get('nombre')
-		appaterno = cleaned_data.get('appaterno')
-		apmaterno = cleaned_data.get('apmaterno')
-		direccion = cleaned_data.get('direccion')
-		colonia = cleaned_data.get('colonia')
-		ciudad = cleaned_data.get('ciudad')
-		estado = cleaned_data.get('num_socio')
-		pais = cleaned_data.get('pais')
-		codigopostal = cleaned_data.get('codigopostal')
-		telefono1 = cleaned_data.get('telefono1')
-		telefono2 = cleaned_data.get('telefono2')
-		fax = cleaned_data.get('fax')
-		celular = cleaned_data.get('celular')
-		radio = cleaned_data.get('radio')
-		direccionelectronica = cleaned_data.get('direccionelectronica')
-		essocio = cleaned_data.get('essocio')
-		forzarcobroanticipo = cleaned_data.get('forzarcobroanticipo')
-		numeroweb = cleaned_data.get('numeroweb')
+		derecho = cleaned_data.get('derecho')
+		
 		usr_id = cleaned_data.get('usr_id')
-		if  not (telefono1 and telefono2 and fax and celular) is None:
-			
-			# elimina espacios al inicio
-
-			telefono1=telefono1.strip()
-			telefono2=telefono2.strip()
-			fax=fax.strip()
-			celular=celular.strip()
-
-			if not(telefono1.isdigit()):
-				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
-			elif not(telefono2.isdigit()): 
-				raise forms.ValidationError(self.error_messages['telefono2'],code='telefono2')
-			elif not(fax.isdigit()): 
-				raise forms.ValidationError(self.error_messages['fax'],code='fax')
-			elif not(celular.isdigit()):
-				raise forms.ValidationError(self.error_messages['celular'],code='celular')
-			elif numeroweb > 32767:
-				 raise forms.ValidationError("Numero web debe ser menor a 32767")	
-			else:
-				pass
-		else:
-			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
-
-				
-
-
+		
 		return self.cleaned_data
