@@ -11698,10 +11698,29 @@ def edita_usuario(request,usuariono):
 			usuario = form.cleaned_data['usuario']
 			
 			activo = int(activo)
-			cursor =  connection.cursor()
+
+			usr_existente=0
+			permiso_exitoso=0
+
 			try:
 
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,19)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
 				cursor.execute('START TRANSACTION')
+
 				cursor.execute('UPDATE usuarios SET nombre = %s,\
 				activo = %s,\
 				usuario=%s\
@@ -11711,18 +11730,33 @@ def edita_usuario(request,usuariono):
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
-
-
-			except DatabaseError as e:
-				print e
 				
-				cursor.execute('ROLLBACK;')
-				msg = 'Error en base de datos !'
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
 
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información de otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+
+			
 		else:
 			
 			pass
+			#form = DatosUsuarioForm()
+		
 	else:	
 
 		form = DatosUsuarioForm()
@@ -11758,10 +11792,26 @@ def crea_usuario(request):
 			usuario = form.cleaned_data['usuario']
 			
 			activo =int(activo)
-
 			
-			cursor =  connection.cursor()
+			usr_existente=0
+			permiso_exitoso=0
+
 			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,18)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
 
 				cursor.execute('START TRANSACTION')
 
@@ -11779,18 +11829,29 @@ def crea_usuario(request):
 				usuario) \
 				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_usuario[0]+1,nombre.upper().lstrip(),hoy,hoy,' ',activo,0,usuario.upper().lstrip()))
 					
-				#cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
-
-
-			except DatabaseError as e:
-				print e
 				
+
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
 				cursor.execute('ROLLBACK;')
-				msg = 'Error en base de datos !'
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para dar de alta usuarios !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)					
+
 
 		else:
 			
