@@ -15,13 +15,14 @@
   <div class="col-md-4">
     <div class="panel panel-success">
 
-        <div class='panel-heading'><h4 align='left'><i class="fa fa-user-circle-o"></i>Asignar derecho<h4></div>
+        <div class='panel-heading'><h4 align='left'><i class="fa fa-user-circle-o"></i>Elimina derecho !<h4></div>
         <div class='panel-body'>
               
             {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
-
-            
-            <form action="{% url 'pedidos:agregar_usuario_derecho' usuariono %}" method="POST">
+            <div class="alert alert-warning" role="alert">
+              <h5> Se procederá a eliminar el derecho seleccionado, si esta seguro de clic en 'Enviar', de otra manera de clic 'Regresar'</h5>
+            </div>
+            <form action="{% url 'pedidos:eliminar_usuario_derecho' usuariono derechono %}" method="POST">
                 
                     <!--<div class="alert alert-danger" role="alert">
                       {% for error in form.non_field_errors %}

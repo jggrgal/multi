@@ -63,7 +63,8 @@ from . forms import (AccesoForm,\
 					FiltroProveedorForm,
 					CreaAlmacenForm,
 					DatosUsuarioForm,
-					DerechosFaltantesUsuarioForm)
+					DerechosFaltantesUsuarioForm,
+					EliminaUsuarioDerechoForm)
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -11888,5 +11889,67 @@ def agregar_usuario_derecho(request,usuariono):
 
 
 def eliminar_usuario_derecho(request,usuariono,derechono):
-	return
 
+
+	if request.method == 'POST':
+
+		form = EliminaUsuarioDerechoForm(request.POST)
+
+		if form.is_valid():
+
+
+			usr_id = form.cleaned_data['usr_id']
+
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,34)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute('DELETE FROM usuario_derechos WHERE usuariono=%s and derechono=%s;',(usuariono,derechono,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuario_derechos',args=(usuariono,)))
+				
+
+			except IntegrityError as error_msg:
+
+				context={'error_msg':"Error de integridad !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para a su vez eliminar derechos a otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+	
+			
+	else:		
+		form = EliminaUsuarioDerechoForm()
+
+
+	return render(request,'pedidos/elimina_usuario_derecho.html',{'form':form,'usuariono':usuariono,'derechono':derechono,})	

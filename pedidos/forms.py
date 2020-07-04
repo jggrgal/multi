@@ -3536,3 +3536,19 @@ class DerechosFaltantesUsuarioForm(forms.Form):
 		usr_id = cleaned_data.get('usr_id')
 		
 		return self.cleaned_data
+
+
+class EliminaUsuarioDerechoForm(forms.Form):
+
+
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+	def clean(self):
+		
+		cleaned_data = super(EliminaUsuarioDerechoForm,self).clean()
+
+		usr_id = cleaned_data.get('usr_id')
+
+		return self.cleaned_data
+

@@ -17,38 +17,48 @@
         </div>
     </div>
 
-
-    <div class="table-responsive">
-        
-    	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
-            <thead>
-            
-            
-        	<tr class='success'>
-                <th>Derecho num</th>
-        		<th>Descripcion</th>
-            	
-                <th></th>
+    <div class='row'>
+        <div class='col-md-3'>
+        </div>
+        <div class='col-md-6'>
+            <div class="table-responsive">
                 
-              
-        	</tr>
-            </thead>
-            <tbody>
-        	{% for item in derechos %}
-        		<tr>
-        			<td>{{item.derechono}}</td>
-                   
-        			<td>{{ item.DESCRIPCION }}</td>
-                    <td><a href="{% url 'pedidos:eliminar_usuario_derecho' usuariono item.derechono %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Eliminar</a></td>
+            	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
+                    <thead>
                     
-                                        
-            	</tr>
-           {% endfor %}
-           </tbody>
-          
-            
-    	</table>
+                    
+                	<tr class='success'>
+                        <th>Derecho num</th>
+                		<th>Descripcion</th>
+                    	
+                        <th></th>
+                        
+                      
+                	</tr>
+                    </thead>
+                    <tbody>
+                	{% for item in derechos %}
+                		<tr>
+                			<td>{{item.derechono}}</td>
+                           
+                			<td>{{ item.DESCRIPCION }}</td>
+                            <td><a href="{% url 'pedidos:eliminar_usuario_derecho' usuariono item.derechono %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Eliminar</a></td>
+                            
+                                                
+                    	</tr>
+                   {% endfor %}
+                   </tbody>
+                  
+                    
+            	</table>
+        
+            </div>
+
     </div>
+    <div class='col-md-3'>
+    </div>
+
+
 </div>
 <div class='row'>
     <div class='col-md-3'>
