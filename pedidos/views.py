@@ -2686,18 +2686,21 @@ def pedidosgeneraldetalle(request,pedido,productono,catalogo,nolinea):
 	
 	cursor=connection.cursor()
 
-	cursor.execute("SELECT h.fechapedido,a.codigoarticulo,pe.fechaencontrado,pe.bodegaencontro,pe.encontrado,pe.id_cierre,pe.causadevprov,pe.observaciones,h.tiposervicio,via.descripcion as via_solicitud from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) INNER JOIN pedidos_encontrados pe on (l.empresano=pe.empresano and l.pedido=pe.pedido and l.productono=pe.productono and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea) INNER JOIN viasolicitud via where l.empresano=1 and l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;", (pedidono,productono,catalogo,nolinea))
+	cursor.execute("SELECT h.fechapedido,a.codigoarticulo,pe.fechaencontrado,pe.bodegaencontro,pe.encontrado,pe.id_cierre,pe.causadevprov,pe.observaciones,h.tiposervicio,via.descripcion as via_solicitud from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) INNER JOIN pedidos_encontrados pe on (l.empresano=pe.empresano and l.pedido=pe.pedido and l.productono=pe.productono and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea) INNER JOIN viasolicitud via  on (via.id=h.viasolicitud) where l.empresano=1 and l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;", (pedidono,productono,catalogo,nolinea))
 	
 	# Agregue los siguientes dos if's por si entrega registros en cero, deben ir ???
 	if cursor.fetchone():
 		print "DATOS CIERRE:"
 		datos_cierre = cursor.fetchone()
+
+		cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
+
 		for j  in range(0,len(datos_cierre)):
 			print datos_cierre[j]
 	else:
 		datos_cierre = ()
 	
-	cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
+
 	if cursor.fetchone():
 
 		datos_almacen = cursor.fetchone()
@@ -3071,7 +3074,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['subtotal']
 			else:
 				precio_imprimir = elemento['precio']	
-			pdb.set_trace()
+			#pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
 			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
