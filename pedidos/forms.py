@@ -174,6 +174,7 @@ def lista_almacenes(proveedor):
 '''   LISTA DE USUARIOS '''
 
 def lista_usuarios():
+			pdb.set_trace()
 			cursor=connection.cursor()
 			cursor.execute('SELECT UsuarioNo,usuario from usuarios where activo;')
 	
@@ -204,20 +205,45 @@ def lista_usuarios():
 			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
 			lprov = tuple(tuple(x) for x in y)
 
-			
-			
 			return (lprov)
 
+# FUNCION PARA GENERAR UNA LISTA DE LOS DERECHOS AUN NO ASIGNADOS A UN USUARIO
 
 
+def lista_derechos_no_asignados(usr):
+			cursor=connection.cursor()
+			#cursor.execute('SELECT id,descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT us.id from usuario_derechos us where us.usuariono=%s));'(usr,))
+			cursor.execute('SELECT r.id,r.descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT ud.derechono from usuario_derechos ud where ud.usuariono=%s)) as r',(usr,))
+			#cursor.execute('SELECT id,descripcion from derechos;')
 
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'GENERAL ') + pr
+			
 
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
 
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
 
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
 
-
-
-
+			return (lprov)
 
 
 f_inicial_init =  date.today()
@@ -3435,6 +3461,7 @@ class CreaDescuentoAsociadoForm(forms.Form):
 
 		return(self.cleaned_data)
 
+
 # FORMA REMISIONES ESPECIALES
 
 
@@ -3491,11 +3518,97 @@ class remisionesespecialesForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
 		else:
 				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+
+
+# FORMA PARA EDITAR/CREAR  USUARIO
+
+class DatosUsuarioForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosUsuarioForm, self).__init__(*args,**kwargs)
+
+		self.fields['usuariono'].widget.attrs['readonly'] = True
+
+
+	usuariono = forms.IntegerField(label='Num. Usuario',required=False)
+	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
+	activo = forms.ChoiceField(widget=forms.Select(),
+			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
+	usuario = forms.CharField(label='Usuario',required=True,max_length=15)	
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosUsuarioForm,self).clean()
+	
+		usuariono = cleaned_data.get('usuariono')
+		nombre = cleaned_data.get('nombre')
+		activo = cleaned_data.get('activo')
+		usuario = cleaned_data.get('usuario')
+		usr_id = cleaned_data.get('usr_id')
+		
+		return self.cleaned_data
+
+
+class DerechosFaltantesUsuarioForm(forms.Form):
+	#pdb.set_trace()
+
+	#lista_derechos = ()
+	#lprov=()
+
+	def __init__(self,*args,**kwargs):
+		#pdb.set_trace()
+		usr = kwargs.pop('usuariono')
+
+		
+		super(DerechosFaltantesUsuarioForm, self).__init__(*args,**kwargs)
+
+		
+
+		lprov = lista_derechos_no_asignados(usr)	
+
+		#derecho = forms.ChoiceField(widget=forms.Select(),
+		#		label='Derecho',choices =lprov,required='True' )
+		self.fields['derecho'] = forms.ChoiceField(widget=forms.Select(),
+		label='Derecho',choices = lprov,required='True' )	
+ 
+		#usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+	derecho = forms.ChoiceField(widget=forms.Select(),
+		label='Derecho',required='True' )
+
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+
+
+	def clean(self):
+
+		cleaned_data = super(DerechosFaltantesUsuarioForm,self).clean()
+	
+		derecho = cleaned_data.get('derecho')
+		
+		usr_id = cleaned_data.get('usr_id')
 		
 		return self.cleaned_data
 
 
 
+class EliminaUsuarioDerechoForm(forms.Form):
 
+
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+	def clean(self):
+		
+		cleaned_data = super(EliminaUsuarioDerechoForm,self).clean()
+
+		usr_id = cleaned_data.get('usr_id')
+
+		return self.cleaned_data
 
 

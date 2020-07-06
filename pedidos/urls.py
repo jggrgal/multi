@@ -129,5 +129,11 @@ urlpatterns = [
 	url(r'^crea_almacen/(?P<proveedorno>[0-9]{1,8})/$',views.crea_almacen,name='crea_almacen'),
 	url(r'^edita_almacen/(?P<proveedorno>[0-9]{1,8})/(?P<almacenno>[0-9]{1,8})/$',views.edita_almacen,name='edita_almacen'),
 	url(r'^rpte_remisiones_especiales/$',views.rpte_remisiones_especiales,name='rpte_remisiones_especiales'),
+	url(r'^lista_usuarios/$',views.lista_usuarios,name='lista_usuarios'),
+	url(r'^edita_usuario/(?P<usuariono>[0-9]{1,8})/$',views.edita_usuario,name='edita_usuario'),
+	url(r'^crea_usuario/$',views.crea_usuario,name='crea_usuario'),
+	url(r'^lista_usuario_derechos/(?P<usuariono>[0-9]{1,8})/$',views.lista_usuario_derechos,name='lista_usuario_derechos'),
+	url(r'^agregar_usuario_derecho/(?P<usuariono>[0-9]{1,8})/$',views.agregar_usuario_derecho,name='agregar_usuario_derecho'),
+	url(r'^eliminar_usuario_derecho/(?P<usuariono>[0-9]{1,8})/(?P<derechono>[0-9]{1,8})/$',views.eliminar_usuario_derecho,name='eliminar_usuario_derecho'),
 
 	]

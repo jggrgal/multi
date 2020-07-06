@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Articulo,Asociado,Pedidosheader,Pedidoslines,PedidosStatusFechas,Preciobase,Usuarios
+from .models import Articulo,Asociado,Pedidosheader,Pedidoslines,PedidosStatusFechas,Preciobase,Usuarios,Derechos
 
 # Register your models here.
 admin.site.register(Articulo)
@@ -9,3 +9,4 @@ admin.site.register(Pedidoslines)
 admin.site.register(PedidosStatusFechas)
 admin.site.register(Preciobase)
 admin.site.register(Usuarios)
+admin.site.register(Derechos)

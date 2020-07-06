@@ -62,7 +62,11 @@ from . forms import (AccesoForm,\
 					FiltroSocioCatalogoForm,
 					FiltroProveedorForm,
 					CreaAlmacenForm,
-					remisionesespecialesForm,)
+					remisionesespecialesForm,
+					DatosUsuarioForm,
+					DerechosFaltantesUsuarioForm,
+					EliminaUsuarioDerechoForm)
+
 
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
@@ -99,7 +103,10 @@ getcontext().prec = 6# esta linea establece la precision de decimales para numer
 
 #pdfmetrics.registerFont(TTFont('FreeSans', '/usr/share/fonts/truetype/freefont/FreeSans.ttf'))
 
+class NoHayRegistrosError(Exception):
 
+	''' Clase para manejar errores cuando no hay registros en consultas'''
+	pass
 
 
 # Las siguiente 3 lineas son para que se indicar a python que hagas las conversiones
@@ -2687,43 +2694,39 @@ def pedidosgeneral(request):
 
 
 def pedidosgeneraldetalle(request,pedido,productono,catalogo,nolinea):
-
+	#pdb.set_trace()
 	pedidono = pedido
 	print (pedido,productono,catalogo,nolinea)
 	print("la linea es ",nolinea)
 	
+
 	cursor=connection.cursor()
 
-	cursor.execute("SELECT h.fechapedido,a.codigoarticulo,pe.fechaencontrado,pe.bodegaencontro,pe.encontrado,pe.id_cierre,pe.causadevprov,pe.observaciones,h.tiposervicio,via.descripcion as via_solicitud from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) INNER JOIN pedidos_encontrados pe on (l.empresano=pe.empresano and l.pedido=pe.pedido and l.productono=pe.productono and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea) INNER JOIN viasolicitud via where l.empresano=1 and l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;", (pedidono,productono,catalogo,nolinea))
-	
-	# Agregue los siguientes dos if's por si entrega registros en cero, deben ir ???
-	if cursor.fetchone():
-		print "DATOS CIERRE:"
-		datos_cierre = cursor.fetchone()
-		for j  in range(0,len(datos_cierre)):
-			print datos_cierre[j]
-	else:
-		datos_cierre = ()
-	
-	cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
-	if cursor.fetchone():
 
+	
+	cursor.execute("SELECT h.fechapedido,a.codigoarticulo,pe.fechaencontrado,pe.bodegaencontro,pe.encontrado,pe.id_cierre,pe.causadevprov,pe.observaciones,h.tiposervicio,via.descripcion as via_solicitud from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) INNER JOIN pedidos_encontrados pe on (l.empresano=pe.empresano and l.pedido=pe.pedido and l.productono=pe.productono and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea) INNER JOIN viasolicitud via  on (via.id=h.viasolicitud) where l.empresano=1 and l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;", (pedidono,productono,catalogo,nolinea))
+
+	if cursor.rowcount:
+		
+		datos_cierre = cursor.fetchone()
+		cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
 		datos_almacen = cursor.fetchone()
+
 	else:
 		# asigna valores default a la tupla para
 		# que pueda hacer joins en los selects y traer informacion
 		# pese a que no haya almacen relacionado.
+		datos_cierre = ('19010101','','19010101','N',0,'','','','','')
 		datos_almacen = ('1','1','1','1','1')
 
-	cursor.execute("SELECT psf.status, psf.fechamvto,psf.horamvto,u.usuario from pedidos_status_fechas psf left join usuarios u on (u.usuariono=psf.usuario) WHERE psf.empresano=1 and psf.pedido=%s and psf.productono=%s and psf.catalogo=%s and psf.nolinea=%s;",(pedidono,productono,catalogo,nolinea) )
+	cursor.execute("SELECT psf.status, psf.fechamvto,psf.horamvto,u.usuario from pedidos_status_fechas psf left join usuarios u on (u.usuariono=psf.usuario) WHERE psf.empresano=1 and psf.pedido=%s and psf.productono=%s and psf.catalogo=%s and psf.nolinea=%s order by psf.fechamvto,psf.horamvto;",(pedidono,productono,catalogo,nolinea) )
 	v_PedidosStatusFechas = dictfetchall(cursor)
 
-	if datos_cierre or v_PedidosStatusFechas:
 
-		context={'fechapedido':datos_cierre[0],'productono':datos_cierre[1],'fechaencontrado':datos_cierre[2],'encontrado':datos_cierre[4],'id_cierre':datos_cierre[5],'tiposervicio':datos_cierre[8],'viasolicitud':datos_cierre[9],'almacen':datos_almacen[2],'psf':v_PedidosStatusFechas,}
-	else:
+	context={'fechapedido':datos_cierre[0],'productono':datos_cierre[1],'fechaencontrado':datos_cierre[2],'encontrado':datos_cierre[4],'id_cierre':datos_cierre[5],'tiposervicio':datos_cierre[8],'via_solicitud':datos_cierre[9],'almacen':datos_almacen[2],'psf':v_PedidosStatusFechas,}
+	'''else:
 		context={'mensaje':"No existe informacion suficiente para la consulta..!"}	
-	
+	'''
 	return render(request,'pedidos/lista_pedidosgeneraldetalle.html',context)
 
 
@@ -3082,7 +3085,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['subtotal']
 			else:
 				precio_imprimir = elemento['precio']	
-
+			#pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
 			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
@@ -3860,7 +3863,7 @@ def procesar_colocaciones(request):
 					error_msg = "Error desconocido"
 					data = {'status_operacion':'fail','error':error_msg,}
 					error = True
-
+						
 		cursor.close()
 
 		# Si no hay error, nos devolvera la lista de pedidos cambiados
@@ -5206,7 +5209,7 @@ def crea_documento(request):
 def calcula_descuento(p_socio,p_idproveedor,p_socio_total_compras_mes_anterior):
 	#pdb.set_trace() 
 
-	factor_descuento = 0
+	factor_descuento = 0.0
 	
 	#if request.is_ajax()  and request.method == 'GET':
 		# Pasa a una variable la tabla  recibida en json string
@@ -5440,6 +5443,7 @@ def trae_inf_venta(request,num_socio):
 	cursor.close()
 
 	return (ventas,creditos,cargos,porconfs_confs)
+
 
 
 
@@ -6413,7 +6417,15 @@ def verifica_derechos_usr(num_usr_valido,usr_derecho):
 
 def valida_usr(request):
 	#pdb.set_trace()
-	socio_zapcat = request.session['socio_zapcat']	
+
+	try:	
+		socio_zapcat = request.session['socio_zapcat']	
+	except KeyError as e:
+		error_msg ="Error  1001: Error al validar el usuario en session, aparentemente su sesión se perdió, cierre completamente su navegador, reabralo y accese nuevamente al sistema !"
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+
 	tiene_derecho = 0 # asume que no tiene derecho
 	usr_id = request.GET.get('usr_id')
 	usr_derecho = int(request.GET.get('usr_derecho').encode('latin_1'))
@@ -11726,6 +11738,7 @@ def asociado_nuevo_descuento(request,asociadono):
 
 
 
+
 # REPORTE DE REMISIONES ESPECIALES
 
 def rpte_remisiones_especiales(request):
@@ -11993,4 +12006,352 @@ def rpte_remisiones_especiales(request):
 
 
 
+
+
+def lista_usuarios(request):
+	cursor=connection.cursor()
+	cursor.execute('SELECT usuariono,nombre,fechacreacion,if(activo,"SI","NO") as esta_activo,usuario from usuarios;')
+	usuarios = dictfetchall(cursor)
+	cursor.close()
+	context = {'usuarios': usuarios}
+	return render(request, 'pedidos/usuarios.html', context)
+
+
+# EDITA USUARIO
+
+
+def edita_usuario(request,usuariono):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	
+
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = DatosUsuarioForm(request.POST)
+		if form.is_valid():
+			usuariono = form.cleaned_data['usuariono']
+			nombre = form.cleaned_data['nombre']
+			usr_id = form.cleaned_data['usr_id']
+			activo = form.cleaned_data['activo']
+			usuario = form.cleaned_data['usuario']
+			
+			activo = int(activo)
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,19)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute('UPDATE usuarios SET nombre = %s,\
+				activo = %s,\
+				usuario=%s\
+				WHERE usuariono=%s;',(nombre.upper().lstrip(),activo,usuario,usuariono,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
+				
+
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información de otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+
+			
+		else:
+			
+			pass
+			#form = DatosUsuarioForm()
+		
+	else:	
+
+		form = DatosUsuarioForm()
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT 	p.usuariono,\
+								p.nombre,\
+								p.activo,\
+								p.usuario\
+								from usuarios p where p.usuariono=%s;",(usuariono,))
+		usuario = cursor.fetchone()
+		
+		form = DatosUsuarioForm(initial={'usuariono':usuario[0],'nombre':usuario[1],'activo':1 if usuario[2]==1 else 0,'usuario':usuario[3],})
+					
+	return render(request,'pedidos/edita_usuario.html',{'form':form,'usuariono':usuariono,})
+
+
+def crea_usuario(request):
+
+	msg = ''
+
+	hoy = date.today()
+
+	if request.method == 'POST':
+
+		form = DatosUsuarioForm(request.POST)
+		if form.is_valid():
+			
+			usuariono = form.cleaned_data['usuariono']
+			nombre = form.cleaned_data['nombre']
+			usr_id = form.cleaned_data['usr_id']
+			activo = form.cleaned_data['activo']
+			usuario = form.cleaned_data['usuario']
+			
+			activo =int(activo)
+			
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,18)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute("SELECT usuariono FROM usuarios ORDER BY usuariono desc limit 1;")
+				ultimo_usuario = cursor.fetchone()	
+
+
+
+				cursor.execute('INSERT INTO usuarios(empresano,usuariono,nombre,\
+				fechacreacion,\
+				fechamodificacion,\
+				password,\
+				activo,\
+				nivel,\
+				usuario) \
+				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_usuario[0]+1,nombre.upper().lstrip(),hoy,hoy,' ',activo,0,usuario.upper().lstrip()))
+					
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
+				
+
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para dar de alta usuarios !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)					
+
+
+		else:
+			
+			pass
+	else:	
+
+		form = DatosUsuarioForm()
+		
+					
+	return render(request,'pedidos/crea_usuario.html',{'form':form,})
+
+
+def lista_usuario_derechos(request,usuariono):
+	cursor=connection.cursor()
+
+	cursor.execute('SELECT ud.derechono,d.DESCRIPCION,ud.usuariono,if(ud.`Activo?`,"SI","NO") as derecho_activo from usuario_derechos ud inner join derechos d on (ud.empresano=1 and ud.derechono=d.id) where ud.usuariono=%s;',(usuariono,))
+	derechos = dictfetchall(cursor)
+	
+	cursor.execute('SELECT usuario from usuarios WHERE usuariono=%s;',(usuariono,))
+	usr_nombre = cursor.fetchone()
+	usr_nombre = usr_nombre[0]
+
+
+	cursor.close()
+	context = {'derechos': derechos,'usuariono':usuariono,'usr_nombre':usr_nombre,}
+	return render(request, 'pedidos/usuario_derechos.html', context)
+
+
+def agregar_usuario_derecho(request,usuariono):
+
+
+	if request.method == 'POST':
+
+		form = DerechosFaltantesUsuarioForm(request.POST,usuariono=usuariono)
+
+		if form.is_valid():
+			
+			derecho = form.cleaned_data['derecho']
+			usr_id = form.cleaned_data['usr_id']
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,33)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("INSERT INTO usuario_derechos(empresaNo,UsuarioNo,DerechoNo,`Activo?`) VALUES(%s,%s,%s,%s);",(1,usuariono,derecho,1,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuario_derechos',args=(usuariono,)))
+				
+
+			except IntegrityError as error_msg:
+
+				context={'error_msg':"Error de integridad !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para a su vez asignar derechos a otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+	else:
+
+		form=DerechosFaltantesUsuarioForm(usuariono=usuariono)
+
+	return render(request,'pedidos/crea_usuario_derecho.html',{'form':form,'usuariono':usuariono,})
+
+
+
+
+
+
+
+def eliminar_usuario_derecho(request,usuariono,derechono):
+
+
+	if request.method == 'POST':
+
+		form = EliminaUsuarioDerechoForm(request.POST)
+
+		if form.is_valid():
+
+
+			usr_id = form.cleaned_data['usr_id']
+
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,34)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute('DELETE FROM usuario_derechos WHERE usuariono=%s and derechono=%s;',(usuariono,derechono,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuario_derechos',args=(usuariono,)))
+				
+
+			except IntegrityError as error_msg:
+
+				context={'error_msg':"Error de integridad !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para a su vez eliminar derechos a otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+	
+			
+	else:		
+		form = EliminaUsuarioDerechoForm()
+
+
+	return render(request,'pedidos/elimina_usuario_derecho.html',{'form':form,'usuariono':usuariono,'derechono':derechono,})	
 

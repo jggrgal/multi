@@ -1,0 +1,73 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+    <div class='row'>
+        <div class='col-md-4'>
+           <h1> <i class="fa fa-users"></i>   </h1>
+        </div>
+        <div class='col-md-4'>
+                  <h3 style="text-align: center;color:#7f7b38;">Usuarios</h3>
+
+        </div>
+        <div class='col-md-4'>
+        </div>
+    </div>
+
+
+    <div class="table-responsive">
+        
+    	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
+            <thead>
+            
+            
+        	<tr class='success'>
+                <th>Numero Usuario</th>
+        		<th>Nombre</th>
+            	<th>Fecha Creacion</th>
+                <th>Activo</th>
+                <th>Nombre corto</th>
+                <th>Derechos</th>
+              
+        	</tr>
+            </thead>
+            <tbody>
+        	{% for item in usuarios %}
+        		<tr>
+        			<td><a href="{% url 'pedidos:edita_usuario' item.usuariono %}">num_usr</a></td>
+                   
+        			<td>{{ item.nombre }}</td>
+                    <td>{{ item.fechacreacion }}</td>
+                    <td>{{ item.esta_activo }}</td>
+                    <td>{{ item.usuario}}</td>
+                    <td><a href="{% url 'pedidos:lista_usuario_derechos' item.usuariono %}" id="lista_usuario_derecho" class="btn btn-success " role="button">Derechos...</a></td>
+                                        
+            	</tr>
+           {% endfor %}
+           </tbody>
+          
+            
+    	</table>
+    </div>
+</div>
+<div class='row'>
+    <div class='col-md-3'>
+        <p align="left">
+                      <a href="{% url 'pedidos:crea_usuario' %}" id="crea_usuario" class="btn btn-success " role="button">Nuevo </a>
+                    </p>
+    </div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    
+    
+</div>
+
+
+
+
+
+{% endblock content %}

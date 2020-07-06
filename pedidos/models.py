@@ -314,6 +314,7 @@ class Creditoaplicado(models.Model):
 
 
 class Derechos(models.Model):
+    id = models.IntegerField(primary_key=True)
     descripcion = models.CharField(db_column='DESCRIPCION', max_length=45)  # Field name made lowercase.
     fechaalta = models.DateField(db_column='FechaAlta')  # Field name made lowercase.
     fechabaja = models.DateField(db_column='FechaBaja')  # Field name made lowercase.
@@ -321,6 +322,11 @@ class Derechos(models.Model):
     class Meta:
         managed = False
         db_table = 'derechos'
+        
+    def __str__(self):
+        return(self.descripcion)
+
+
 
 
 class Devolucionesaprovheader(models.Model):

@@ -1,0 +1,80 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+    <div class='row'>
+        <div class='col-md-4'>
+           <h1> <i class="fa fa-key"></i>   </h1>
+        </div>
+        <div class='col-md-4'>
+                  <h3 style="text-align: center;color:#7f7b38;">Derechos del usuario {{ usr_nombre }}</h3>
+
+        </div>
+        <div class='col-md-4'>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-md-3'>
+        </div>
+        <div class='col-md-6'>
+            <div class="table-responsive">
+                
+            	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
+                    <thead>
+                    
+                    
+                	<tr class='success'>
+                        <th>Derecho num</th>
+                		<th>Descripcion</th>
+                    	
+                        <th></th>
+                        
+                      
+                	</tr>
+                    </thead>
+                    <tbody>
+                	{% for item in derechos %}
+                		<tr>
+                			<td>{{item.derechono}}</td>
+                           
+                			<td>{{ item.DESCRIPCION }}</td>
+                            <td><a href="{% url 'pedidos:eliminar_usuario_derecho' usuariono item.derechono %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Eliminar</a></td>
+                            
+                                                
+                    	</tr>
+                   {% endfor %}
+                   </tbody>
+                  
+                    
+            	</table>
+        
+            </div>
+
+    </div>
+    <div class='col-md-3'>
+    </div>
+
+
+</div>
+<div class='row'>
+    <div class='col-md-3'>
+        <p align="left">
+                      <a href="{% url 'pedidos:agregar_usuario_derecho' usuariono  %}" id="agregar_usuario_derecho" class="btn btn-success " role="button">Nuevo </a>
+                    </p>
+    </div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    
+    
+</div>
+
+
+
+
+
+{% endblock content %}
