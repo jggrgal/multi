@@ -101,7 +101,10 @@ getcontext().prec = 6# esta linea establece la precision de decimales para numer
 
 #pdfmetrics.registerFont(TTFont('FreeSans', '/usr/share/fonts/truetype/freefont/FreeSans.ttf'))
 
+class NoHayRegistrosError(Exception):
 
+	''' Clase para manejar errores cuando no hay registros en consultas'''
+	pass
 
 
 # Las siguiente 3 lineas son para que se indicar a python que hagas las conversiones
@@ -2679,46 +2682,39 @@ def pedidosgeneral(request):
 
 
 def pedidosgeneraldetalle(request,pedido,productono,catalogo,nolinea):
-
+	#pdb.set_trace()
 	pedidono = pedido
 	print (pedido,productono,catalogo,nolinea)
 	print("la linea es ",nolinea)
 	
+
 	cursor=connection.cursor()
 
+
+	
 	cursor.execute("SELECT h.fechapedido,a.codigoarticulo,pe.fechaencontrado,pe.bodegaencontro,pe.encontrado,pe.id_cierre,pe.causadevprov,pe.observaciones,h.tiposervicio,via.descripcion as via_solicitud from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) INNER JOIN pedidos_encontrados pe on (l.empresano=pe.empresano and l.pedido=pe.pedido and l.productono=pe.productono and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea) INNER JOIN viasolicitud via  on (via.id=h.viasolicitud) where l.empresano=1 and l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;", (pedidono,productono,catalogo,nolinea))
-	
-	# Agregue los siguientes dos if's por si entrega registros en cero, deben ir ???
-	if cursor.fetchone():
-		print "DATOS CIERRE:"
+
+	if cursor.rowcount:
+		
 		datos_cierre = cursor.fetchone()
-
 		cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
-
-		for j  in range(0,len(datos_cierre)):
-			print datos_cierre[j]
-	else:
-		datos_cierre = ()
-	
-
-	if cursor.fetchone():
-
 		datos_almacen = cursor.fetchone()
+
 	else:
 		# asigna valores default a la tupla para
 		# que pueda hacer joins en los selects y traer informacion
 		# pese a que no haya almacen relacionado.
+		datos_cierre = ('19010101','','19010101','N',0,'','','','','')
 		datos_almacen = ('1','1','1','1','1')
 
-	cursor.execute("SELECT psf.status, psf.fechamvto,psf.horamvto,u.usuario from pedidos_status_fechas psf left join usuarios u on (u.usuariono=psf.usuario) WHERE psf.empresano=1 and psf.pedido=%s and psf.productono=%s and psf.catalogo=%s and psf.nolinea=%s;",(pedidono,productono,catalogo,nolinea) )
+	cursor.execute("SELECT psf.status, psf.fechamvto,psf.horamvto,u.usuario from pedidos_status_fechas psf left join usuarios u on (u.usuariono=psf.usuario) WHERE psf.empresano=1 and psf.pedido=%s and psf.productono=%s and psf.catalogo=%s and psf.nolinea=%s order by psf.fechamvto,psf.horamvto;",(pedidono,productono,catalogo,nolinea) )
 	v_PedidosStatusFechas = dictfetchall(cursor)
 
-	if datos_cierre or v_PedidosStatusFechas:
 
-		context={'fechapedido':datos_cierre[0],'productono':datos_cierre[1],'fechaencontrado':datos_cierre[2],'encontrado':datos_cierre[4],'id_cierre':datos_cierre[5],'tiposervicio':datos_cierre[8],'viasolicitud':datos_cierre[9],'almacen':datos_almacen[2],'psf':v_PedidosStatusFechas,}
-	else:
+	context={'fechapedido':datos_cierre[0],'productono':datos_cierre[1],'fechaencontrado':datos_cierre[2],'encontrado':datos_cierre[4],'id_cierre':datos_cierre[5],'tiposervicio':datos_cierre[8],'via_solicitud':datos_cierre[9],'almacen':datos_almacen[2],'psf':v_PedidosStatusFechas,}
+	'''else:
 		context={'mensaje':"No existe informacion suficiente para la consulta..!"}	
-	
+	'''
 	return render(request,'pedidos/lista_pedidosgeneraldetalle.html',context)
 
 
