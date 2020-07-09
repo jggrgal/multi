@@ -1,0 +1,80 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+    <div class='row'>
+        <div class='col-md-4'>
+           <h1> <i class="fa fa-users"></i>   </h1>
+        </div>
+        <div class='col-md-4'>
+                  <h3 style="text-align: center;color:#7f7b38;">Socios Web</h3>
+
+        </div>
+        <div class='col-md-4'>
+        </div>
+    </div>
+
+
+    <div class="table-responsive">
+        
+    	<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
+            <thead>
+            
+            
+        	<tr class='success'>
+
+                <th>id</th>
+        		<th>Nombre</th>
+            	<th>Apellido paterno</th>
+                <th>Apellido materno</th>
+                <th>Email</th>
+                <th>Esta activo</th>
+                <th>Es staff </th>
+                <th>Ultimo acceso firmado</th>
+              
+        	</tr>
+            </thead>
+            <tbody>
+        	{% for item in usuarios %}
+        		<tr>
+        			<td><a href="{% url 'pedidos:edita_usuario_web' item.id %}">{{item.id}}</a></td>
+                   
+        			<td>{{ item.username }}</td>
+                    <td>{{ item.first_name }}</td>
+                    <td>{{ item.last_name }}</td>
+                    <td>{{ item.email}}</td>
+                    <td>{{ item.is_active }}</td>
+                    <td>{{ item.is_staff }}</td>
+                    <td>{{ item.last_login }}</td>
+                    
+                                                            
+            	</tr>
+           {% endfor %}
+           </tbody>
+          
+            
+    	</table>
+    </div>
+</div>
+<div class='row'>
+    <!--
+    <div class='col-md-3'>
+        <p align="left">
+                      <a href="{% url 'pedidos:crea_usuario' %}" id="crea_usuario" class="btn btn-success " role="button">Nuevo </a>
+                    </p>
+    </div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    <div class='col-md-3'></div>
+    -->
+    
+</div>
+
+
+
+
+
+{% endblock content %}

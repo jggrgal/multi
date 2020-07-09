@@ -65,7 +65,8 @@ from . forms import (AccesoForm,\
 					remisionesespecialesForm,
 					DatosUsuarioForm,
 					DerechosFaltantesUsuarioForm,
-					EliminaUsuarioDerechoForm)
+					EliminaUsuarioDerechoForm,
+					DatosUsuarioWebForm)
 
 
 
@@ -12005,7 +12006,7 @@ def rpte_remisiones_especiales(request):
 
 
 
-
+# LISTA DE USUARIOS
 
 
 def lista_usuarios(request):
@@ -12354,4 +12355,117 @@ def eliminar_usuario_derecho(request,usuariono,derechono):
 
 
 	return render(request,'pedidos/elimina_usuario_derecho.html',{'form':form,'usuariono':usuariono,'derechono':derechono,})	
+
+
+
+# LISTA DE USUARIOSWEB
+
+def lista_usuarios_web(request):
+	cursor=connection.cursor()
+	cursor.execute('SELECT id,last_login,username,first_name,last_name,email,is_staff,is_active from auth_user;')
+	usuarios = dictfetchall(cursor)
+	cursor.close()
+	context = {'usuarios': usuarios}
+	return render(request, 'pedidos/usuarios_web.html', context)
+
+
+# EDITA USUARIO
+
+
+def edita_usuario_web(request,id):
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	
+	
+
+	msg = ''
+
+	if request.method == 'POST':
+
+		form = DatosUsuarioWebForm(request.POST)
+		if form.is_valid():
+			id = form.cleaned_data['id']
+
+			is_active = form.cleaned_data['is_active']
+			is_staff = form.cleaned_data['is_staff']
+			email = form.cleaned_data['email']
+			usr_id = form.cleaned_data['usr_id']
+			
+			is_active = int(is_active)
+			is_staff = int(is_staff)
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(usr_id)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,29)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor=connection.cursor()
+
+				cursor.execute('START TRANSACTION')
+
+				cursor.execute('UPDATE auth_user SET email = %s,\
+				is_active = %s,\
+				is_staff=%s\
+				WHERE id=%s;',(email.lower().lstrip(),is_active,is_staff,id,))
+			
+							
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:lista_usuarios_web'))
+				
+
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
+				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información web de otro usuario !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+
+			
+		else:
+			
+			pass
+			#form = DatosUsuarioForm()
+		
+	else:	
+
+		form = DatosUsuarioWebForm()
+		
+		cursor=connection.cursor()
+		cursor.execute("SELECT 	p.id,\
+								p.email,\
+								p.is_active,\
+								p.is_staff,\
+								p.username\
+								from auth_user p where p.id=%s;",(id,))
+		usuario = cursor.fetchone()
+		
+		form = DatosUsuarioWebForm(initial={'id':usuario[0],'email':usuario[1],'is_active':usuario[2],'is_staff':usuario[3],'nombre':usuario[3]})
+					
+	return render(request,'pedidos/edita_usuario_web.html',{'form':form,'id':id,})
+
 

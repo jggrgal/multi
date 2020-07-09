@@ -174,7 +174,7 @@ def lista_almacenes(proveedor):
 '''   LISTA DE USUARIOS '''
 
 def lista_usuarios():
-			pdb.set_trace()
+			#pdb.set_trace()
 			cursor=connection.cursor()
 			cursor.execute('SELECT UsuarioNo,usuario from usuarios where activo;')
 	
@@ -2589,10 +2589,6 @@ class ventasporcajeroForm(forms.Form):
 
 
 
-
-
-
-
 		t = datetime.now
 		#t.strftime('%m/%d/%Y')
 
@@ -3612,3 +3608,38 @@ class EliminaUsuarioDerechoForm(forms.Form):
 		return self.cleaned_data
 
 
+
+# Datos socioweb
+
+class DatosUsuarioWebForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosUsuarioWebForm, self).__init__(*args,**kwargs)
+
+		self.fields['id'].widget.attrs['readonly'] = True
+
+
+	id = forms.IntegerField(label='Num. Usuario',required=False)
+
+	is_active = forms.ChoiceField(widget=forms.Select(),
+			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
+	is_staff = forms.ChoiceField(widget=forms.Select(),
+			label='Staff',choices =((1,'Si'),(0,'No')),required='True' )
+	email = forms.EmailField(label='Email',required=True,max_length=150)
+	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosUsuarioWebForm,self).clean()
+	
+		id = cleaned_data.get('id')
+
+		is_active = cleaned_data.get('is_active')
+		is_staff = cleaned_data.get('is_staff')
+		email = cleaned_data.get('email')
+		usr_id = cleaned_data.get('usr_id')
+		
+		return self.cleaned_data
