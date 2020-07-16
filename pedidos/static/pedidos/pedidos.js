@@ -1608,7 +1608,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
             seleccionados_como_encontrados += 1;
             $("#total_encontrados").html(function(i, val) { return val*1+1 });
-
+            val_anterior = $(this).val();
             }
 
         else { 
@@ -1619,6 +1619,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
                     // #coloc_detail_table id_encontrado select
                       seleccionados_como_encontrados -= 1;
                        $("#total_encontrados").html(function(i, val) { return val*1-1 });
+                      val_anterior = $(this).val();
                   }
                  
              };

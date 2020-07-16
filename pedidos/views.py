@@ -1351,7 +1351,6 @@ def documentos(request):
 									d.saldo,
 									d.comisiones,
 									d.DescuentoAplicado,
-	#pdb.set_trace()
 									if(d.Cancelado='\x00','Activo','Cancelado') as Cancelado,if((not(d.tipodedocumento="Remision" and trim(d.concepto)='Venta') and not((d.tipodedocumento='Credito' or d.tipodedocumento='Cargo') and d.saldo=0)) and not(d.Cancelado),1,0) as cancelar FROM documentos d
 									INNER JOIN asociado s
 									on d.empresano=s.empresano
@@ -2710,8 +2709,14 @@ def pedidosgeneraldetalle(request,pedido,productono,catalogo,nolinea):
 	if cursor.rowcount:
 		
 		datos_cierre = cursor.fetchone()
+
 		cursor.execute("SELECT proveedorno,almacen,razonsocial from almacen where empresano=1 and almacen =%s;",(datos_cierre[3],))
-		datos_almacen = cursor.fetchone()
+		
+		if cursor.rowcount:
+
+			datos_almacen = cursor.fetchone()
+		else:
+			datos_almacen = ('1','1','1','1','1')
 
 	else:
 		# asigna valores default a la tupla para
@@ -2939,6 +2944,7 @@ def imprime_ticket(request):
 	tot_art = 0
 	try:
 		is_staff = request.session['is_staff']
+		suc_ok = request.session['sucursal_nombre']
 	except KeyError:
 		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
 		return render(request, 'pedidos/error.html',context)
@@ -3075,6 +3081,7 @@ def imprime_ticket(request):
 		linea -= 10
 		#p.setFont("Helvetica",8)
 		i,paso=1,linea-10
+		monto_total = 0.0
 		for elemento in pedido_detalle:
 			print(paso)
 			if elemento['talla'] != 'NE':
@@ -3086,6 +3093,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['subtotal']
 			else:
 				precio_imprimir = elemento['precio']	
+			monto_total += precio_imprimir
 			#pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
@@ -3093,7 +3101,7 @@ def imprime_ticket(request):
 			paso -= 30
 			
 		p.drawString(20,paso-10,"Total ==>")
-		p.drawString(130,paso-10,'$ '+str(round(pedido_header[6],0)))
+		p.drawString(130,paso-10,'$ '+str(round(monto_total,0)))
 		
 		p.drawString(20,paso-20,'Ctd. articulos => ')
 		p.drawString(130,paso-20,str(tot_art))
@@ -4555,12 +4563,19 @@ def procesar_recepcion(request):
 					# Si el pedido completo no llego, se deja como esta y solo se cambia fecha tentativa de llegada
 					
 					elif incidencia == '2' and marcartodo_nollego == 'on':
+					
+
+						cursor.execute("SELECT FechaColocacion from prov_ped_cierre WHERE id=%s;",(cierre,))
+						
+						fecha_anterior_llegada= cursor.fetchone()
 
 						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,HoraModicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(f_convertida,pedido,productono,catalogo,nolinea))
 						cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
 
-						cursor.execute("UPDATE pedidos_notas SET observaciones=CONCAT('No llegó: ',%s) WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(fecha_nollego,pedido,productono,catalogo,nolinea))
+
+						if f_convertida > fecha_anterior_llegada[0].strftime('HH:MM:SS'):
+							cursor.execute("UPDATE pedidos_notas SET observaciones=CONCAT('No llegó: ',%s) WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(fecha_nollego,pedido,productono,catalogo,nolinea))
 
 					elif incidencia > '2':
 						# Si el producto llego pero no pasa el control de calidad
@@ -4637,6 +4652,11 @@ def procesar_recepcion(request):
 						registrot = cursor.fetchone()
 
 						reg_temporada = registrot[0] 
+
+
+						# Las siguientes dos lineas modifican totales de pedidosheader con el precio del articulo.
+						reg_VtaTotal = reg_PrecioOriginal
+						reg_Saldototal = reg_PrecioOriginal
 
 						cursor.execute("""INSERT INTO pedidosheader (EmpresaNo,PedidoNo,
 																FechaPedido,HoraPedido,
