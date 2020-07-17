@@ -4571,11 +4571,16 @@ def procesar_recepcion(request):
 
 						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,HoraModicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(f_convertida,pedido,productono,catalogo,nolinea))
-						cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
-
-
-						if f_convertida > fecha_anterior_llegada[0].strftime('HH:MM:SS'):
+						
+						
+						#if f_convertida > fecha_anterior_llegada[0].strftime('%Y%m%d'):
+						if datetime.strptime(nueva_fecha_llegada, '%d/%m/%Y').date() > fecha_anterior_llegada[0]:
 							cursor.execute("UPDATE pedidos_notas SET observaciones=CONCAT('No llegó: ',%s) WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(fecha_nollego,pedido,productono,catalogo,nolinea))
+						
+
+						else:
+							cursor.execute("UPDATE pedidos_notas SET observaciones=' ' WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(pedido,productono,catalogo,nolinea))
+
 
 					elif incidencia > '2':
 						# Si el producto llego pero no pasa el control de calidad
@@ -4763,11 +4768,12 @@ def procesar_recepcion(request):
 						pass	
 					
 
-				# Marca como recepcionado todo el pedido a menos que se haya marcado todo el pedido como 'no llego'
-				#if not ((incidencia == '2' and marcartodo_nollego=='on') or incidencia=='0'):
+				
+			''' En caso de que la incidencia sea 2 y se haya asignado una nueva fecha de lleda a todo el pedido, la siguinte linea sirve para altualizar esa
+			nueva fecha de llegada en prov_ped_cierre'''	
 
-				#	cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=1 WHERE id=%s;",(contador_productos_recibidos,cierre))
-
+			if datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").date() > datetime.strptime("01/01/1901","%d/%m/%Y").date():
+				cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
 
 
 
@@ -4782,7 +4788,8 @@ def procesar_recepcion(request):
 			data = {'status_operacion':'fail','error':'Error en base de datos',}
 			cursor.close()
 			return HttpResponse(json.dumps(data),content_type='application/json',)
-		except:
+		except ValueError as x:
+			print str(x)
 			data = {'status_operacion':'fail','error':'Error no relativo a db.'}
 			cursor.close()
 			return HttpResponse(json.dumps(data),content_type='application/json',)

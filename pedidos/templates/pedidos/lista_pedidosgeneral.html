@@ -48,7 +48,7 @@
             <tbody>
         	{% for item in pedidos %}
                 
-        		<tr {% if 'No llegó' in item.notas %} style="background-color:#ffbf00"{% endif %}>
+        		<tr {% if 'No lleg' in item.notas %} style="background-color:#ffbf00"{% endif %}>
                     <td>{{item.pedido}} </td>
                     <td style="display:none">{{item.productono}}</td>
                     <td style="display:none">{{item.catalogo}}</td>
