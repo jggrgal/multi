@@ -228,9 +228,13 @@ def acceso(request):
 		
 	else:
 		
-		if request.session.session_key is None:
-			return HttpResponse("Por favor active cookies en su navegador e intente nuevamente.")
+		return HttpResponse("Por favor active cookies en su navegador e intente nuevamente.")
 
+
+	if request.session.session_key is None:
+
+		error_msg ="Su sesión terminó !, por favor ingrese nuevamente al sistema con sus credenciales !"
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
 	# Se trae la session
 	session_id = request.session.session_key
 
@@ -310,7 +314,7 @@ def acceso(request):
 
 					request.session['is_staff']	= user.is_staff			
 					# Con la siguiente linea cierra la session al cerrar el navegador.		
-					request.session.set_expiry(0)
+					request.session.set_expiry(300)
 					
 					if user.is_staff:
 						actualiza_preciooriginal()
@@ -1285,6 +1289,7 @@ def genera_documento(cursor,
 
 
 	''' ********** DOCUMENTOS ****************'''
+@login_required(login_url = "/pedidos/acceso/")
 def documentos(request):
 	documentos = {}
 	tipo='D'
@@ -3093,7 +3098,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['subtotal']
 			else:
 				precio_imprimir = elemento['precio']	
-			monto_total += precio_imprimir
+			monto_total += float(precio_imprimir)
 			#pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
@@ -4772,8 +4777,10 @@ def procesar_recepcion(request):
 			''' En caso de que la incidencia sea 2 y se haya asignado una nueva fecha de lleda a todo el pedido, la siguinte linea sirve para altualizar esa
 			nueva fecha de llegada en prov_ped_cierre'''	
 
-			if datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").date() > datetime.strptime("01/01/1901","%d/%m/%Y").date():
-				cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
+			
+			if nueva_fecha_llegada != u'None':
+				if datetime.strptime(nueva_fecha_llegada, "%d/%m/%Y").date() > datetime.strptime("01/01/1901","%d/%m/%Y").date():
+					cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s, recepcionado=0,fechacolocacion=%s WHERE id=%s;",(0,f_convertida,cierre))
 
 
 

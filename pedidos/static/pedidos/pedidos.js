@@ -2202,10 +2202,17 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                             $("#contador").html(function(i, val) { return val*1+1 });
 
+
                             // Incrementa el monto total de la orden
 
 
                             $("#grantotal").html(function(i, val) { return val*1 + parseInt(data.precio) });
+
+
+                            if($("#contador").html() >15) {
+
+                              alert("Se permite pedir máximo 15 artículos por pedido, procese este pedido y registre el resto de los artículos en un pedido nuevo ! ");
+                            };
 
                             // Si hay un elemento en el carrito vuelve a habilitar el combo sucursal.
                           
