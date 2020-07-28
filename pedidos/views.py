@@ -66,7 +66,8 @@ from . forms import (AccesoForm,\
 					DatosUsuarioForm,
 					DerechosFaltantesUsuarioForm,
 					EliminaUsuarioDerechoForm,
-					DatosUsuarioWebForm)
+					DatosUsuarioWebForm,
+					RpteStatusxMarcaForm)
 
 
 
@@ -314,7 +315,7 @@ def acceso(request):
 
 					request.session['is_staff']	= user.is_staff			
 					# Con la siguiente linea cierra la session al cerrar el navegador.		
-					request.session.set_expiry(300)
+					request.session.set_expiry(3000)
 					
 					if user.is_staff:
 						actualiza_preciooriginal()
@@ -12503,3 +12504,170 @@ def edita_usuario_web(request,id):
 	return render(request,'pedidos/edita_usuario_web.html',{'form':form,'id':id,})
 
 
+def rpteStatusxMarca(request):
+
+	'''try:
+	
+		g_numero_socio_zapcat = request.session['socio_zapcat']	
+	except KeyError :
+
+		return	HttpResponse("Ocurrió un error de conexión con el servidor, Por favor salgase completamente y vuelva a entrar a la página !")
+
+	if request.user.is_authenticated():'''		
+
+	#pdb.set_trace()		
+	if request.method == 'POST':
+		form = RpteStatusxMarcaForm(request.POST)
+		'''
+		Si la forma es valida se normalizan los campos numpedido, status y fecha,
+		de otra manera se envia la forma con su contenido erroreo para que el validador
+		de errores muestre los mansajes correspondientes '''
+
+		if form.is_valid():
+		
+			# limpia datos 
+			sucursal = form.cleaned_data['sucursal']
+			
+			status = form.cleaned_data['status']
+			marca = form.cleaned_data['xmarca']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			salida_a = form.cleaned_data['salida_a']
+			
+			# Convierte el string '1901-01-01' a una fecha valida en python
+			# para ser comparada con la fecha ingresada 
+
+			fecha_1901 =datetime.strptime('1901-01-01', '%Y-%m-%d').date()
+			hoy = date.today()
+
+
+			# Establece conexion con la base de datos
+			cursor=connection.cursor()
+
+		
+			# Comienza a hacer selects en base a criterios 
+
+
+			
+
+			if  sucursal ==u'0':
+				suc_ini,suc_fin=1,99
+			else:
+				suc_ini,suc_fin=sucursal,sucursal
+
+			if  marca ==u'0':
+				marca_ini,marca_fin=1,99
+			else:
+				marca_ini,marca_fin=marca,marca
+				
+									
+			
+			cursor.execute("SELECT p.pedido,p.precio,p.status,\
+				p.catalogo,p.nolinea,\
+				a.pagina,a.idmarca,a.idestilo,a.idcolor,\
+				a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,\
+				aso.appaterno,aso.apmaterno, psf.fechamvto,\
+				p.Observaciones,CONCAT(CAST(aso.asociadono AS CHAR),\
+				' ',aso.nombre,' ',aso.appaterno,' ',aso.apmaterno)\
+				 as socio,suc.nombre as sucursal,a.idproveedor FROM pedidoslines p\
+				inner join  pedidosheader h\
+				on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo)\
+				inner join articulo a\
+				on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo\
+				and p.catalogo=a.catalogo)\
+				inner join asociado aso\
+				on (h.asociadoNo=aso.asociadoNo)\
+				inner join  pedidos_status_fechas psf\
+				on (p.empresano=psf.empresaNo\
+				and p.pedido=psf.pedido and p.productono=psf.productono\
+				and p.status=psf.status and p.catalogo=psf.catalogo\
+				and p.nolinea=psf.nolinea) \
+				inner join sucursal suc on (h.idsucursal=suc.sucursalNo)\
+				 WHERE p.status>=%s and p.status<=%s\
+				and psf.fechamvto>=%s and psf.fechamvto<=%s\
+				and h.idsucursal>=%s and h.idsucursal<=%s\
+				and a.idproveedor >= %s and a.idproveedor <= %s\
+				ORDER BY a.idproveedor,\
+				h.PedidoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,))
+							
+			pedidos = dictfetchall(cursor)
+			elementos = len(pedidos)
+
+			total_gral=0
+			
+			for i in pedidos:
+				total_gral+= i['precio']
+
+			cursor.execute("SELECT a.idproveedor,SUM(p.precio) AS subtotal FROM pedidoslines p\
+				inner join  pedidosheader h\
+				on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo)\
+				inner join articulo a\
+				on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo\
+				and p.catalogo=a.catalogo)\
+				inner join asociado aso\
+				on (h.asociadoNo=aso.asociadoNo)\
+				inner join  pedidos_status_fechas psf\
+				on (p.empresano=psf.empresaNo\
+				and p.pedido=psf.pedido and p.productono=psf.productono\
+				and p.status=psf.status and p.catalogo=psf.catalogo\
+				and p.nolinea=psf.nolinea) \
+				inner join sucursal suc on (h.idsucursal=suc.sucursalNo)\
+				 WHERE p.status>=%s and p.status<=%s\
+				and psf.fechamvto>=%s and psf.fechamvto<=%s\
+				and h.idsucursal>=%s and h.idsucursal<=%s\
+				and a.idproveedor>=%s and a.idproveedor<=%s\
+				GROUP BY a.idproveedor ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,))
+							
+			subxsocio = dictfetchall(cursor)
+			
+
+			cursor.execute("SELECT nombre as nombresuc from sucursal where sucursalNo=%s;",(sucursal,))
+			suc_nom=cursor.fetchone()
+			
+			cursor.execute("SELECT razonsocial from proveedor where empresano=1 and proveedorno=%s;",(marca,))
+			proveedor_nombre=cursor.fetchone()
+
+
+
+
+
+			if not pedidos:# or not nombre_socio[0]:
+				mensaje = 'No se encontraron registros !'
+				
+				return render(request,'pedidos/lista_pedidos_StatusxMarca.html',{'form':form,'mensaje':mensaje,})
+			else:
+				mensaje ='Registros encontrados:'
+				context = {'pedidos':pedidos,'subxsocio':subxsocio,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,'fechainicial':fechainicial,'fechafinal':fechafinal,'total_gral':total_gral,'elementos':elementos,'proveedor_nombre':proveedor_nombre[0] if marca!=u'0' else 'General',}
+
+				if salida_a == 'Pantalla':
+
+					return render(request,'pedidos/lista_pedidos_StatusxMarca.html',context)
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="PedidosStatusxMarca.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['SUCURSAL','SOCIO_NUMERO','SOCIO_NOMBRE','SOCIO_APPATERNO','SOCIO_APMATERNO','PEDIDO','FECHA_MVTO','STATUS','CATALOGO','PAGINA','MARCA','ESTILO','COLOR','TALLA','PRECIO',])
+					
+					for registro in pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['sucursal','asociadoNo','Nombre','appaterno','apmaterno','pedido','fechamvto','status','catalogo','pagina','idmarca','idestilo','idcolor','talla','precio',] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
+
+
+
+			# Cierra la conexion a la base de datos
+			cursor.close()
+			
+		
+	else:
+		form = RpteStatusxMarcaForm()
+		#cursor.close()
+		
+	return render(request,'pedidos/pedidos_por_status_xmarca_form.html',{'form':form,})

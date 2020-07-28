@@ -137,6 +137,8 @@ urlpatterns = [
 	url(r'^eliminar_usuario_derecho/(?P<usuariono>[0-9]{1,8})/(?P<derechono>[0-9]{1,8})/$',views.eliminar_usuario_derecho,name='eliminar_usuario_derecho'),
 	url(r'^lista_usuarios_web/$',views.lista_usuarios_web,name='lista_usuarios_web'),
 	url(r'^edita_usuario_web/(?P<id>[0-9]{1,8})/$',views.edita_usuario_web,name='edita_usuario_web'),
+	url(r'^rpteStatusxMarca/$',views.rpteStatusxMarca,name='rpteStatusxMarca'),
+
 
 
 	]

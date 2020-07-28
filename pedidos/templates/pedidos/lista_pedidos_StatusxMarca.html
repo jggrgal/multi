@@ -1,0 +1,74 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+ 
+    
+<h3>{{ titulo }}</h3>   
+<h3>Proveedor: {{ proveedor_nombre }}</h3>  
+<p> Entre las fechas {{ fechainicial }} y {{ fechafinal }}
+<div class="table-responsive">
+    {% regroup pedidos by idproveedor as prove %}
+    {% for item in prove %}
+        <!--Socio: {{ item.grouper }} -->
+        <table id="pedidosxstatus" class='display table table-hover table-bordered  table-condensed'>
+        <thead>
+            <tr class='success'>    
+                <th>Pedido</th>
+                <th>Suc</th>
+                <th>Socio</th>
+                <th>Fecha</th>
+                <th>Catalgo</th>
+                <th>Pagina</th>
+                <th>Marca</th>
+                <th>Estilo</th>
+                <th>Color</th>
+                <th>Talla</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+          
+            <!--  En la siguiente linea se sigue utilizando la variable 'socio' para no hacer muchos cambios pero en realidad es marca (proveedor)-->
+            {% for socio in item.list %}
+            <tr>
+                <td>{{ socio.pedido }} </td>
+                <td>{{socio.idsucursal }}</td>
+                <td> {{socio.socio |slice:":15"}} </td>
+                
+                <td>{{ socio.fechamvto | date:'d/m/Y' }} </td>
+                
+                <td>{{ socio.catalogo }} </td>
+                <td>{{ socio.pagina }} </td>
+                <td>{{ socio.idmarca }} </td>
+                <td>{{ socio.idestilo }} </td>  
+                <td style="word-spacing:-2;">{{ socio.idcolor }} </td>
+                <td>{{ socio.talla }} </td>
+                <td>{{ socio.precio }} </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            {% for sub in subxsocio %}
+
+                {% if item.grouper == sub.idproveedor %}
+            <tr>
+                    <td></td><td></td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td>Subtotal: </td><td>{{sub.subtotal}}</td><br>
+            </tr>
+                {% endif %}
+            {% endfor %}
+        </tfoot>
+
+        </table> 
+                
+      
+        
+    {% endfor %}
+
+</div>
+
+Total General: {{ total_gral }} <br>
+Total piezas: {{ elementos }}
+{% endblock %}
+    
