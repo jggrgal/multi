@@ -315,7 +315,7 @@ def acceso(request):
 
 					request.session['is_staff']	= user.is_staff			
 					# Con la siguiente linea cierra la session al cerrar el navegador.		
-					request.session.set_expiry(3000)
+					request.session.set_expiry(0)
 					
 					if user.is_staff:
 						actualiza_preciooriginal()
@@ -12588,7 +12588,7 @@ def rpteStatusxMarca(request):
 				and h.idsucursal>=%s and h.idsucursal<=%s\
 				and a.idproveedor >= %s and a.idproveedor <= %s\
 				ORDER BY a.idproveedor,\
-				h.PedidoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,))
+				h.asociadono ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,))
 							
 			pedidos = dictfetchall(cursor)
 			elementos = len(pedidos)
