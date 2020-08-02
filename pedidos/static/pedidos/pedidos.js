@@ -3606,6 +3606,67 @@ $('#procesar_ventas').click(function(e){
         }
       });
 
+// RUTINA PARA REASIGNAR SUCURSAL A UN PEDIDO
+
+
+
+        $('.btn_cambia_suc_apedido').click(function(e){
+
+        // valida que el anticipo sea menor al monto del pedido.
+        // observar que se puede comparar un contenido html con un valor
+        // al menos aqui si hace la comparacion.
+        
+        continuar_procesando = 0;
+        
+        e.preventDefault();
+        var answer=confirm('El artículo en el cuál se encuentra ubicado será asignado a la sucursal actualmente activa en la sesión, si está seguro de clic en "aceptar", caso contrario de clic en "cancelar".');
+          if(answer){
+
+                                
+                 
+                 pedido = $(this).parents('tr').find('td:eq(0)').text();
+                 productono = $(this).parents('tr').find('td:eq(1)').text();
+                 catalogo = $(this).parents('tr').find('td:eq(2)').text();
+                 nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
+                 
+
+
+                  //TableData = $.toJSON(TableData);
+                  //TableData = JSON.stringify(TableData);
+                  
+                  $.ajax({
+
+                    url: '/pedidos/reasigna_sucursal_apedido/',
+                    type: 'POST',
+                    data: {'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea, },
+                    datatype:'application/json',
+                    //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    success: function(data){
+
+                                      
+                        console.log(data);
+
+                        if (data.status_operacion != 'ok') { 
+                          alert(data.error);
+                          }
+                        else {
+                          alert("El artículo ha sido asignado a la sucursal en sesión !.");
+                          $(".btn_cambia_suc_apedido").prop('disabled',false);
+                          console.log($(this).parents('tr').find('td:eq(18)').text())
+                          $(this).parents('tr').find('td:eq(18)').html(data.nueva_suc);
+                          }; 
+                        //$("#procesar_recepcion").prop('disabled', true);
+                    },
+                    error: function(){ 
+                      console.log(data);
+                      
+                    },
+
+                  });
+             
+          }
+      });
+
 
 
 

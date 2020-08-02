@@ -1,0 +1,1 @@
+create table usr_extend (usuariono int(10) unsigned not null primary key, pass_paso varchar(3) not null unique);

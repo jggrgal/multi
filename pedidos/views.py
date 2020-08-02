@@ -2837,7 +2837,7 @@ def cancelar_pedido(request):
 
 	
 
-
+@login_required()
 def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de pedido o 'D' de documento y se pasa a los templates 
 	#pdb.set_trace()
 
@@ -2874,9 +2874,9 @@ def ingresa_socio(request,tipo): # el parametro 'tipo' toma los valores 'P' de p
 			cursor.execute("SELECT asociadono,nombre,appaterno,apmaterno,EsSocio,telefono1 from asociado where asociadono=%s;",(socio,))
 			
 			asociado_data = cursor.fetchone()
-						
+			'''			
 			print asociado_data	
-			print asociado_data		
+			print asociado_data'''
 
 			
 			# Si el asociado no existe...se notifica.
@@ -5352,7 +5352,7 @@ def calcula_descuento(p_socio,p_idproveedor,p_socio_total_compras_mes_anterior):
 def trae_inf_venta(request,num_socio):
 	# funcion llamada desde la rutiona 'ingresa_socio'
 
-	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 
 
 	hoy = date.today()
@@ -5383,7 +5383,7 @@ def trae_inf_venta(request,num_socio):
 							h.viasolicitud,\
 							l.observaciones,\
 							v.descripcion,\
-							l.precio,a.idproveedor,ct.no_maneja_descuentos FROM pedidoslines l\
+							l.precio,a.idproveedor,ct.no_maneja_descuentos,if(%s<>h.idsucursal,1,0) as es_de_otra_suc,h.idsucursal FROM pedidoslines l\
 							inner join pedidosheader h\
 							on l.empresano=h.empresano and\
 							l.pedido=h.pedidono\
@@ -5393,7 +5393,7 @@ def trae_inf_venta(request,num_socio):
 							left join viasolicitud v on (v.id=h.viasolicitud)\
 							inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
 							inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
-							WHERE l.status='Aqui' and  h.asociadono=%s and h.idsucursal=%s;",(num_socio,id_sucursal,))
+							WHERE l.status='Aqui' and  h.asociadono=%s;",(id_sucursal,num_socio,))
 	ventas = dictfetchall(cursor)
 
 		
@@ -5452,7 +5452,7 @@ def trae_inf_venta(request,num_socio):
 
 	#cursor.execute("SELECT p.pedido,p.productono,p.precio,p.status,p.catalogo,p.nolinea,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,aso.appaterno,aso.apmaterno, p.fechatentativallegada, f.fechamvto,p.Observaciones,h.fechapedido,if(trim(p.status)='Encontrado' or trim(p.status)='Confirmado',m.razonsocial,'') as razonsocial,n.observaciones as notas FROM pedidoslines p inner join pedidos_encontrados e on (p.empresano=e.empresano and p.pedido=e.pedido and p.productono=e.productono and p.catalogo=e.catalogo and p.nolinea=e.nolinea) inner join pedidosheader h on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo) inner join articulo a on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo and p.catalogo=a.catalogo) inner join asociado aso on (h.asociadoNo=aso.asociadoNo)  inner join pedidos_status_fechas f on ( p.empresano=f.empresano and p.pedido=f.pedido and p.productono=f.productono and p.catalogo=f.catalogo and p.nolinea=f.nolinea and p.status=f.status) left join almacen m on (m.empresano=e.empresano and a.idproveedor=m.proveedorno and m.almacen=e.BodegaEncontro) inner join pedidos_notas n on (n.empresano=p.empresano and n.pedido=p.pedido and n.productono=p.productono and n.catalogo=p.catalogo and n.nolinea=p.nolinea) WHERE h.idsucursal=%s and (p.status='Encontrado' or p.status='Por Confirmar' or p.status='Confirmado' or p.status='Descontinuado') and h.asociadoNo=%s order by p.status;",(id_sucursal,num_socio,))
 
-	cursor.execute("SELECT p.pedido,p.productono,p.precio,p.status,p.catalogo,p.nolinea,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,aso.appaterno,aso.apmaterno, p.fechatentativallegada, f.fechamvto,p.Observaciones,h.fechapedido,if(trim(p.status)='Encontrado' or trim(p.status)='Confirmado',m.razonsocial,'') as razonsocial,n.observaciones as notas FROM pedidoslines p inner join pedidos_encontrados e on (p.empresano=e.empresano and p.pedido=e.pedido and p.productono=e.productono and p.catalogo=e.catalogo and p.nolinea=e.nolinea) inner join pedidosheader h on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo) inner join articulo a on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo and p.catalogo=a.catalogo) inner join asociado aso on (h.asociadoNo=aso.asociadoNo)  inner join pedidos_status_fechas f on ( p.empresano=f.empresano and p.pedido=f.pedido and p.productono=f.productono and p.catalogo=f.catalogo and p.nolinea=f.nolinea and p.status=f.status) left join almacen m on (m.empresano=e.empresano and a.idproveedor=m.proveedorno and m.almacen=e.BodegaEncontro) left join pedidos_notas n on (n.empresano=p.empresano and n.pedido=p.pedido and n.productono=p.productono and n.catalogo=p.catalogo and n.nolinea=p.nolinea) WHERE h.idsucursal=%s and (p.status='Encontrado' or p.status='Por Confirmar' or p.status='Confirmado' or p.status='Descontinuado') and h.asociadoNo=%s order by p.status;",(id_sucursal,num_socio,))
+	cursor.execute("SELECT p.pedido,p.productono,p.precio,p.status,p.catalogo,p.nolinea,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,aso.appaterno,aso.apmaterno, p.fechatentativallegada, f.fechamvto,p.Observaciones,h.fechapedido,if(trim(p.status)='Encontrado' or trim(p.status)='Confirmado',m.razonsocial,'') as razonsocial,n.observaciones as notas FROM pedidoslines p inner join pedidos_encontrados e on (p.empresano=e.empresano and p.pedido=e.pedido and p.productono=e.productono and p.catalogo=e.catalogo and p.nolinea=e.nolinea) inner join pedidosheader h on (p.EmpresaNo=h.EmpresaNo and p.pedido=h.pedidoNo) inner join articulo a on ( p.EmpresaNo=a.empresano and p.productono=a.codigoarticulo and p.catalogo=a.catalogo) inner join asociado aso on (h.asociadoNo=aso.asociadoNo)  inner join pedidos_status_fechas f on ( p.empresano=f.empresano and p.pedido=f.pedido and p.productono=f.productono and p.catalogo=f.catalogo and p.nolinea=f.nolinea and p.status=f.status) left join almacen m on (m.empresano=e.empresano and a.idproveedor=m.proveedorno and m.almacen=e.BodegaEncontro) left join pedidos_notas n on (n.empresano=p.empresano and n.pedido=p.pedido and n.productono=p.productono and n.catalogo=p.catalogo and n.nolinea=p.nolinea) WHERE (p.status='Encontrado' or p.status='Por Confirmar' or p.status='Confirmado' or p.status='Descontinuado') and h.asociadoNo=%s order by p.status;",(num_socio,))
 
 	porconfs_confs = dictfetchall(cursor) 
 
@@ -5465,8 +5465,8 @@ def trae_inf_venta(request,num_socio):
 
 	creditos = dictfetchall(cursor)
 
-	for credito in creditos:
-		print credito
+	'''for credito in creditos:
+		print credito'''
 
 	# trae cargos
 
@@ -12479,8 +12479,7 @@ def edita_usuario_web(request,id):
 				
 				return render(request, 'pedidos/error.html',context)		
 
-
-			
+		
 		else:
 			
 			pass
@@ -12671,3 +12670,55 @@ def rpteStatusxMarca(request):
 		#cursor.close()
 		
 	return render(request,'pedidos/pedidos_por_status_xmarca_form.html',{'form':form,})
+
+
+
+
+"""ESTA RUTINA REASIGNA LA SUCURSAL A UN PEDIDO ES LLAMADA VIA AJAX DE LA PANTALLA
+DE VENTAS"""
+def reasigna_sucursal_apedido(request):
+	
+	#pdb.set_trace()
+	try:
+		id_sucursal = request.session['sucursal_activa']
+	except KeyError:
+		error_msg='Session expirada...cierre navegador y vuelva e entrar !'
+		HttpResponse(error_msg)
+	
+	pedido = request.POST['pedido']
+	productono = request.POST['productono']
+	catalogo = request.POST['catalogo']
+	nolinea = request.POST['nolinea']
+
+	status_operacion='fail'
+	error = ''
+
+
+
+
+
+	# AQUI VA LA EL UPDATE PARA CAMBIAR SUCURAL.
+	try:
+		cursor=connection.cursor()
+
+		cursor.execute('START TRANSACTION')
+
+		cursor.execute('UPDATE pedidosheader set idsucursal=%s WHERE pedidono=%s;',(id_sucursal,pedido,))
+				
+								
+		cursor.execute("COMMIT;")
+		status_operacion='ok'
+		cursor.close()
+	except DatabaseError as error_msg:
+		cursor.execute('ROLLBACK;')
+		status_operacion='fail'
+		error =str(error_msg)
+
+		cursor.close()	
+	
+	
+	context={}
+	
+		
+	data = {'status_operacion':status_operacion,'error':error,'nueva_suc':id_sucursal}
+	return HttpResponse(json.dumps(data),content_type='application/json',)	
