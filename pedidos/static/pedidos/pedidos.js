@@ -3610,7 +3610,7 @@ $('#procesar_ventas').click(function(e){
 
 
 
-        $('.btn_cambia_suc_apedido').click(function(e){
+        $('.btn_cambia_suc_apedido').on('click',function(e){
 
         // valida que el anticipo sea menor al monto del pedido.
         // observar que se puede comparar un contenido html con un valor
@@ -3628,7 +3628,7 @@ $('#procesar_ventas').click(function(e){
                  productono = $(this).parents('tr').find('td:eq(1)').text();
                  catalogo = $(this).parents('tr').find('td:eq(2)').text();
                  nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
-                 
+                 var trid = $(this).closest('tr').attr('id')
 
 
                   //TableData = $.toJSON(TableData);
@@ -3638,7 +3638,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/reasigna_sucursal_apedido/',
                     type: 'POST',
-                    data: {'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea, },
+                    data: {'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea,'trid':trid, },
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3650,10 +3650,20 @@ $('#procesar_ventas').click(function(e){
                           alert(data.error);
                           }
                         else {
-                          alert("El artículo ha sido asignado a la sucursal en sesión !.");
-                          $(".btn_cambia_suc_apedido").prop('disabled',false);
-                          console.log($(this).parents('tr').find('td:eq(18)').text())
-                          $(this).parents('tr').find('td:eq(18)').html(data.nueva_suc);
+                          //alert("El artículo ha sido asignado a la sucursal en sesión !");
+                          //$(".btn_cambia_suc_apedido").prop('disabled',false);
+                          //alert($('#productos_por_vender tr').eq(data.trid).find('td').eq(18).text())
+                          
+                          // Con la siguiente linea se asigna refresca el campo sucursal en la tabla(trid guarda el numero de reglon que se subio al servidor via ajax y se vuelve a bajar para usarlo aqui.)
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(18).html(data.nueva_suc)
+                          // La siguiente linea muestra nuevamente el checkbox para seleccion para venta.
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(13).find("input").css("display","block");
+                          // Las siguietes dos lineas cambian al color original el registro procesado
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(18).css("background-color", "#f2f2e7")
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(0).css("background-color", "#f2f2e7")
+                          
+                          //console.log(data.nueva_suc)
+                          
                           }; 
                         //$("#procesar_recepcion").prop('disabled', true);
                     },

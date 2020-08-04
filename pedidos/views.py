@@ -5352,7 +5352,7 @@ def calcula_descuento(p_socio,p_idproveedor,p_socio_total_compras_mes_anterior):
 def trae_inf_venta(request,num_socio):
 	# funcion llamada desde la rutiona 'ingresa_socio'
 
-	pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 
 
 	hoy = date.today()
@@ -5630,6 +5630,7 @@ def procesar_venta(request):
 		recibido = request.POST.get('recibido')
 		user_id = request.POST.get('usr_id')
 
+
 		if float(totalcreditos) > 0:
 		
 			if float(totalventas) + float(totalcargos) > float(totalcreditos) :
@@ -5651,6 +5652,8 @@ def procesar_venta(request):
 		#capturista = request.session['socio_zapcat']
 		capturista = user_id
 		sucursal_activa = request.session['sucursal_activa']
+
+
 
 		if sucursal_activa == 0:
 			HttpResponse("Al parecer, no selecciono una sucursal, por favor cierre su navegador, vuelva a abrir el navegador e ingrese nuevamente al sistema. !")
@@ -12689,6 +12692,7 @@ def reasigna_sucursal_apedido(request):
 	productono = request.POST['productono']
 	catalogo = request.POST['catalogo']
 	nolinea = request.POST['nolinea']
+	trid = request.POST['trid']
 
 	status_operacion='fail'
 	error = ''
@@ -12720,5 +12724,5 @@ def reasigna_sucursal_apedido(request):
 	context={}
 	
 		
-	data = {'status_operacion':status_operacion,'error':error,'nueva_suc':id_sucursal}
+	data = {'status_operacion':status_operacion,'error':error,'nueva_suc':id_sucursal,'trid':trid,}
 	return HttpResponse(json.dumps(data),content_type='application/json',)	
