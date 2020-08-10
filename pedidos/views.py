@@ -2951,6 +2951,7 @@ def imprime_ticket(request):
 	try:
 		is_staff = request.session['is_staff']
 		suc_ok = request.session['sucursal_nombre']
+		tel = request.session['sucursal_telefono']
 	except KeyError:
 		context={'error_msg':"Se perdio su sesion, por favor cierre su navegador completamente e ingrese nuevamente al sistema !",}
 		return render(request, 'pedidos/error.html',context)
@@ -3060,8 +3061,8 @@ def imprime_ticket(request):
 		linea -= 10
 		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
 		linea -= 20
-		p.drawString(20,linea,pedido_header[1].strftime("%d-%m-%Y"))
-		p.drawString(100,linea,pedido_header[2].strftime("%H:%M:%S"))
+		p.drawString(20,linea,pedido_header[1].strftime("%d-%m-%Y")+' '+pedido_header[2].strftime("%H:%M:%S")+' '+'Tel '+str(request.session['sucursal_telefono']))
+		#p.drawString(100,linea,)
 		linea -= 10
 		p.drawString(20,linea,"CREADO POR: ")
 		#p.drawString(100,linea,request.user.username)
@@ -3299,8 +3300,8 @@ def imprime_documento(p_num_documento=0,
 			p.drawString(20,linea,socio[0].strip()+' '+socio[1].strip()+' '+socio[2].strip())
 			linea -= 15
 
-		p.drawString(20,linea,documento[1].strftime("%d-%m-%Y"))
-		p.drawString(100,linea,documento[2].strftime("%H:%M:%S"))
+		p.drawString(20,linea,documento[1].strftime("%d-%m-%Y")+' '+documento[2].strftime("%H:%M:%S")+' Tel '+str(sucursal_telefono))
+		#p.drawString(100,linea,)
 		linea -= 10
 	 	
 		p.setFont("Helvetica",8)
@@ -6690,8 +6691,8 @@ def imprime_venta(request):
 		linea -= 10
 		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
 		linea -= 10
-		p.drawString(20,linea,datos_documento[8].strftime("%d-%m-%Y"))
-		p.drawString(100,linea,datos_documento[9].strftime("%H:%M:%S"))
+		p.drawString(20,linea,datos_documento[8].strftime("%d-%m-%Y")+' '+datos_documento[9].strftime("%H:%M:%S")+' '+'Tel '+str(request.session['sucursal_telefono']))
+		#p.drawString(100,linea,)
 		linea -= 10
 		p.drawString(20,linea,"CREADO POR: ")
 		#p.drawString(100,linea,request.user.username)
