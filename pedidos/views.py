@@ -8153,9 +8153,9 @@ def vtaneta_socio(request):
 				and a.catalogo=l.catalogo)\
 				inner join proveedor p\
 				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
-				inner join ProvConfBono pcb on\
-				(pcb.empresano=1 and p.proveedorno=pcb.proveedorno)\
-				where f.fechamvto>=%s and f.fechamvto<=%s and pcb.proveedorno=%s\
+				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+				inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+				where f.fechamvto>=%s and f.fechamvto<=%s and p.proveedorno=%s\
 				group by h.asociadono;",\
 				(fechainicial,fechafinal,proveedor))
 
@@ -8164,6 +8164,7 @@ def vtaneta_socio(request):
 			
 			
 			elementos = len(registros_venta)
+			print " los Elementos son elementos", elementos
 
 			# TRAE DEVOLUCIONES EN GENERAL
 			
@@ -8202,6 +8203,7 @@ def vtaneta_socio(request):
 				cursor.execute("SELECT COUNT(*) as totrec FROM vtas_socio_tmp")
 				totrectmp=dictfetchall(cursor)
 
+				print "Total de regitron en tmporal", totrectmp
 				j=1
 				for registro in registros_venta:
 
@@ -8247,10 +8249,10 @@ def vtaneta_socio(request):
 
 			#pdb.set_trace()
 			#cursor.execute("UPDATE vtas_socio_tmp as t INNER JOIN asociado as p on t.asociadono=p.asociadono SET t.nombreprov=p.razonsocial;")
-			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and venta_FD=0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_bruta = ventas + venta_FD;")
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = 0;")
-			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
+			#cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
 
 
 
