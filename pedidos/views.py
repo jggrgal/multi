@@ -8070,6 +8070,10 @@ def crea_catalogo(request,id_proveedor):
 '''REPORTE QUE CALCULA  LA VENTA NETA POR SOCIO Y POR PROVEEDOR '''
 
 def vtaneta_socio(request):
+
+	# EL REPORTE CONSIDERA TANTO SOCIOS COMO CLIENTES PARA DETERMINAR LAS VENTAS Y
+	# QUE CUADRE CON EL REPORTE DE VENTA POR PROVEEDOR.
+	
 	''' Inicializa Variables '''
 	#pdb.set_trace()
 
@@ -8216,7 +8220,7 @@ def vtaneta_socio(request):
 						vst.devoluciones=0,\
 						vst.venta_neta=0,\
 						vst.bono=0\
-						where vst.asociadono=%s and s.EsSocio=1;",\
+						where vst.asociadono=%s;",\
 					 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
 					 		registro['asociadono']))					 
                         										
@@ -8252,7 +8256,7 @@ def vtaneta_socio(request):
 			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and venta_FD=0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_bruta = ventas + venta_FD;")
 			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = 0;")
-			#cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_neta <= 0;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_bruta <= 0;")
 
 
 
