@@ -92,6 +92,7 @@ import csv
 from decimal import Decimal,getcontext
 import locale  # Se usa para representar cantidades monetarias
   # move the origin up and to the left
+from django.utils.crypto import get_random_string  # genera un string de 3 caract. para password da paso
 
 getcontext().prec = 6# esta linea establece la precision de decimales para numeros decimales,
 					  # leer la funcion getcontext de decimales.
@@ -2365,7 +2366,7 @@ def consultaventas(request):
 
 			
 			#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones > d.Saldo,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado,0) as VtaComisionSaldo FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
-			cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
+			cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s and d.horacreacion>='17:00:00' and d.horacreacion<='17:59:59' and trim(d.concepto)='Venta';",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
 			
 			
 
@@ -6130,11 +6131,11 @@ def consultavtasxproveedor(request):
 
 			#cursor.execute("SELECT d.EmpresaNo,d.Consecutivo,d.NoDocto,d.TipoDeDocumento,d.TipoDeVenta,d.Asociado,d.FechaCreacion,d.Concepto,d.Monto,d.Saldo,d.VtaDeCatalogo,d.Cancelado,d.comisiones,d.idsucursal,d.venta,d.descuentoaplicado,a.AsociadoNo,a.Nombre,a.ApPaterno,a.ApMaterno,s.SucursalNo,s.nombre as suc_nom, if(d.venta + d.comisiones-d.descuentoaplicado <= d.Saldo,0,d.venta+d.comisiones-d.Saldo-d.descuentoaplicado) as VtaComisionSaldo,if(d.venta + d.comisiones - d.descuentoaplicado <= d.Saldo,d.venta+d.comisiones-d.descuentoaplicado,d.Saldo) as cred_aplicado FROM documentos d INNER  JOIN  asociado a on ( d.EmpresaNo=a.EmpresaNo and d.Asociado=a.AsociadoNo) INNER JOIN  sucursal s ON (d.EmpresaNo= s.EmpresaNo and d.idsucursal=s.SucursalNo) WHERE d.EmpresaNo=1 and  d.TipoDeDocumento='Remision' and not(d.Cancelado) and d.TipoDeVenta='Contado' and d.FechaCreacion>=%s and d.FechaCreacion<=%s and d.idsucursal>=%s  and d.idsucursal<=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
 
-
+			
 			cursor.execute("SELECT a.idproveedor,\
 				p.razonsocial,\
-				sum(a.precio) as venta,\
-				sum(if (a.precio>l.precio and ct.no_maneja_descuentos=0,a.precio-l.precio,0 )) as dscto\
+				sum(l.preciooriginal) as venta,\
+				sum(if (a.preciooriginal>l.precio and ct.no_maneja_descuentos=0,a.precio-l.precio,0 )) as dscto\
 				from pedidoslines l inner join pedidosheader h\
 				on (h.empresano=1 and h.pedidono=l.pedido)\
 				inner join pedidos_status_fechas f\
@@ -6149,11 +6150,11 @@ def consultavtasxproveedor(request):
 				on (p.empresano=1 and p.proveedorno=a.idproveedor)\
 				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
 				inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
-				where f.fechamvto>=%s and f.fechamvto<=%s\
+				inner join documentos doc on (l.empresano=doc.empresano and l.remisionno=doc.NoDocto)\
+				where f.fechamvto>=%s and f.fechamvto<=%s and f.horamvto>='00:00:01' and f.horamvto<='23:59:59'\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
 				group by a.idproveedor ; ",\
-				(fechainicial,fechafinal,sucursalinicial,sucursalfinal))
-
+				(fechainicial,fechafinal,sucursalinicial,sucursalfinal,))
 			
 			registros_venta = dictfetchall(cursor)
 			#print "descuentos:",registros_venta[3]
@@ -6364,7 +6365,15 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 
 	try:
 		
-		cursor.execute("SELECT h.pedidono,l.remisionno as remision_num,h.asociadono,h.fechapedido,h.horapedido,a.idmarca, a.idestilo,idcolor,a.talla,l.preciooriginal,l.observaciones from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
+		cursor.execute("SELECT h.pedidono,l.remisionno as remision_num,h.asociadono,h.fechapedido,h.horapedido,a.idmarca, a.idestilo,idcolor,a.talla,l.preciooriginal,l.observaciones from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and f.horamvto>='17:00:00' and f.horamvto<='17:59:59' and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
+		'''cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+		where f.fechamvto>=%s and f.fechamvto<=%s and f.horamvto>='12:00:01' and f.horamvto<='13:59:59' and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))'''
+
+
+
+
+
 		"""cursor.execute("SELECT h.pedidono,\
 			l.remisionno as remision_num,\
 			h.asociadono,\
@@ -6390,7 +6399,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 		vtasresult = dictfetchall(cursor)
 
 		# DETERMINA EL TOTAL DE LA VENTA
-		cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
+		cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and f.horamvto>='17:00:00' and f.horamvto<='17:59:59' and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
 
 		total_registros = dictfetchall(cursor)
 		
@@ -6401,7 +6410,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 
 	except DatabaseError as e:
 		print (e)
-
+		vtasresult =0
 
 	context = {'vtasresult':vtasresult,'totalvta':totalvta,'proveedor':proveedor,'fechainicial':fechainicial,'fechafinal':fechafinal,}	
 
@@ -12733,3 +12742,46 @@ def reasigna_sucursal_apedido(request):
 		
 	data = {'status_operacion':status_operacion,'error':error,'nueva_suc':id_sucursal,'trid':trid,}
 	return HttpResponse(json.dumps(data),content_type='application/json',)	
+
+'''
+#### RUTINA PARA GENERAR UNA CADENA DE 3 DIGITOS ALEATORIA 
+
+
+
+def genera_cadena_tres():
+
+	return(get_random_strin(3))
+
+
+# rutina para checar password de paso
+
+def checa_pass_paso(request,passw):
+
+	# trae el usuario con el pass
+
+	cursor=connection.cursor()
+	cursor.execute('SELECT id FROM usr_extend WHERE pass_paso=%s ',(passw,))
+	
+	resultado = cursor.fetchone()
+
+	try:
+
+		if resultado[0] != request.user:
+
+			error_msg ='Password incorrecto !'
+			return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+		else:
+
+			return(resultado[0])'''
+
+
+
+
+			
+
+							
+
+
+
+
+
