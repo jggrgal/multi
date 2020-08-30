@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login, logout,update_session_auth_
 from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib.auth.decorators import login_required,permission_required
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.mail import send_mail
 from . forms import (AccesoForm,\
 					BuscapedidosForm,\
 					PedidosForm,\
@@ -12740,14 +12741,14 @@ def reasigna_sucursal_apedido(request):
 	data = {'status_operacion':status_operacion,'error':error,'nueva_suc':id_sucursal,'trid':trid,}
 	return HttpResponse(json.dumps(data),content_type='application/json',)	
 
-'''
+
 #### RUTINA PARA GENERAR UNA CADENA DE 3 DIGITOS ALEATORIA 
 
 
 
 def genera_cadena_tres():
 
-	return(get_random_strin(3))
+	return(get_random_string(3).lower())
 
 
 # rutina para checar password de paso
@@ -12761,22 +12762,101 @@ def checa_pass_paso(request,passw):
 	
 	resultado = cursor.fetchone()
 
+	
+
+	if resultado[0] != request.user:
+
+		error_msg ='Password incorrecto !'
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+	else:
+
+		return(resultado[0])
+
+# RUTINA PARA GENERAR EL PASSWORD
+
+def genera_pass_paso(request,usuariono):
+	pdb.set_trace()
+
+	# trae passwords de todos los usuarios para comparar 
+
+	cursor=connection.cursor()
+	cursor.execute('SELECT pass_paso FROM usr_extend;')
+	
+	pass_resultantes = cursor.fetchall()
+
+
+	# trae email del usuario
+	cursor.execute('SELECT email FROM usr_extend WHERE usuariono=%s;',(usuariono,))
+	
+	email_result = cursor.fetchone()
+
+	
+	# Busca un psw_paso no registrado  en la base de datos y lo asigna al usuario.
+	psw_paso = genera_cadena_tres()
+	while psw_paso in pass_resultantes:
+		psw_paso =genera_cadena_tres()
+
 	try:
+		cursor.execute('UPDATE usr_extend set pass_paso=%s where usuariono=%s;',(psw_paso,usuariono,))	
+	
+	except DatabaseError as e:
 
-		if resultado[0] != request.user:
+		error_msg ='Error en base de datos: '+e
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
 
-			error_msg ='Password incorrecto !'
-			return render(request,'pedidos/error.html',{'error_msg':error_msg,})
-		else:
+	# envia correo
 
-			return(resultado[0])'''
+	v_asunto='Nueva constraseña de paso.'
+	v_cuerpo='''Estimado usuario,
+	Se generó una nueva constraseña de paso para Ud. para ejecutar transacciones en el sistema.
 
+	La nueva contraseña es: '''+psw_paso+'''.
+
+	Atenamente,
+	Administración de Multimarcas Laredo. '''
+	
+	v_para=email_result[0]
+
+	envio_mail_exitoso = envia_correo(v_asunto,v_cuerpo,v_para)
+
+	if envio_mail_exitoso == 0:
+
+		error_msg='Se presento un error en el envio de correo, solicite nuevamente la generación de contraseña !'
+	else:
+		error_msg='Contraseña generada con exito !. Se envió un mensaje de correo al buzón del usuario !'
+
+	return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+
+def envia_correo(v_asunto,v_cuerpo,v_para):
+	# Observar que en la siguiente linea  el parametro auth_user='pedidos_multimarcas' es el mailbox en el servidor de webfaction, mas que el correo electronico.
+	#r= send_mail('prueba','prueba de envio de  message','soporte@esshoesmultimarcas.com',['jggalvan@prodigy.net.mx'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+	envio_mail_exitoso= send_mail(v_asunto,v_cuerpo,'soporte@esshoesmultimarcas.com',[v_para], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+
+	return(envio_mail_exitoso)
+
+
+
+def prueba_mail(request):
+
+	r=0	
+	try:
+		send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr39.kalinka@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+		return HttpResponse('Envio Ok')
+	except SMTPException as e:
+		print str(e)
+		return HttpResponse(str(e))
+	'''
+	if r==0:
+		return HttpResponse('Error en envio')
+	else:
+		return HttpResponse('Envio Ok')'''
 
 
 
 			
 
-							
+						
 
 
 

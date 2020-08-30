@@ -141,22 +141,23 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 
  # Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.webfaction.com'
 
-EMAIL_PORT = '587'
+EMAIL_PORT = '465'
 
-EMAIL_HOST_USER ='jggalvandlr@gmail.com'
+EMAIL_HOST_USER ='soporte@esshoesmultimarcas.com'
 
-EMAIL_HOST_PASSWORD ='Go!jose!13'
+EMAIL_HOST_PASSWORD ='pedidos1'
 
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = False
 
 #EMAIL_USE_SSL = False
 
-SERVER_EMAIL = 'jggalvandlr@gmail.com'
+SERVER_EMAIL = 'soporte@esshoesmultimarcas.com'
 
-DEFAULT_FROM_EMAIL = 'jggalvandlr@gmail.com'
+DEFAULT_FROM_EMAIL = 'soporte@esshoesmultimarcas.com'
 
 #EMAIL_HOST = 'smtp.webfaction.com'
 
@@ -168,5 +169,6 @@ DEFAULT_FROM_EMAIL = 'jggalvandlr@gmail.com'
 
 #EMAIL_USE_TLS = True
 
-EMAIL_USE_SSL = False
+EMAIL_USE_SSL = True
+
 

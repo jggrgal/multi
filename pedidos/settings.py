@@ -135,22 +135,23 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # ----------- configuracion de correo 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-SERVER_EMAIL = 'atencion.clientes@esshoesmultimarcas.com'
+SERVER_EMAIL = 'soporte@esshoesmultimarcas.com'
 
 EMAIL_HOST = 'smtp.webfaction.com'
 
-EMAIL_PORT = '587'
+EMAIL_PORT = '465'
 
-EMAIL_HOST_USER ='atencion_clientes'
+EMAIL_HOST_USER ='soporte@esshoesmultimarcas.com'
 
-EMAIL_HOST_PASSWORD ='ciajcm1218'
+EMAIL_HOST_PASSWORD ='pedidos1'
 
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = False
 
-EMAIL_USE_SSL = False
+EMAIL_USE_SSL = True
 
-DEFAULT_FROM_EMAIL = 'atencion.clientes@esshoesmultimarcas.com'
+DEFAULT_FROM_EMAIL = 'soporte@esshoesmultimarcas.com'
 
 
 

@@ -139,5 +139,7 @@ urlpatterns = [
 	url(r'^edita_usuario_web/(?P<id>[0-9]{1,8})/$',views.edita_usuario_web,name='edita_usuario_web'),
 	url(r'^rpteStatusxMarca/$',views.rpteStatusxMarca,name='rpteStatusxMarca'),
 	url(r'^reasigna_sucursal_apedido/$',views.reasigna_sucursal_apedido,name='reasigna_sucursal_apedido'),
+	url(r'^prueba_mail/$',views.prueba_mail,name='prueba_mail'),
+	url(r'^genera_pass_paso/(?P<usuariono>[0-9]{1,8})$',views.genera_pass_paso,name='genera_pass_paso'),
 
 	]

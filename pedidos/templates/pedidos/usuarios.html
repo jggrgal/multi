@@ -31,6 +31,7 @@
                 <th>Activo</th>
                 <th>Nombre corto</th>
                 <th>Derechos</th>
+                <th>Nvo Pass paso</th>
               
         	</tr>
             </thead>
@@ -44,6 +45,7 @@
                     <td>{{ item.esta_activo }}</td>
                     <td>{{ item.usuario}}</td>
                     <td><a href="{% url 'pedidos:lista_usuario_derechos' item.usuariono %}" id="lista_usuario_derecho" class="btn btn-success " role="button">Derechos...</a></td>
+                    <td><a href="{% url 'pedidos:genera_pass_paso' item.usuariono %}" id="genera_pass_paso" class="btn btn-success " role="button">Nvo pass paso</a></td>
                                         
             	</tr>
            {% endfor %}
