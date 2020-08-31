@@ -147,7 +147,7 @@ EMAIL_HOST = 'smtp.webfaction.com'
 
 EMAIL_PORT = '465'
 
-EMAIL_HOST_USER ='soporte@esshoesmultimarcas.com'
+EMAIL_HOST_USER ='pedidos_multimarcas'
 
 EMAIL_HOST_PASSWORD ='pedidos1'
 
@@ -155,7 +155,7 @@ EMAIL_USE_TLS = False
 
 #EMAIL_USE_SSL = False
 
-SERVER_EMAIL = 'soporte@esshoesmultimarcas.com'
+SERVER_EMAIL = 'smtp.webfaction.com'
 
 DEFAULT_FROM_EMAIL = 'soporte@esshoesmultimarcas.com'
 

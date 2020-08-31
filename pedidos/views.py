@@ -1777,7 +1777,6 @@ def registro_socio(request):
 			
 			para = [request.POST.get('email')]
 
-			email_host_user = getattr(settings, "EMAIL_HOST_USER", None)
 
 			mensaje = """Estimado socio:
 
@@ -1792,7 +1791,7 @@ def registro_socio(request):
 			 Atentamente.
 			 ES Shoes Multimarcas. """
 			
-			envia_mail(para,email_host_user,'Su registro en ES Shoes mulitimarcas WEB',mensaje)			  
+			envio_mail_exisoto = envia_mail(para,'Su registro en ES Shoes mulitimarcas WEB',mensaje)			  
 
 			request.session['socio_a_dar_de_alta']=0
 
@@ -1817,11 +1816,17 @@ def cambiar_password(request):
         'form': form,
     })
 
-def envia_mail(v_para,v_de,v_asunto,v_mensaje):
-				
-	send_mail(v_asunto,v_mensaje,'atencion.clientes@multimarcaslaredo.com',v_para,fail_silently=False,)
+def envia_mail(v_para,v_asunto,v_mensaje):
 
-	return
+	email_host_user = getattr(settings, "EMAIL_HOST_USER", None)
+	default_from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
+	auth_user = getattr(settings, "EMAIL_HOST_USER", None)
+	auth_password = getattr(settings,"EMAIL_HOST_PASSWORD",None)
+
+	#send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+	envio_mail_exitoso= send_mail(v_asunto,v_mensaje,default_from_email,[v_para], fail_silently=False, auth_user=auth_user, auth_password=auth_password, connection=None, html_message=None)
+
+	return (envio_mail_exitoso)
 
 
 #@permission_required('auth.add_user',login_url=None,raise_exception=True)
@@ -12775,7 +12780,7 @@ def checa_pass_paso(request,passw):
 # RUTINA PARA GENERAR EL PASSWORD
 
 def genera_pass_paso(request,usuariono):
-	pdb.set_trace()
+	#pdb.set_trace()
 
 	# trae passwords de todos los usuarios para comparar 
 
@@ -12807,17 +12812,23 @@ def genera_pass_paso(request,usuariono):
 	# envia correo
 
 	v_asunto='Nueva constraseña de paso.'
-	v_cuerpo='''Estimado usuario,
+	v_cuerpo=""" Estimado usuario,
+
 	Se generó una nueva constraseña de paso para Ud. para ejecutar transacciones en el sistema.
 
-	La nueva contraseña es: '''+psw_paso+'''.
+	La nueva contraseña es: """+psw_paso+""".
+
+	Por seguridad se recomienda borrar de su buzón este mensaje una vez que haya memorizado su contraseña.
+
+	De le recordamos que puede solicitar a su administrador una nueva constraseña cuando lo crea conveniente.
 
 	Atenamente,
-	Administración de Multimarcas Laredo. '''
+	Administración Multimarcas Laredo. """
 	
 	v_para=email_result[0]
 
-	envio_mail_exitoso = envia_correo(v_asunto,v_cuerpo,v_para)
+	envio_mail_exitoso = envia_mail(v_para,v_asunto,v_cuerpo)
+	#envio_mail_exitoso = envia_correo(v_asunto,v_cuerpo,v_para)
 
 	if envio_mail_exitoso == 0:
 
@@ -12826,12 +12837,18 @@ def genera_pass_paso(request,usuariono):
 		error_msg='Contraseña generada con exito !. Se envió un mensaje de correo al buzón del usuario !'
 
 	return render(request,'pedidos/error.html',{'error_msg':error_msg,})
-
+'''
 
 def envia_correo(v_asunto,v_cuerpo,v_para):
 	# Observar que en la siguiente linea  el parametro auth_user='pedidos_multimarcas' es el mailbox en el servidor de webfaction, mas que el correo electronico.
 	#r= send_mail('prueba','prueba de envio de  message','soporte@esshoesmultimarcas.com',['jggalvan@prodigy.net.mx'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
-	envio_mail_exitoso= send_mail(v_asunto,v_cuerpo,'soporte@esshoesmultimarcas.com',[v_para], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+
+	email_host_user = getattr(settings, "EMAIL_HOST_USER", None)
+
+	envio_mail_exitoso = envia_mail(v_para,email_host_user,v_asunto,v_cuerpo)			  
+
+
+	#envio_mail_exitoso= send_mail(v_asunto,v_cuerpo,'soporte@esshoesmultimarcas.com',[v_para], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
 
 	return(envio_mail_exitoso)
 
@@ -12841,12 +12858,12 @@ def prueba_mail(request):
 
 	r=0	
 	try:
-		send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr39.kalinka@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+		send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
 		return HttpResponse('Envio Ok')
 	except SMTPException as e:
 		print str(e)
 		return HttpResponse(str(e))
-	'''
+	
 	if r==0:
 		return HttpResponse('Error en envio')
 	else:
