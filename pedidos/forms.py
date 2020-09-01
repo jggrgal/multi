@@ -3532,6 +3532,7 @@ class DatosUsuarioForm(forms.Form):
 	nombre = forms.CharField(label='Nombre',required=True,max_length=45)	
 	activo = forms.ChoiceField(widget=forms.Select(),
 			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
+	email = forms.EmailField(label='Email',required=True,max_length=254)
 	usuario = forms.CharField(label='Usuario',required=True,max_length=15)	
 	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
 
@@ -3544,6 +3545,7 @@ class DatosUsuarioForm(forms.Form):
 		nombre = cleaned_data.get('nombre')
 		activo = cleaned_data.get('activo')
 		usuario = cleaned_data.get('usuario')
+		email = cleaned_data.get('email')
 		usr_id = cleaned_data.get('usr_id')
 		
 		return self.cleaned_data

@@ -12,6 +12,7 @@ from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib.auth.decorators import login_required,permission_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.mail import send_mail
+from smtplib import SMTPException,SMTPSenderRefused,SMTPAuthenticationError,SMTPRecipientsRefused,SMTPServerDisconnected
 from . forms import (AccesoForm,\
 					BuscapedidosForm,\
 					PedidosForm,\
@@ -74,7 +75,6 @@ from . forms import (AccesoForm,\
 
 from pedidos.models import Asociado,Articulo,Proveedor,Configuracion
 from django.db import connection,DatabaseError,Error,transaction,IntegrityError,OperationalError,InternalError,ProgrammingError,NotSupportedError
-
 from datetime import datetime,date,time,timedelta
 import calendar
 from django.conf import settings
@@ -82,7 +82,6 @@ import pdb
 import unicodedata
 import json
 from collections import namedtuple
-from django.core.mail import send_mail
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 import io
 from django.http import FileResponse
@@ -1791,7 +1790,7 @@ def registro_socio(request):
 			 Atentamente.
 			 ES Shoes Multimarcas. """
 			
-			envio_mail_exisoto = envia_mail(para,'Su registro en ES Shoes mulitimarcas WEB',mensaje)			  
+			envio_mail_exitoso,error_envio_msg = envia_mail(para,'Su registro en ES Shoes mulitimarcas WEB',mensaje)			  
 
 			request.session['socio_a_dar_de_alta']=0
 
@@ -1818,15 +1817,41 @@ def cambiar_password(request):
 
 def envia_mail(v_para,v_asunto,v_mensaje):
 
+	''' La presente rutina retorna un codigo de error (0=Error, 1=Exito)
+		en la variable envio_mail_exitoso.
+		Tambien devuelve el mensaje de error si lo hay en la variable error_envio
+	'''
+
+
+	# TRAE PARAMETROS DE settings.py
+
 	email_host_user = getattr(settings, "EMAIL_HOST_USER", None)
 	default_from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
 	auth_user = getattr(settings, "EMAIL_HOST_USER", None)
 	auth_password = getattr(settings,"EMAIL_HOST_PASSWORD",None)
 
 	#send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
-	envio_mail_exitoso= send_mail(v_asunto,v_mensaje,default_from_email,[v_para], fail_silently=False, auth_user=auth_user, auth_password=auth_password, connection=None, html_message=None)
+	
+	envio_mail_exitoso=0
+	error_envio=''
 
-	return (envio_mail_exitoso)
+	try:
+		envio_mail_exitoso= send_mail(v_asunto,v_mensaje,default_from_email,[v_para], fail_silently=False, auth_user=auth_user, auth_password=auth_password, connection=None, html_message=None)
+
+		
+	except SMTPServerDisconnected as e:
+		error_envio = "Posiblemente el servidor de correo esta caido: "+str(e)
+
+	except SMTPSenderRefused as e:
+		error_envio ="La direccion de quién envía fue rechazada por el servidor: "+str(e)
+
+	except SMTPRecipientsRefused as e:
+		error_envio ="La dirección de destino no fué encontrada por el servidor: "+str(e)
+
+	except SMTPAuthenticationError as e:
+		error_envio ="La combinacion Usuario / Password no fue aceptada por el servidor: "+str(e)
+
+	return (envio_mail_exitoso,error_envio)
 
 
 #@permission_required('auth.add_user',login_url=None,raise_exception=True)
@@ -12093,6 +12118,7 @@ def edita_usuario(request,usuariono):
 			nombre = form.cleaned_data['nombre']
 			usr_id = form.cleaned_data['usr_id']
 			activo = form.cleaned_data['activo']
+			email = form.cleaned_data['email']
 			usuario = form.cleaned_data['usuario']
 			
 			activo = int(activo)
@@ -12123,7 +12149,10 @@ def edita_usuario(request,usuariono):
 				activo = %s,\
 				usuario=%s\
 				WHERE usuariono=%s;',(nombre.upper().lstrip(),activo,usuario,usuariono,))
-			
+
+				cursor.execute('UPDATE usr_extend SET email= %s \
+				WHERE usuariono=%s;',(email,usuariono,))
+
 							
 				cursor.execute("COMMIT;")
 
@@ -12163,11 +12192,12 @@ def edita_usuario(request,usuariono):
 		cursor.execute("SELECT 	p.usuariono,\
 								p.nombre,\
 								p.activo,\
-								p.usuario\
-								from usuarios p where p.usuariono=%s;",(usuariono,))
+								p.usuario,\
+								u.email \
+								from usuarios p inner join usr_extend u  on (p.empresano=1 and p.usuariono =u.usuariono) where p.usuariono=%s;",(usuariono,))
 		usuario = cursor.fetchone()
 		
-		form = DatosUsuarioForm(initial={'usuariono':usuario[0],'nombre':usuario[1],'activo':1 if usuario[2]==1 else 0,'usuario':usuario[3],})
+		form = DatosUsuarioForm(initial={'usuariono':usuario[0],'nombre':usuario[1],'activo':1 if usuario[2]==1 else 0,'usuario':usuario[3],'email':usuario[4],})
 					
 	return render(request,'pedidos/edita_usuario.html',{'form':form,'usuariono':usuariono,})
 
@@ -12187,6 +12217,7 @@ def crea_usuario(request):
 			nombre = form.cleaned_data['nombre']
 			usr_id = form.cleaned_data['usr_id']
 			activo = form.cleaned_data['activo']
+			email = form.cleaned_data['email']
 			usuario = form.cleaned_data['usuario']
 			
 			activo =int(activo)
@@ -12209,7 +12240,26 @@ def crea_usuario(request):
 
 					raise ValueError
 
+
+
 				cursor=connection.cursor()
+
+
+				'''  COMIENZA A GENERAR UN PASSWORD DE PASO '''
+
+
+				cursor.execute('SELECT pass_paso FROM usr_extend;')
+	
+				pass_resultantes = cursor.fetchall()
+		
+				
+				# Busca un psw_paso no registrado  en la base de datos y lo asigna al usuario.
+				psw_paso = genera_cadena_tres()
+				while psw_paso in pass_resultantes:
+					psw_paso =genera_cadena_tres()
+
+
+				# Empieza a insertar registro
 
 				cursor.execute('START TRANSACTION')
 
@@ -12226,7 +12276,12 @@ def crea_usuario(request):
 				nivel,\
 				usuario) \
 				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_usuario[0]+1,nombre.upper().lstrip(),hoy,hoy,' ',activo,0,usuario.upper().lstrip()))
-					
+
+				cursor.execute('INSERT INTO usr_extend(usuariono,pass_paso,\
+				email) \
+				VALUES(%s,%s,%s);',(ultimo_usuario[0]+1,psw_paso,email))
+
+								
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
@@ -12477,7 +12532,7 @@ def edita_usuario_web(request,id):
 				is_staff=%s\
 				WHERE id=%s;',(email.lower().lstrip(),is_active,is_staff,id,))
 			
-							
+				
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios_web'))
@@ -12820,19 +12875,22 @@ def genera_pass_paso(request,usuariono):
 
 	Por seguridad se recomienda borrar de su buzón este mensaje una vez que haya memorizado su contraseña.
 
-	De le recordamos que puede solicitar a su administrador una nueva constraseña cuando lo crea conveniente.
+	Le recordamos que puede solicitar en administración una nueva constraseña cuando lo crea conveniente.
 
 	Atenamente,
 	Administración Multimarcas Laredo. """
 	
 	v_para=email_result[0]
 
-	envio_mail_exitoso = envia_mail(v_para,v_asunto,v_cuerpo)
+	envio_mail_exitoso = 0
+	error_envio_msg =''
+	# La rutina envia_mail retorna un codigo (0=Error,1= Exito) y un mensaje de error, el primero es recibido por envia_mail_exitoso y el segundo por error_envio_msg
+	envio_mail_exitoso,error_envio_msg = envia_mail(v_para,v_asunto,v_cuerpo)
 	#envio_mail_exitoso = envia_correo(v_asunto,v_cuerpo,v_para)
 
 	if envio_mail_exitoso == 0:
 
-		error_msg='Se presento un error en el envio de correo, solicite nuevamente la generación de contraseña !'
+		error_msg='Se presento un error en el envio de correo, solicite nuevamente la generación de contraseña !. '+error_envio_msg
 	else:
 		error_msg='Contraseña generada con exito !. Se envió un mensaje de correo al buzón del usuario !'
 
@@ -12852,22 +12910,22 @@ def envia_correo(v_asunto,v_cuerpo,v_para):
 
 	return(envio_mail_exitoso)
 
-
+'''
 
 def prueba_mail(request):
 
 	r=0	
 	try:
-		send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
-		return HttpResponse('Envio Ok')
-	except SMTPException as e:
+		send_mail('prueba','prueba de envio de  message por segunda vez','soporte@esshoesmultimarcas.com',['jggalvandlr2772@gmail.com'], fail_silently=False, auth_user='pedidos_multimarcas', auth_password='pedidos1', connection=None, html_message=None)
+		
+	except Error as e:
 		print str(e)
 		return HttpResponse(str(e))
 	
 	if r==0:
 		return HttpResponse('Error en envio')
 	else:
-		return HttpResponse('Envio Ok')'''
+		return HttpResponse('Envio Ok')
 
 
 
