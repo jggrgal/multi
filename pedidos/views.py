@@ -6456,11 +6456,11 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 # VERICA LA EXISTENCIA DEL USUARIO EN 
 # LA TABLA DE USUARIOS
 
-def verifica_existencia_usr(usr_id):
+def verifica_existencia_usr(psw_paso):
 	#pdb.set_trace()
 
 	cursor=connection.cursor()
-	cursor.execute('SELECT usuariono FROM usuarios where usuariono=%s;',(usr_id,))
+	cursor.execute('SELECT usuariono FROM usr_extend where pass_paso=%s;',(psw_paso,))
 	num = cursor.fetchone()
 
 	cursor.close()
@@ -12116,7 +12116,7 @@ def edita_usuario(request,usuariono):
 		if form.is_valid():
 			usuariono = form.cleaned_data['usuariono']
 			nombre = form.cleaned_data['nombre']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			activo = form.cleaned_data['activo']
 			email = form.cleaned_data['email']
 			usuario = form.cleaned_data['usuario']
@@ -12128,7 +12128,7 @@ def edita_usuario(request,usuariono):
 
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 

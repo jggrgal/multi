@@ -3534,7 +3534,7 @@ class DatosUsuarioForm(forms.Form):
 			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
 	email = forms.EmailField(label='Email',required=True,max_length=254)
 	usuario = forms.CharField(label='Usuario',required=True,max_length=15)	
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',max_length=3,widget=forms.PasswordInput(),required=True)
 
 
 	def clean(self):
@@ -3546,7 +3546,7 @@ class DatosUsuarioForm(forms.Form):
 		activo = cleaned_data.get('activo')
 		usuario = cleaned_data.get('usuario')
 		email = cleaned_data.get('email')
-		usr_id = cleaned_data.get('usr_id')
+		psw_paso = cleaned_data.get('psw_paso')
 		
 		return self.cleaned_data
 
