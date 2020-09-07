@@ -12215,7 +12215,7 @@ def crea_usuario(request):
 			
 			usuariono = form.cleaned_data['usuariono']
 			nombre = form.cleaned_data['nombre']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			activo = form.cleaned_data['activo']
 			email = form.cleaned_data['email']
 			usuario = form.cleaned_data['usuario']
@@ -12227,7 +12227,7 @@ def crea_usuario(request):
 
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
@@ -12254,9 +12254,9 @@ def crea_usuario(request):
 		
 				
 				# Busca un psw_paso no registrado  en la base de datos y lo asigna al usuario.
-				psw_paso = genera_cadena_tres()
-				while psw_paso in pass_resultantes:
-					psw_paso =genera_cadena_tres()
+				psw_paso_nuevo = genera_cadena_tres()
+				while psw_paso_nuevo in pass_resultantes:
+					psw_paso_nuevo = genera_cadena_tres()
 
 
 				# Empieza a insertar registro
@@ -12279,10 +12279,40 @@ def crea_usuario(request):
 
 				cursor.execute('INSERT INTO usr_extend(usuariono,pass_paso,\
 				email) \
-				VALUES(%s,%s,%s);',(ultimo_usuario[0]+1,psw_paso,email))
+				VALUES(%s,%s,%s);',(ultimo_usuario[0]+1,psw_paso_nuevo,email))
 
 								
 				cursor.execute("COMMIT;")
+
+				'''MANDA CORREO CON NUEVO PASS_PASO '''
+
+				v_asunto='Nueva constraseña de paso.'
+				v_cuerpo=""" Estimado usuario,
+
+				Se generó una nueva constraseña de paso para Ud. para ejecutar transacciones en el sistema.
+
+				La nueva contraseña es: """+psw_paso+""".
+
+				Por seguridad se recomienda borrar de su buzón este mensaje una vez que haya memorizado su contraseña.
+
+				Le recordamos que puede solicitar en administración una nueva constraseña cuando lo crea conveniente.
+
+				Atenamente,
+				Administración Multimarcas Laredo. """
+				
+				v_para=email
+
+				envio_mail_exitoso = 0
+				error_envio_msg =''
+				# La rutina envia_mail retorna un codigo (0=Error,1= Exito) y un mensaje de error, el primero es recibido por envia_mail_exitoso y el segundo por error_envio_msg
+				envio_mail_exitoso,error_envio_msg = envia_mail(v_para,v_asunto,v_cuerpo)
+				#envio_mail_exitoso = envia_correo(v_asunto,v_cuerpo,v_para)
+				'''
+				if envio_mail_exitoso == 0:
+
+					error_msg='Se presento un error en el envio de correo, solicite nuevamente la generación de contraseña !. '+error_envio_msg
+					return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+				'''
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
 				
