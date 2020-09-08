@@ -11258,13 +11258,44 @@ def edita_asociado(request,asociadono):
 			cel = form.cleaned_data['celular']
 			radio = form.cleaned_data['radio']
 			direccionelectronica = form.cleaned_data['direccionelectronica']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			essocio = form.cleaned_data['essocio']
 			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
 			numeroweb = form.cleaned_data['numeroweb']
 			
 			if numeroweb is None:
 				numeroweb =0
+
+
+			'''VALIDA USUARIO Y DERECHOS '''
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,2)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información de socios !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+
+
 
 			cursor =  connection.cursor()
 			try:
@@ -12291,7 +12322,7 @@ def crea_usuario(request):
 
 				Se generó una nueva constraseña de paso para Ud. para ejecutar transacciones en el sistema.
 
-				La nueva contraseña es: """+psw_paso+""".
+				La nueva contraseña es: """+psw_paso_nuevo+""".
 
 				Por seguridad se recomienda borrar de su buzón este mensaje una vez que haya memorizado su contraseña.
 

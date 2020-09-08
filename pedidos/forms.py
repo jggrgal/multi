@@ -3048,7 +3048,7 @@ class DatosAsociadoForm(forms.Form):
 	forzarcobroanticipo = forms.ChoiceField(widget=forms.Select(),
 			label='Forzar el cobro de anticipo',choices =((1,'Si'),(0,'No')),required='True' )
 	numeroweb = forms.IntegerField(label='Numero Web',required=False)
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',widget=forms.PasswordInput(),max_length=3,required=True)
 	
 	
 	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
