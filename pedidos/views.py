@@ -11269,6 +11269,13 @@ def edita_asociado(request,asociadono):
 
 			'''VALIDA USUARIO Y DERECHOS '''
 
+
+			hoy = datetime.now()
+			fecha_hoy = hoy.strftime("%Y-%m-%d")
+			hora_hoy = hoy.strftime("%H:%M:%S") 
+
+	
+
 			usr_existente=0
 			permiso_exitoso=0
 
@@ -11281,7 +11288,7 @@ def edita_asociado(request,asociadono):
 					raise ValueError
 
 
-				permiso_exitoso = verifica_derechos_usr(usr_existente,2)
+				permiso_exitoso = verifica_derechos_usr(usr_existente,3)
 
 				if permiso_exitoso ==0:
 
@@ -11320,7 +11327,8 @@ def edita_asociado(request,asociadono):
 				num_web = %s,\
 				nocontrol=%s\
 				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,numcontrol.upper().lstrip(),asociadono,))
-			
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,3,fecha_hoy,hora_hoy,'Se modifico el socio: '+str(asociado)))		
 							
 				cursor.execute("COMMIT;")
 
@@ -11396,7 +11404,7 @@ def crea_asociado(request):
 			cel = form.cleaned_data['celular']
 			radio = form.cleaned_data['radio']
 			direccionelectronica = form.cleaned_data['direccionelectronica']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			essocio = form.cleaned_data['essocio']
 			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
 			numeroweb = form.cleaned_data['numeroweb']
@@ -11404,6 +11412,39 @@ def crea_asociado(request):
 
 			if numeroweb is None:
 				numeroweb =0
+
+			
+			'''VALIDA USUARIO Y DERECHOS '''
+
+
+			hoy = datetime.now()
+			fecha_hoy = hoy.strftime("%Y-%m-%d")
+			hora_hoy = hoy.strftime("%H:%M:%S") 
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,1)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para crear socios !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
 
 
 			cursor =  connection.cursor()
@@ -11440,8 +11481,15 @@ def crea_asociado(request):
 				creditodisponible,\
 				nocontrol) \
 				VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);',(1,ultimo_socio[0]+1,nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,hoy,'19010101',' ',0,0,numcontrol))
-					
+
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
+
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,1,fecha_hoy,hora_hoy,'Se creó el socio: '+str(ultimo_socio[0]+1)))		
+
+
+
+
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:asociados'))
@@ -12154,6 +12202,13 @@ def edita_usuario(request,usuariono):
 			
 			activo = int(activo)
 
+
+			hoy = datetime.now()
+			fecha_hoy = hoy.strftime("%Y-%m-%d")
+			hora_hoy = hoy.strftime("%H:%M:%S") 
+
+
+
 			usr_existente=0
 			permiso_exitoso=0
 
@@ -12184,7 +12239,9 @@ def edita_usuario(request,usuariono):
 				cursor.execute('UPDATE usr_extend SET email= %s \
 				WHERE usuariono=%s;',(email,usuariono,))
 
-							
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,19,fecha_hoy,hora_hoy,'Se modificó el usuario: '+str(usuariono)))		
+
+
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:lista_usuarios'))
@@ -12253,6 +12310,12 @@ def crea_usuario(request):
 			
 			activo =int(activo)
 			
+			hoy = datetime.now()
+			fecha_hoy = hoy.strftime("%Y-%m-%d")
+			hora_hoy = hoy.strftime("%H:%M:%S") 
+			
+
+
 			usr_existente=0
 			permiso_exitoso=0
 
@@ -12311,6 +12374,9 @@ def crea_usuario(request):
 				cursor.execute('INSERT INTO usr_extend(usuariono,pass_paso,\
 				email) \
 				VALUES(%s,%s,%s);',(ultimo_usuario[0]+1,psw_paso_nuevo,email))
+
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,18,fecha_hoy,hora_hoy,'Se creó el usuario: '+str(ultimo_usuario[0]+1)))		
 
 								
 				cursor.execute("COMMIT;")
