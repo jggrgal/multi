@@ -12627,17 +12627,22 @@ def edita_usuario_web(request,id):
 			is_active = form.cleaned_data['is_active']
 			is_staff = form.cleaned_data['is_staff']
 			email = form.cleaned_data['email']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			
 			is_active = int(is_active)
 			is_staff = int(is_staff)
+
+
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+
+
 
 			usr_existente=0
 			permiso_exitoso=0
 
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
@@ -12658,6 +12663,8 @@ def edita_usuario_web(request,id):
 				is_active = %s,\
 				is_staff=%s\
 				WHERE id=%s;',(email.lower().lstrip(),is_active,is_staff,id,))
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,29,fecha_hoy,hora_hoy,'Se modificó el staff del socio_web: '+str(id)))		
 			
 				
 				cursor.execute("COMMIT;")
