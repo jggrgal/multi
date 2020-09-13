@@ -2291,7 +2291,7 @@ class DatosProveedorForm(forms.Form):
 	maneja_desc = forms.ChoiceField(widget=forms.Select(),
 			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
 	baseparabono = forms.BooleanField(label='Base para bono',required=False)
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',max_length=3,widget=forms.PasswordInput(),required=True)
 	
 
 	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
@@ -2322,7 +2322,7 @@ class DatosProveedorForm(forms.Form):
 		email = cleaned_data.get('email')
 		maneja_desc = cleaned_data.get('maneja_desc')
 		baseparabono = cleaned_data.get('baseparabono')
-		usr_id = cleaned_data.get('usr_id')
+		psw_paso = cleaned_data.get('psw_paso')
 		if  not (telefono1 and telefono2 and fax and celular) is None:
 			
 			# elimina espacios al inicio
@@ -2371,7 +2371,7 @@ class CreaProveedorForm(forms.Form):
 	maneja_desc = forms.ChoiceField(widget=forms.Select(),
 			label='Maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
 	baseparabono = forms.BooleanField(label='Base para bono',required=False)
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',max_length=3,widget=forms.PasswordInput(),required=True)
 	
 
 	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',
@@ -2402,7 +2402,7 @@ class CreaProveedorForm(forms.Form):
 		email = cleaned_data.get('email')
 		maneja_desc = cleaned_data.get('maneja_desc')
 		baseparabono = cleaned_data.get('baseparabono')
-		usr_id = cleaned_data.get('usr_id')
+		psw_paso = cleaned_data.get('psw_paso')
 		if  not (telefono1 and telefono2 and fax and celular) is None:
 			if not(telefono1.isdigit()):
 				raise forms.ValidationError(self.error_messages['telefono1'],code='telefono1')
@@ -3369,7 +3369,7 @@ class CreaAlmacenForm(forms.Form):
 	celular = forms.CharField(label='Celular',required=True,max_length=15)
 	radio = forms.CharField(label='radio',required=True,max_length=15)
 	direccionelectronica = forms.EmailField(label='email',required=True,max_length=100)
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',max_length=3,widget=forms.PasswordInput(),required=True)
 			
 
 	error_messages = {'telefono1':'Valor incorrecto para telefono1, ingrese unicamente numeros !',

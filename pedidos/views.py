@@ -7782,15 +7782,34 @@ def edita_proveedor(request,proveedorno):
 			cel = form.cleaned_data['celular']
 			radio = form.cleaned_data['radio']
 			email = form.cleaned_data['email']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			maneja_desc = form.cleaned_data['maneja_desc']
 			baseparabono = form.cleaned_data['baseparabono']
-			
-			
 
 
-			cursor =  connection.cursor()
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+
+
+			usr_existente=0
+			permiso_exitoso=0
+
 			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,14)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor =  connection.cursor()
+			
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute('UPDATE proveedor SET RazonSocial = %s,\
@@ -7808,9 +7827,12 @@ def edita_proveedor(request,proveedorno):
 				email = %s,\
 				Usuaroi = %s,\
 				manejar_desc = %s \
-				WHERE proveedorno=%s;',(RazonSocial.upper(),Direccion.upper(),Colonia.upper(),Ciudad.upper(),Estado.upper(),Pais.upper(),CodigoPostal,telefono1,telefono2,fax,cel,radio,email.lower(),usr_id,'\x01' if maneja_desc==u'1' else '\x00',proveedorno,))
+				WHERE proveedorno=%s;',(RazonSocial.upper(),Direccion.upper(),Colonia.upper(),Ciudad.upper(),Estado.upper(),Pais.upper(),CodigoPostal,telefono1,telefono2,fax,cel,radio,email.lower(),usr_existente,'\x01' if maneja_desc==u'1' else '\x00',proveedorno,))
 			
 				cursor.execute("UPDATE ProvConfBono SET BaseParaBono=%s WHERE proveedorno=%s;",(baseparabono,proveedorno,))
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,14,fecha_hoy,hora_hoy,'Se modificó el proveedor: '+str(proveedorno)))		
+
 				
 				cursor.execute("COMMIT;")
 
@@ -7823,6 +7845,12 @@ def edita_proveedor(request,proveedorno):
 				cursor.execute('ROLLBACK;')
 				msg = 'Error en base de datos !'
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información de proveedores !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)
 
 		else:
 			
@@ -7887,15 +7915,39 @@ def crea_proveedor(request):
 			cel = form.cleaned_data['celular']
 			radio = form.cleaned_data['radio']
 			email = form.cleaned_data['email']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			maneja_desc = form.cleaned_data['maneja_desc']
 			baseparabono = form.cleaned_data['baseparabono']
 			
+
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+
+
+			usr_existente=0
+			permiso_exitoso=0
+
+			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,14)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+				cursor =  connection.cursor()
+			
 			
 
 
-			cursor =  connection.cursor()
-			try:
+
+
 
 				cursor.execute("SELECT proveedorNo from proveedor order by proveedorno desc limit 1;")
 				proveedorNo = cursor.fetchone()
@@ -7934,8 +7986,8 @@ def crea_proveedor(request):
 				cel,\
 				radio,\
 				email.lower(),\
-				usr_id,\
-				usr_id,\
+				usr_existente,\
+				usr_existente,\
 				fecha_hoy,\
 				fecha_hoy,\
 				'\x01' if maneja_desc==u'1' else '\x00'))
@@ -7943,6 +7995,8 @@ def crea_proveedor(request):
 					
 				cursor.execute("INSERT INTO ProvConfBono(EmpresaNo,ProveedorNo,BaseParaBono) VALUES(%s,%s,%s);",(1,proveedorNo[0]+1,baseparabono,))
 				
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,13,fecha_hoy,hora_hoy,'Se creó el proveedor: '+str(proveedorNo[0]+1)))		
+
 				cursor.execute("COMMIT;")
 
 				return HttpResponseRedirect(reverse('pedidos:proveedores'))
@@ -7954,6 +8008,13 @@ def crea_proveedor(request):
 				cursor.execute('ROLLBACK;')
 				msg = 'Error en base de datos !'
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para crear proveedores !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)
 
 		else:
 			pass
@@ -11689,11 +11750,36 @@ def edita_almacen(request,proveedorno,almacenno):
 			cel = form.cleaned_data['celular']
 			radio = form.cleaned_data['radio']
 			direccionelectronica = form.cleaned_data['direccionelectronica']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			
 
 
+			
+
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+
+
+
+			usr_existente=0
+			permiso_exitoso=0
+
 			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,14)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+
+
 
 				cursor.execute('START TRANSACTION')
 
@@ -11713,6 +11799,8 @@ def edita_almacen(request,proveedorno,almacenno):
 				fechaalta=%s,\
 				fechabaja=%s\
 				WHERE empresano=%s and proveedorno=%s and almacen=%s;',(razonsocial.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),'19010101','19010101',1,proveedorno,almacenno))
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,14,fecha_hoy,hora_hoy,'Se modificó el almacén: '+str(almacenno)+' del proveedor: '+str(proveedorno)))		
 
 				cursor.execute("COMMIT;")
 				cursor.close()
@@ -11741,6 +11829,13 @@ def edita_almacen(request,proveedorno,almacenno):
 				cursor.execute('ROLLBACK;')
 				msg = 'Error en base de datos !'
 				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+			
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar información de almacenes !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
 
 		else:
 			
