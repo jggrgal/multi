@@ -16,6 +16,7 @@
        var seleccionados_como_encontrados = 0
        var is_staff='False'
        var usr_id = 0
+       var psw_paso =''
        var usr_derecho // Variable utilizada para guardar el derecho
                        // del empleado a hacer alguna accion,
                        // ejemplo, crear pedidos (derecho 5)
@@ -2852,8 +2853,8 @@ $('#procesar_ventas').click(function(e){
         if (parseInt(recibido) < parseInt(tot_gral) && parseInt(tot_gral) > 0 ) {
                 alert("Lo recibido debe cubrir el total !")
         } else {
-              if(parseInt($("#usr_id_colocadosacerrar").val())<=0){
-                    alert("Ingrese un codigo de empleado !");
+              if($("#psw_paso").val() ==''){
+                    alert("Ingrese su password de paso !");
                     continuar_procesando = 0;
               } else {
                   continuar_procesando = 1
@@ -2877,8 +2878,6 @@ $('#procesar_ventas').click(function(e){
         //}
 
         
-
-
         if (continuar_procesando == 1) {
           e.preventDefault();
           var answer=confirm('Su venta va a ser procesada, Si está seguro acepte, caso contrario cancele y modifique.');
@@ -2914,7 +2913,7 @@ $('#procesar_ventas').click(function(e){
                     // Y MANDARLO VIA AJAX A VIEWS, SE UTILIZA IGUAL QUE
                     // EN CIERRE DE PEDIDOS PARA NO TIRAR TANTO CODIGO.
 
-                    var usr_id = $("#usr_id_colocadosacerrar").val();
+                    var usr_id = $("#psw_paso").val();
 
 
 
@@ -3678,17 +3677,102 @@ $('#procesar_ventas').click(function(e){
       });
 
 
+// F U N I C I O N   GENERAL DE VALIDACION
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE CERRAR PEDIDO EN COLOCACIONES
+      $("#psw_paso").blur(function() {
+
+                var usr_id = $(this).val()
+                //$("#psw_paso").prop('disabled',true)
+                var derecho = $('#derecho').val()
+                var msg_derecho_valido = $('#msg_derecho_valido').val()
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'usr_id':usr_id,'usr_derecho':derecho},
+                  success: function(data){
+                            if (data.num_usr_valido == 0){
+                                         
+                                alert(derecho) 
+                                                                                       
+                                switch (derecho) { 
+                                  case '22':
+                                    alert (msg_derecho_valido); 
+                                    $("#procesar_ventas").prop('disabled',true);
+                                    break;
+                                  case 'prototype': 
+                                    alert('prototype Wins!');
+                                    break;
+                                  case 'mootools': 
+                                    alert('mootools Wins!');
+                                    break;    
+                                  case 'dojo': 
+                                    alert('dojo Wins!');
+                                    break;
+                                  default:
+                                    alert('Nobody Wins!');
+                                }; 
+
+
+                            }
+
+                            else{
+
+                              num_usr_valido = data.num_usr_valido 
+
+                                
+                                switch (derecho) { 
+                                  case '22': 
+                                    $("#procesar_ventas").prop('disabled',false);
+                                    break;
+                                  case 'prototype': 
+                                    alert('prototype Wins!');
+                                    break;
+                                  case 'mootools': 
+                                    alert('mootools Wins!');
+                                    break;    
+                                  case 'dojo': 
+                                    alert('dojo Wins!');
+                                    break;
+                                  default:
+                                    alert('Nobody Wins!');
+                                  };
+
+                            
+
+                              if(data.tiene_derecho == 0){
+                                        
+                                      alert(msg_derecho_valido)
+
+                                        $("#procesar_cierre_pedido").prop('disabled',true)
+
+                              }
+                              else {
+                                        tiene_derecho = 1
+                              };
+
+
+                            }
+                    
+                    ;
+                    
+                    console.log(data.num_usr_valido);
+                    console.log(data.tiene_derecho);
+
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+      });
+
+
+
 
 
                             
 
  });
 
-
-
-
-
-                   
-    
-
-    
