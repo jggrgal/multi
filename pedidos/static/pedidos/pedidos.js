@@ -2839,7 +2839,7 @@ $('#procesar_ventas').click(function(e){
         continuar_procesando = 0;
         var tot_gral = $('#totalgral').text();
         var recibido = $('#input_recibido').val();// A este control el cual es un input
-                                                  // a diferencia del anterior que no es input
+        var usr_id =                                           // a diferencia del anterior que no es input
                                                   // debe aplicarsele el metodo val() en lugar
                                                   // del .text() o el .html(), de lo contrario
                                                   // no se traera su valor y la variable "recibido"
@@ -2853,7 +2853,7 @@ $('#procesar_ventas').click(function(e){
         if (parseInt(recibido) < parseInt(tot_gral) && parseInt(tot_gral) > 0 ) {
                 alert("Lo recibido debe cubrir el total !")
         } else {
-              if($("#psw_paso").val() ==''){
+              if($("#psw_paso_procesar_ventas").val() ==''){
                     alert("Ingrese su password de paso !");
                     continuar_procesando = 0;
               } else {
@@ -2913,7 +2913,7 @@ $('#procesar_ventas').click(function(e){
                     // Y MANDARLO VIA AJAX A VIEWS, SE UTILIZA IGUAL QUE
                     // EN CIERRE DE PEDIDOS PARA NO TIRAR TANTO CODIGO.
 
-                    var usr_id = $("#psw_paso").val();
+                    var psw_paso = $("#psw_paso_procesar_ventas").val();
 
 
 
@@ -2932,7 +2932,7 @@ $('#procesar_ventas').click(function(e){
 
                       url: '/pedidos/procesar_venta/',
                       type: 'POST',
-                      data: {'TableData_ventas':TableData_ventas,'TableData_creditos':TableData_creditos,'TableData_cargos':TableData_cargos,'totalcreditos':totalcreditos,'totalventas':totalventas,'totalcargos':totalcargos,'totaldsctos':totaldsctos,'totalgral':totalgral,'id_socio':id_socio,'recibido':recibido,'usr_id':usr_id,},
+                      data: {'TableData_ventas':TableData_ventas,'TableData_creditos':TableData_creditos,'TableData_cargos':TableData_cargos,'totalcreditos':totalcreditos,'totalventas':totalventas,'totalcargos':totalcargos,'totaldsctos':totaldsctos,'totalgral':totalgral,'id_socio':id_socio,'recibido':recibido,'psw_paso':psw_paso,},
                       datatype:'application/json',
                       //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                       success: function(data){
@@ -3250,6 +3250,25 @@ $('#procesar_ventas').click(function(e){
         // al menos aqui si hace la comparacion.
         
         continuar_procesando = 0;
+
+        while ($("#psw_paso_cancela_pedido").val() == '' && $("#derecho").val()=='7'){
+
+            alert("Ingrese su password de paso !");
+            
+
+        }
+
+        continuar_procesando = 1;      
+        
+        /*
+        if($("#psw_paso").val() =='' && $("#derecho").value()='7'){
+                    alert("Ingrese su password de paso !");
+                    continuar_procesando = 0;
+              } else {
+                  continuar_procesando = 1
+                } */
+
+
         
         e.preventDefault();
         var answer=confirm('Se procederá a cancelar el registro, si está seguro de clic en "aceptar", caso contrario de clic en "cancelar".');
@@ -3261,7 +3280,7 @@ $('#procesar_ventas').click(function(e){
                  productono = $(this).parents('tr').find('td:eq(1)').text();
                  catalogo = $(this).parents('tr').find('td:eq(2)').text();
                  nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
-                 usr_id = $('#usr_id_cancela_pedido').val();
+                 psw_paso = $('#psw_paso_cancela_pedido').val();
 
 
                   //TableData = $.toJSON(TableData);
@@ -3271,7 +3290,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/cancelar_pedido/',
                     type: 'POST',
-                    data: {'motivo':motivo,'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea,'usr_id':usr_id, },
+                    data: {'motivo':motivo,'pedido':pedido,'productono':productono,'catalogo':catalogo,'nolinea':nolinea,'psw_paso':psw_paso, },
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3681,9 +3700,10 @@ $('#procesar_ventas').click(function(e){
 
       // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
       // AL MOMENTO DE CERRAR PEDIDO EN COLOCACIONES
-      $("#psw_paso").blur(function() {
+      $(".psw_paso").blur(function() {
+              console.log("YA ENTRE A psw_paso")
 
-                var usr_id = $(this).val()
+                var psw_paso = $(this).val()
                 //$("#psw_paso").prop('disabled',true)
                 var derecho = $('#derecho').val()
                 var msg_derecho_valido = $('#msg_derecho_valido').val()
@@ -3691,19 +3711,22 @@ $('#procesar_ventas').click(function(e){
                 $.ajax({
                   url: '/pedidos/valida_usr/',
                   type: 'GET',
-                  data:{'usr_id':usr_id,'usr_derecho':derecho},
+                  data:{'psw_paso':psw_paso,'usr_derecho':derecho},
                   success: function(data){
-                            if (data.num_usr_valido == 0){
+                            if (data.num_usr_valido == 0 || data.tiene_derecho == 0 ){
                                          
-                                alert(derecho) 
+                                console.log(derecho) 
                                                                                        
                                 switch (derecho) { 
-                                  case '22':
+                                  case '22': // procesar ventas
                                     alert (msg_derecho_valido); 
                                     $("#procesar_ventas").prop('disabled',true);
                                     break;
-                                  case 'prototype': 
-                                    alert('prototype Wins!');
+                                  case '7': 
+
+                                    alert(msg_derecho_valido);
+                                    $("#btn_cancela_pedido").prop('disabled',true);
+
                                     break;
                                   case 'mootools': 
                                     alert('mootools Wins!');
@@ -3740,24 +3763,8 @@ $('#procesar_ventas').click(function(e){
                                     alert('Nobody Wins!');
                                   };
 
-                            
-
-                              if(data.tiene_derecho == 0){
+                            };         
                                         
-                                      alert(msg_derecho_valido)
-
-                                        $("#procesar_cierre_pedido").prop('disabled',true)
-
-                              }
-                              else {
-                                        tiene_derecho = 1
-                              };
-
-
-                            }
-                    
-                    ;
-                    
                     console.log(data.num_usr_valido);
                     console.log(data.tiene_derecho);
 
@@ -3769,10 +3776,50 @@ $('#procesar_ventas').click(function(e){
       });
 
 
+// F U N I C I O N  PARA CANCELAR PEDIDOS
+
+      // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
+      // AL MOMENTO DE CERRAR PEDIDO EN COLOCACIONES
+      $("#psw_paso_cancela_pedido").blur(function() {
+              console.log("YA ENTRE A PASS PASO CANCELACION PEDIDOS");
+
+                var psw_paso = $(this).val();
+                //$("#psw_paso").prop('disabled',true)
+                var derecho = $('#derecho_cancela_pedido').val();
+                var msg_derecho_valido = $('#msg_derecho_ivalido_cancela_pedido').val();
+            
+                $.ajax({
+                  url: '/pedidos/valida_usr/',
+                  type: 'GET',
+                  data:{'psw_paso':psw_paso,'usr_derecho':derecho},
+                  success: function(data){
+                            if (data.num_usr_valido == 0 || data.tiene_derecho == 0 ){
+                                         
+                                alert(msg_derecho_valido); 
+                                 $(".btn_cancela_pedido").prop('disabled',true);
+                    
+                            }
+
+                            else{
+
+                                $(".btn_cancela_pedido").prop('disabled',false);
+
+                                num_usr_valido = data.num_usr_valido 
+
+                                
+                                  };
+
+                                     
+                                        
+                    
+                   
+                  },
+                  error: console.log("algo pasa con data")
+                });
+
+      });
 
 
-
-                            
 
  });
 

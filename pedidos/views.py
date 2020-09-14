@@ -2814,22 +2814,36 @@ def cancelarpedidoadvertencia(request,pedido,productono,catalogo,nolinea):
 
 # RUTINA PARA CANCELAR UN PRODUCTO
 
-def cancela_producto(request,pedido,productono,catalogo,nolinea,motivo_cancelacion):
+def cancela_producto(request,pedido,productono,catalogo,nolinea,motivo_cancelacion,psw_paso):
 
 	#pdb.set_trace()
 	cursor = connection.cursor()
-	usr_id = request.POST.get('usr_id')
+	if psw_paso == '':
+		psw_paso = request.POST.get('psw_paso')
 	hoy = datetime.now()
 	fecha_hoy = hoy.strftime("%Y-%m-%d")
 	hora_hoy = hoy.strftime("%H:%M:%S") 
 	error = ''
 	 
 	try:
+		cursor.execute("SELECT usuariono FROM usr_extend WHERE pass_paso=%s;",(psw_paso,))
+		usr_existente =cursor.fetchone()
+		usr_existente = usr_existente[0]
+
 		cursor.execute("START TRANSACTION;")
 		cursor.execute("UPDATE pedidoslines l set l.status='Cancelado' WHERE l.empresano=1 and  l.pedido=%s and l.productono=%s and l.catalogo=%s and l.nolinea=%s;",(pedido,productono,catalogo,nolinea,))
 		cursor.execute("UPDATE pedidos_encontrados set BodegaEncontro=0,encontrado='' WHERE empresano=1 and pedido=%s and productono=%s and catalogo=%s and nolinea=%s;",(pedido,productono,catalogo,nolinea,))
-		cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);",(1,pedido,productono,'Cancelado',catalogo,nolinea,fecha_hoy,hora_hoy,usr_id))
+		cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);",(1,pedido,productono,'Cancelado',catalogo,nolinea,fecha_hoy,hora_hoy,usr_existente))
 		cursor.execute("INSERT INTO pedidoscancelados (Empresano,pedido,productono,catalogo,nolinea,motivo) values(1,%s,%s,%s,%s,%s);",(pedido,productono,catalogo,nolinea,motivo_cancelacion))			
+		
+		# Actualiza log
+		cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,7,fecha_hoy,hora_hoy,'Canceló un articulo del catalogo '+catalogo+' con id '+productono+' del pedido '+str(pedido)))		
+
+
+
+
+
+
 		status_operation='ok'
 		cursor.execute("COMMIT;")
 
@@ -2852,14 +2866,14 @@ def cancelar_pedido(request):
 	catalogo = request.POST['catalogo']
 	nolinea = request.POST['nolinea']
 	motivo = request.POST['motivo']
-	usr_id = request.POST['usr_id']
+	psw_paso = request.POST['psw_paso']
 
 	status_operation='fail'
 	error = ''
 	
 	context={}
 	
-	status_operacion,error = cancela_producto(request,pedido,productono,catalogo,nolinea,motivo)
+	status_operacion,error = cancela_producto(request,pedido,productono,catalogo,nolinea,motivo,psw_paso)
 				
 	data = {'status_operacion':status_operacion,'error':error}
 	return HttpResponse(json.dumps(data),content_type='application/json',)	
@@ -5658,7 +5672,7 @@ def procesar_venta(request):
 		totaldsctos = request.POST.get('totaldsctos')
 		totalgral = request.POST.get('totalgral')
 		recibido = request.POST.get('recibido')
-		user_id = request.POST.get('usr_id')
+		psw_paso = request.POST.get('psw_paso')
 
 
 		if float(totalcreditos) > 0:
@@ -5680,7 +5694,7 @@ def procesar_venta(request):
 		datos_cargos = json.loads(TableData_cargos)
 
 		#capturista = request.session['socio_zapcat']
-		capturista = user_id
+		#capturista = user_id
 		sucursal_activa = request.session['sucursal_activa']
 
 
@@ -5718,6 +5732,13 @@ def procesar_venta(request):
 			#registro = cursor.fetchone()
 			#id_nuevo_cierre = registro[0]+1
 
+			# Trae el usuario para luego grabar el log.
+			cursor.execute('SELECT usuariono FROM usr_extend WHERE pass_paso=%s;',(psw_paso,))
+
+			usr_existente = cursor.fetchone()
+			usr_existente =usr_existente[0]
+
+			capturista = usr_existente # se actualiza esta variable porque se utiliza en los updates
 
 
 			# Crea nuevo cierre en tabla de cierres !
@@ -5818,6 +5839,14 @@ def procesar_venta(request):
 											float(totaldsctos),False,False,\
 											float(totalcargos),0,float(recibido),\
 											float(totalventas),sucursal_activa,False,))
+
+
+
+			# Actualiza log
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,22,fecha_hoy,hora_hoy,'Creó la venta : '+str(nuevo_docto)))		
+
+
+
 
 
 			# Asocia cada registro al nuevo documento (remision) generado
@@ -6489,9 +6518,6 @@ def verifica_derechos_usr(num_usr_valido,usr_derecho):
 		derecho = 1
 	return(derecho)
 
-
-
-
 def valida_usr(request):
 	#pdb.set_trace()
 
@@ -6504,11 +6530,11 @@ def valida_usr(request):
 
 
 	tiene_derecho = 0 # asume que no tiene derecho
-	usr_id = request.GET.get('usr_id')
+	psw_paso = request.GET.get('psw_paso')
 	usr_derecho = int(request.GET.get('usr_derecho').encode('latin_1'))
 
 
-	num_usr_valido = verifica_existencia_usr(usr_id) # verifica si existe
+	num_usr_valido = verifica_existencia_usr(psw_paso) # verifica si existe
 
 	if num_usr_valido != 0:
 		tiene_derecho = verifica_derechos_usr(num_usr_valido,usr_derecho) # Si existe verifica que tenga el derecho solicitado

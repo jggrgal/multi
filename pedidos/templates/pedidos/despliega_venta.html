@@ -224,7 +224,7 @@
 	    <div class="col-md-3">
 	    	<br>
 	    	<label for="usr_id">psw_paso:</label> 
-		            <input id="psw_paso" name="psw_paso" class="form-control" type="password" pattern=".{,3}" value=''>
+		            <input id="psw_paso_procesar_ventas" name="psw_paso" class="form-control psw_paso" type="password" pattern=".{,3}" value=''>
 		            <input id ='derecho' name ='derecho' type="hidden" value="22" />
 		            <input id ='msg_derecho_valido' name ='msg_derecho_valido' type="hidden" value="Usuario invalido o sin derechos para procesar ventas !" />
 		            <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET" >
@@ -303,7 +303,7 @@
 	                    {% endlocalize %}
 	                    <td>{{ porconf_conf.razonsocial }}</td>
 	                    <td><p align="left">
-                          <button class="btn btn-danger btn-sm btn_cancela_pedido" href="#" role="button" {% if porconf_conf.status == 'Cancelado' or porconf_conf.status == 'Facturado' or porconf_conf.status == 'Aqui' or porconf_conf.status == 'Confirmado' or porconf_conf.status == 'Devuelto' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</button>
+                          <button class="btn btn-danger btn-sm btn_cancela_pedido" href="#" role="button" {% if porconf_conf.status == 'Cancelado' or porconf_conf.status == 'Facturado' or porconf_conf.status == 'Aqui' or porconf_conf.status == 'Confirmado' or porconf_conf.status == 'Devuelto' or porcon_conf.status == 'Descontiunado' %} style="display: none;" {% endif %} > <span class="glyphicon glyphicon-remove-sign"> </span> Cancelar</button>
                         </p></td>
                         <td>{{ porconf_conf.notas }} </td>
 																		
@@ -314,8 +314,13 @@
     	</table>
     	<div class='col-md-4'>
 
-            <label for="usr_id">Usr_cancela:</label> 
-            <input id="usr_id_cancela_pedido" name="usr_id_cancelapedido" class="form-control" type="password" pattern=".{,3}" value=0>
+            <label for="psw_paso_cancelacion">psw_paso_cancelación:</label> 
+            <input id="psw_paso_cancela_pedido" name="psw_paso_cancela_pedido" class="form-control" type="password" pattern=".{,3}" value=0>
+            <input id ='derecho_cancela_pedido' name ='derecho' type="hidden" value="7" />
+		    <input id ='msg_derecho_ivalido_cancela_pedido' name ='msg_derecho_valido' type="hidden" value="Usuario invalido o sin derechos para cancelar pedidos  !" />
+
+
+
    
         </div>
     </div>
