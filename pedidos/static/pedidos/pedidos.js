@@ -2500,7 +2500,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                      url: '/pedidos/procesar_pedido/',
                       type: 'POST',
-                      data: {'lsuc':lsuc,'tiposervicio':tiposerv,'viasolicitud':viasolic,'anticipo':anticipo,'total':total,'usr_id':$("#usr_id").val()},
+                      data: {'lsuc':lsuc,'tiposervicio':tiposerv,'viasolicitud':viasolic,'anticipo':anticipo,'total':total,'psw_paso':$("#psw_paso_crear_pedido").val()},
                       datatype:'application/json',
                       //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                       success: function(data){
@@ -3728,9 +3728,11 @@ $('#procesar_ventas').click(function(e){
                                     $("#btn_cancela_pedido").prop('disabled',true);
 
                                     break;
-                                  case 'mootools': 
-                                    alert('mootools Wins!');
-                                    break;    
+                                  case '5': 
+                                    alert(msg_derecho_valido);
+                                    $("#procesar").prop('disabled',true);
+                                    break;  
+
                                   case 'dojo': 
                                     alert('dojo Wins!');
                                     break;
@@ -3743,15 +3745,17 @@ $('#procesar_ventas').click(function(e){
 
                             else{
 
-                              num_usr_valido = data.num_usr_valido 
-
+                              num_usr_valido = data.num_usr_valido;
+                              tiene_derecho =data.tiene_derecho;
                                 
                                 switch (derecho) { 
                                   case '22': 
                                     $("#procesar_ventas").prop('disabled',false);
                                     break;
-                                  case 'prototype': 
-                                    alert('prototype Wins!');
+                                  case '5': 
+                                    $("#procesar").prop('disabled',false);
+
+                                    ;
                                     break;
                                   case 'mootools': 
                                     alert('mootools Wins!');

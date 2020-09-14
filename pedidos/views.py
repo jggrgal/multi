@@ -1507,14 +1507,13 @@ def procesar_pedido(request):
 				status_a_asignar='RecepEnDevol'
 			
 			#capturista = request.session['socio_zapcat'] # toma el valor del empleado que captura
-			capturista =  request.POST.get('usr_id') # toma el id  de confirmacion del empleado que captura 
 			tiposervicio = request.POST.get('tiposervicio')
 			
 			viasolicitud = request.POST.get('viasolicitud')
 			viasolicitud = int(viasolicitud) #  se convierte a entero	
 		
 			
-			usr_id = request.POST.get('usr_id')
+			psw_paso = request.POST.get('psw_paso')
 			try:
 				if float(request.POST.get('anticipo')):
 					anticipo = int(request.POST.get('anticipo').encode('latin_1'))
@@ -1541,9 +1540,20 @@ def procesar_pedido(request):
 		lsuc = request.POST.get('lsuc')
 
 		cursor = connection.cursor()
+		
 		cursor.execute("SELECT SucursalNo from sucursal where nombre = %s;",[lsuc])
 		sucursal_registro = cursor.fetchone()
 		id_suc = sucursal_registro[0]
+
+		cursor.execute("SELECT usuariono from usr_extend where pass_paso=%s;",(psw_paso,))
+		usr_existente =cursor.fetchone()
+		usr_existente =usr_existente[0]
+
+		if request.session['is_staff']:
+			capturista = usr_existente
+
+
+
 		cursor.close()
 
 		
@@ -1551,6 +1561,9 @@ def procesar_pedido(request):
 		try:
 			cursor = connection.cursor()
 			cursor.execute("START TRANSACTION;")
+
+
+
 
 
 			# Se busca el ultimo pedido registrado para hacer y se le suma uno para crear el nuevo
@@ -1647,6 +1660,11 @@ def procesar_pedido(request):
 
 			# La siguiente linea se agrega para actualizar la vta totalcorrectamenteya que el valor que se trea del browser no es correcto, esta mal redondeado.	
 			cursor.execute("UPDATE pedidosheader SET vtatotal=%s WHERE pedidono=%s;",(v_total,PedidoNuevo,))	
+
+			# crea log de pedido
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,3,fecha_hoy,hora_hoy,'Creó el pedido: '+str(PedidoNuevo)))		
+		
+
 
 			cursor.execute("DELETE FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])	
 			
