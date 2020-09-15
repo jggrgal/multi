@@ -7038,7 +7038,7 @@ def procesar_devolucion_socio(request):
 
 
 	contador_productos_recibidos = 0
-
+	nuevo_credito = 0
 
 
 
@@ -7055,7 +7055,7 @@ def procesar_devolucion_socio(request):
 		
 		socio = request.POST.get('socio')
 
-		usr_id = request.POST.get('usr_id')
+		psw_paso = request.POST.get('psw_paso')
 		#almacen = request.POST.get('almacen')
 		#almacen = almacen.encode('latin_1')
 		tipoconsulta = request.POST.get('tipoconsulta')
@@ -7090,6 +7090,10 @@ def procesar_devolucion_socio(request):
 		hoy = datetime.now()
 		fecha_hoy = hoy.strftime("%Y-%m-%d")
 		hora_hoy = hoy.strftime("%H:%M:%S") 
+
+		cursor.execute("SELECT usuariono FROM usr_extend WHERE pass_paso=%s;",(psw_paso,))
+		usr_existente = cursor.fetchone()
+		usr_existente = usr_existente[0]
 
 		cursor.execute("START TRANSACTION;")
 
@@ -7170,10 +7174,10 @@ def procesar_devolucion_socio(request):
 							socio,
 							fecha_hoy,
 							hora_hoy,
-							usr_id,
+							usr_existente,
 							fecha_hoy,
 							hora_hoy,
-							usr_id,
+							usr_existente,
 							'Com. prod. no recogido '+registro[2]+' '+registro[3]+' '+registro[4],
 							Decimal(cuotadiasextemp),
 							Decimal(cuotadiasextemp),
@@ -7203,7 +7207,7 @@ def procesar_devolucion_socio(request):
 										VALUES (%s,%s,%s,%s,
 											%s,%s,%s,%s,%s);""",
 										[1,pedido,productono,nuevo_status_pedido,
-										catalogo,nolinea,fecha_hoy,hora_hoy,usr_id])
+										catalogo,nolinea,fecha_hoy,hora_hoy,usr_existente])
 
 
 
@@ -7221,10 +7225,10 @@ def procesar_devolucion_socio(request):
 				socio,
 				fecha_hoy,
 				hora_hoy,
-				usr_id,
+				usr_existente,
 				fecha_hoy,
 				hora_hoy,
-				usr_id,
+				usr_existente,
 				'Credito generado por concepto de devolucion sobre venta',
 				total_devuelto_dinero,
 				total_devuelto_dinero,
@@ -7252,6 +7256,13 @@ def procesar_devolucion_socio(request):
 
 					if incidencia != 'Seleccionar':
 						cursor.execute("UPDATE pedidoslines SET NoNotaCreditoPorDevolucion=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_credito,pedido,productono,catalogo,nolinea))
+
+			
+
+			# crea log de pedido
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,8,fecha_hoy,hora_hoy,'Creó una devolución con nota de credito: '+str(nuevo_credito)))		
+
+
 
 			cursor.execute("COMMIT;")
 

@@ -3341,20 +3341,29 @@ $('#procesar_ventas').click(function(e){
 
                   $("#id_marcartodo_nollego").val()
                   $("#id_nueva_fecha_llegada").val()
-                  var usr_id = $("#usr_id_pedidos_recepcionar").val();
+                  var psw_paso = $("#psw_paso_pedidos_recepcionar").val();
+
+
+                  // Valida que ingrese un pass de paso.
+                  while(psw_paso == ''){
+
+                          alert('Ingrese su password de paso !');
+
+                        };
 
 
                   $.ajax({
 
                     url: '/pedidos/procesar_devolucion_socio/',
                     type: 'POST',
-                    data: {'TableData':TableData,'socio':socio,'usr_id':usr_id,'tipoconsulta':tipoconsulta},
+                    data: {'TableData':TableData,'socio':socio,'psw_paso':psw_paso,'tipoconsulta':tipoconsulta},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
 
                                       
                         console.log(data);
+
 
                         if (data.status_operacion != 'ok') { 
                           alert(data.error);
@@ -3363,7 +3372,9 @@ $('#procesar_ventas').click(function(e){
                           $("#id_nuevo_credito").val(data.nuevo_credito);
 
                           alert("Devolucion grabada con éxito !.");
+                          
                           }; 
+
                         $("#procesar_devolucion_socio").prop('disabled', true);
                     },
                     error: function(){ 
@@ -3716,26 +3727,26 @@ $('#procesar_ventas').click(function(e){
                             if (data.num_usr_valido == 0 || data.tiene_derecho == 0 ){
                                          
                                 console.log(derecho) 
+                                // Despliega mensaje de derecho invalido:
+                                alert(msg_derecho_valido); 
                                                                                        
                                 switch (derecho) { 
-                                  case '22': // procesar ventas
-                                    alert (msg_derecho_valido); 
-                                    $("#procesar_ventas").prop('disabled',true);
+                                  case '22': 
+                                    $("#procesar_ventas").prop('disabled',true);// procesar ventas
                                     break;
                                   case '7': 
 
-                                    alert(msg_derecho_valido);
-                                    $("#btn_cancela_pedido").prop('disabled',true);
+                                    $("#btn_cancela_pedido").prop('disabled',true); // cancelar pedido ..pendiente su uso
 
                                     break;
                                   case '5': 
-                                    alert(msg_derecho_valido);
-                                    $("#procesar").prop('disabled',true);
+                                    $("#procesar").prop('disabled',true); // procesar pedido
                                     break;  
 
-                                  case 'dojo': 
-                                    alert('dojo Wins!');
+                                  case '8': 
+                                    $("#procesar_devolucion_socio").prop('disabled',true);
                                     break;
+
                                   default:
                                     alert('Nobody Wins!');
                                 }; 
@@ -3754,11 +3765,10 @@ $('#procesar_ventas').click(function(e){
                                     break;
                                   case '5': 
                                     $("#procesar").prop('disabled',false);
-
-                                    ;
                                     break;
-                                  case 'mootools': 
-                                    alert('mootools Wins!');
+                                  case '8': 
+                                    $("#procesar_devolucion_socio").prop('disabled',false);
+
                                     break;    
                                   case 'dojo': 
                                     alert('dojo Wins!');
