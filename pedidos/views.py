@@ -5094,7 +5094,7 @@ def crea_documento(request):
 			asociado = request.POST.get('doc_asociado')
 			concepto = request.POST.get('doc_concepto')
 			monto = request.POST.get('doc_monto')
-			usr_crear_documento =request.POST.get('usr_crear_documento')
+			psw_paso =request.POST.get('psw_paso')
 
 
 			fecha_hoy = ''
@@ -5135,7 +5135,37 @@ def crea_documento(request):
 
 
 			cursor =  connection.cursor()
+
 			try:
+
+				usr_existente=0
+				permiso_exitoso=0
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,23)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para crear documentos !"
+				context={'error_msg':error_msg,}
+				
+				return render(request, 'pedidos/error.html',context)		
+
+	
+
+
+			try:		
+
 
 				cursor.execute('START TRANSACTION')
 
@@ -5174,10 +5204,11 @@ def crea_documento(request):
 					  VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
 					  %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\
 					  %s,%s,%s,%s);''',[1,ultimodocto[0]+1,ultimoconsec[0]+1,tipodedocumento,'Contado',
-					  	asociado,fecha_hoy,hora_hoy,usr_crear_documento,\
-					  	fecha_hoy,hora_hoy,usr_crear_documento,\
+					  	asociado,fecha_hoy,hora_hoy,usr_existente,\
+					  	fecha_hoy,hora_hoy,usr_existente,\
 					  	concepto,monto,saldo,0,vtadecatalogo,0,0,0,0,venta,id_sucursal,0])
 				
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,23,fecha_hoy,hora_hoy,'Se creó el documento: '+str(ultimodocto[0]+1)))		
 
 				
 				

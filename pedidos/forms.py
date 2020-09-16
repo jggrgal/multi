@@ -1586,7 +1586,7 @@ class CreaDocumentoForm(forms.Form):
 	doc_asociado= forms.IntegerField(label='Socio',initial=0,required=True)
 	doc_concepto = forms.CharField(label="Concepto",initial=' ',required=True)
 	doc_monto = forms.FloatField(label='Monto',initial=0,required=True)
-	usr_crear_documento = forms.IntegerField(widget=forms.PasswordInput,label='usr_id',initial=0,required=True)
+	psw_paso = forms.CharField(widget=forms.PasswordInput,label='Password de paso',initial=0,max_length=3,required=True)
 
 
 	error_messages = {'asociado_inv':'El numero de socio ingresado debe ser mayor a 0 !',\
@@ -1627,7 +1627,7 @@ class CreaDocumentoForm(forms.Form):
 		self.asociado = cleaned_data.get('doc_asociado')
 		self.concepto =  cleaned_data.get('doc_concepto')
 		self.monto =  cleaned_data.get('doc_monto')
-		self.usr_crear_documento = cleaned_data.get('usr_crear_documento')
+		self.psw_paso = cleaned_data.get('psw_paso')
 
 		try:
 			self.longitud_concepto = len(self.concepto.strip())

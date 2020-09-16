@@ -487,7 +487,7 @@ $("#procesar_recepcion_dev_prov").prop('disabled',true)
       // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
       // AL MOMENTO DE CREAR UN DOCUMENTO.
 
-$("#btn_crea_documento").prop('disabled',true)
+$("#1btn_crea_documento").prop('disabled',true)
 
 
 
