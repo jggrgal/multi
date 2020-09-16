@@ -3746,6 +3746,11 @@ $('#procesar_ventas').click(function(e){
                                   case '8': 
                                     $("#procesar_devolucion_socio").prop('disabled',true);
                                     break;
+                                  case '35': 
+                                    $("#procesar").prop('disabled',true); // procesar pedido
+                                    break;  
+
+
 
                                   default:
                                     alert('Nobody Wins!');
@@ -3770,8 +3775,8 @@ $('#procesar_ventas').click(function(e){
                                     $("#procesar_devolucion_socio").prop('disabled',false);
 
                                     break;    
-                                  case 'dojo': 
-                                    alert('dojo Wins!');
+                                  case '35': 
+                                    $("#procesar").prop('disabled',false);
                                     break;
                                   default:
                                     alert('Nobody Wins!');

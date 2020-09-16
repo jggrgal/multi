@@ -1662,7 +1662,7 @@ def procesar_pedido(request):
 			cursor.execute("UPDATE pedidosheader SET vtatotal=%s WHERE pedidono=%s;",(v_total,PedidoNuevo,))	
 
 			# crea log de pedido
-			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,3,fecha_hoy,hora_hoy,'Creó el pedido: '+str(PedidoNuevo)))		
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,35 if socio_a_validar == 3 else 3,fecha_hoy,hora_hoy,'Creó el pedido: '+str(PedidoNuevo) if socio_a_validar != 3 else 'Capturó pieza no solicitada con pedido: '+str(PedidoNuevo)))		
 		
 
 
