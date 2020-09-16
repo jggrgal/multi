@@ -3495,7 +3495,7 @@ $('#procesar_ventas').click(function(e){
 
 
         
-        usr_id = $("#usr_id_recepcion_dev_prov").val();
+        psw_paso = $("#psw_paso_recepcionar_dev_aproveedor").val();
 
         // comienza validacion de campos antes de pasar al servidor
 
@@ -3518,7 +3518,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/procesar_recepcion_devolucion_proveedor/',
                     type: 'POST',
-                    data: {'TableData':TableData,'usr_id':usr_id,},
+                    data: {'TableData':TableData,'psw_paso':psw_paso,},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3750,7 +3750,9 @@ $('#procesar_ventas').click(function(e){
                                     $("#procesar").prop('disabled',true); // procesar pedido
                                     break;  
 
-
+                                  case '32': 
+                                    $("#procesar_recepcion_dev_prov").prop('disabled',true); // procesar pedido
+                                    break; 
 
                                   default:
                                     alert('Nobody Wins!');
@@ -3778,6 +3780,12 @@ $('#procesar_ventas').click(function(e){
                                   case '35': 
                                     $("#procesar").prop('disabled',false);
                                     break;
+
+                                  case '32': 
+                                    $("#procesar_recepcion_dev_prov").prop('disabled',false); // procesar pedido
+                                    break; 
+
+
                                   default:
                                     alert('Nobody Wins!');
                                   };

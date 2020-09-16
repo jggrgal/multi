@@ -9109,13 +9109,24 @@ def procesar_recepcion_devolucion_proveedor(request):
 		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
 		datos = json.loads(TableData)
 
-		if request.POST.get('usr_id') is not None:
-			capturista = request.POST.get('usr_id')
+		cursor = connection.cursor()
+
+
+		if request.POST.get('psw_paso') is not None:
+		
+			psw_paso = request.POST.get('psw_paso')
+		
+			cursor.execute("SELECT usuariono FROM usr_extend where pass_paso=%s;",(psw_paso,))
+			usr_existente = cursor.fetchone()
+			usr_existente = usr_existente[0]
+			capturista = usr_existente
+
 		else:
 			capturista = 99
-		
-		
-		cursor = connection.cursor()
+			usr_existente = 0
+
+
+
 
 		''' INICIALIZACION DE VARIABLES '''
 
@@ -9161,6 +9172,8 @@ def procesar_recepcion_devolucion_proveedor(request):
 
 					cursor.execute("INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,ProductoNo,Status,catalogo,NoLinea,FechaMvto,HoraMvto,Usuario) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",[1,pedido,productono,nuevo_status_pedido,catalogo,nolinea,fecha_hoy,hora_hoy,capturista])
 
+					# crea log de pedido
+					cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,32,fecha_hoy,hora_hoy,'Recepcionó una devolución de proveedor del pedido: '+str(pedido)))		
 
 
 
