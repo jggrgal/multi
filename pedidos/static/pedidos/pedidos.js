@@ -2623,9 +2623,9 @@ $(".btn_cancela_pedido").prop('disabled',true)
         // valida que el anticipo sea menor al monto del pedido.
         // observar que se puede comparar un contenido html con un valor
         // al menos aqui si hace la comparacion.
-        continuar_procesando = 0;
+        continuar_procesando = 1;
 
-        if(num_usr_valido == 0 ){                                       
+        /*if(num_usr_valido == 0 ){                                       
                                 //alert ("Código de empleado inválido, ingrese su código de empleado !"); 
                                 continuar_procesando = 0;
               }
@@ -2642,7 +2642,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
                                   continuar_procesando = 1;
 
                     }
-                  };
+                  };*/
 
         if(continuar_procesando == 1){
 
@@ -2661,7 +2661,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                     url: '/pedidos/procesar_colocaciones/',
                     type: 'POST',
-                    data: {csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),'TableData':TableData,'almacen':almacen,'usr_id':$("#usr_id_colocaciones").val(),'fecha_probable':$("#id_fecha_probable").val()},
+                    data: {csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),'TableData':TableData,'almacen':almacen,'psw_paso':$("#psw_paso_colocaciones").val(),'fecha_probable':$("#id_fecha_probable").val(),'proveedor_nombre':proveedor_nombre,'almacen_nombre':almacen_nombre},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3754,6 +3754,10 @@ $('#procesar_ventas').click(function(e){
                                     $("#procesar_recepcion_dev_prov").prop('disabled',true); // procesar pedido
                                     break; 
 
+                                  case '36': 
+                                    $("#procesar_colocaciones").prop('disabled',true); // procesar pedido
+                                    break;
+                                  
                                   default:
                                     alert('Nobody Wins!');
                                 }; 
@@ -3784,7 +3788,10 @@ $('#procesar_ventas').click(function(e){
                                   case '32': 
                                     $("#procesar_recepcion_dev_prov").prop('disabled',false); // procesar pedido
                                     break; 
-
+                                  case '36': 
+                                    $("#procesar_colocaciones").prop('disabled',false); // procesar pedido
+                                    break;
+                                  
 
                                   default:
                                     alert('Nobody Wins!');

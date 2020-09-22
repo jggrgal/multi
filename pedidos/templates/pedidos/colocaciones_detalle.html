@@ -8,6 +8,8 @@
     var reg_encontrados = "{{ reg_encontrados }}";
     var almacen = "{{ almacen }}";
     var tipo_consulta = "{{ tipo_consulta }}";
+    var proveedor_nombre = "{{ prov_nombre }}";
+    var almacen_nombre = "{{almacen_nombre}}";
     </script>
 
 {% load l10n %}
@@ -149,9 +151,16 @@
     </div>
     <div class="row">
         <div class='col-md-4'>
+ 
+            <!--<label for="usr_id">Usuario_id:</label> 
+            <input id="usr_id_colocaciones" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>-->
+            <label for="psw_paso">Password de paso:</label> 
+              <input id="psw_paso_colocaciones" name="psw_paso_colocaciones" class="form-control psw_paso" type="password" pattern=".{,3}" value=0>
+              <input id ='derecho' name ='derecho' type="hidden" value="36" />
+              <input id ='msg_derecho_valido' name ='msg_derecho_valido' type="hidden" value="Usuario invalido o sin derechos para colocar pedidos con proveedor !" />
 
-            <label for="usr_id">Usuario_id:</label> 
-            <input id="usr_id_colocaciones" name="usr_id_colocaciones" class="form-control" type="password" pattern=".{,3}" value=0>
+
+
 
 
             <label for="usr_id">Fecha Probable LLegada:</label> 

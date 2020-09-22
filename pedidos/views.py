@@ -3632,15 +3632,17 @@ def muestra_colocaciones(request):
 		print e
 		mensaje ="Se  produjo un error al acceder a base de datos"
 
-	if cursor.rowcount != 0:
+	try:
 
 		registros = dictfetchall(cursor)
 		mensaje ="Lista de articulos  a colocar:"
-	else:
+		cursor.close()
+		return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,'prov_nombre':prov_nombre[0],'almacen_nombre':almacen_nombre[0],'tot_reg':tot_reg,})
+	except:
 		registros ={}
 		mensaje = "Registros no encontrados para esta consulta !"
-	cursor.close()
-	return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,'prov_nombre':prov_nombre[0],'almacen_nombre':almacen_nombre[0],'tot_reg':tot_reg,})
+		cursor.close()
+		return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,})
 	#return render(request,'pedidos/colocaciones_detalle.html',{'registros':registros,'mensaje':mensaje,'reg_encontrados':reg_encontrados,'almacen':almacen,'reg_cancelados':reg_cancelados,'tipo_consulta':tipo_consulta,})
 
 	"""data = serializers.serialize('json', registros)
@@ -3726,12 +3728,12 @@ def procesar_colocaciones(request):
 
 		try:
 
+			psw_paso =  request.POST.get('psw_paso') # toma el id  de confirmacion del empleado que captura 
 		
-			capturista =  request.POST.get('usr_id') # toma el id  de confirmacion del empleado que captura 
-
-			usr_id = request.POST.get('usr_id')
-
 			fecha_probable = request.POST.get('fecha_probable')
+			proveedor_nombre = request.POST.get('proveedor_nombre')
+			almacen_nombre = request.POST.get('almacen_nombre')
+
 
 			
 		except:
@@ -3739,6 +3741,10 @@ def procesar_colocaciones(request):
 			pass
 			#HttpResponse('div class="alert alert-warning" role="alert"><strong>Operacion fallida !</strong> Hubo un error de sesion al procesar, la transacción no pudo ser completada, cierre su navegador, ingrese nuevamente e intente otra vez !</div>')
 		
+
+
+
+
 
 		almacen = request.POST.get('almacen')
 		almacen = almacen.encode('latin_1')
@@ -3763,6 +3769,11 @@ def procesar_colocaciones(request):
 		hora_hoy = hoy.strftime("%H:%M:%S") 
 
 
+
+		cursor.execute("SELECT usuariono from usr_extend WHERE pass_paso=%s;",(psw_paso,))
+		usr_existente = cursor.fetchone()
+		usr_existente = usr_existente[0]
+		capturista = usr_existente
 
 
         # Recupera cada diccionario y extrae los valores de la llave a buscar.
@@ -3940,7 +3951,12 @@ def procesar_colocaciones(request):
 					error_msg = "Error desconocido"
 					data = {'status_operacion':'fail','error':error_msg,}
 					error = True
-						
+		
+
+		cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,36,fecha_hoy,hora_hoy,"Colocó artículos del proveedor "+proveedor_nombre+" en el almacén "+almacen_nombre))
+
+
+
 		cursor.close()
 
 		# Si no hay error, nos devolvera la lista de pedidos cambiados
