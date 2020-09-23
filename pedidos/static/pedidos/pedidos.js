@@ -219,10 +219,10 @@ $("#nextBtn").click(function(){
 
       // FUNCION PARA VALIDAR QUE EXISTE EMPLEADO Y QUE TENGA DERECHOS 
       // AL MOMENTO DE CERRAR PEDIDO EN COLOCACIONES
-      $("#usr_id_colocadosacerrar").blur(function() {
+      $("#1usr_id_colocadosacerrar").blur(function() {
 
                 var usr_id = $(this).val()
-                $("#procesar_cierre_pedido").prop('disabled',true)
+                $("#1procesar_cierre_pedido").prop('disabled',true)
 
             
                 $.ajax({
@@ -2719,7 +2719,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
         monto_pagar =  $('#id_monto_pagar').val();
         paqueteria = $('#id_paqueteria').val();
         no_de_guia = $('#id_no_de_guia').val();
-        usr_id = $("#usr_id_colocadosacerrar").val();
+        psw_paso = $("#psw_paso_colocadosacerrar").val();
 
         // comienza validacion de campos antes de pasar al servidor
 
@@ -2795,7 +2795,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                     url: '/pedidos/procesar_cierre_pedido/',
                     type: 'POST',
-                    data: {'TableData':TableData,'almacen':almacen,'referencia':referencia,'total_articulos':total_articulos,'colocado_via':colocado_via,'confirmado_por':confirmado_por,'tomado_por':tomado_por,'fecha_cierre':fecha_cierre,'hora_cierre':hora_cierre,'fecha_llegada':fecha_llegada,'pedido':pedido,'importe':importe,'importe_nc':importe_nc,'monto_pagar':monto_pagar,'paqueteria':paqueteria,'no_de_guia':no_de_guia,'proveedor':proveedor,'usr_id':usr_id,},
+                    data: {'TableData':TableData,'almacen':almacen,'referencia':referencia,'total_articulos':total_articulos,'colocado_via':colocado_via,'confirmado_por':confirmado_por,'tomado_por':tomado_por,'fecha_cierre':fecha_cierre,'hora_cierre':hora_cierre,'fecha_llegada':fecha_llegada,'pedido':pedido,'importe':importe,'importe_nc':importe_nc,'monto_pagar':monto_pagar,'paqueteria':paqueteria,'no_de_guia':no_de_guia,'proveedor':proveedor,'psw_paso':psw_paso,},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3621,8 +3621,7 @@ $('#procesar_ventas').click(function(e){
                         else {
                           alert("Devolución exitosa !.");
                           $("#procesar_dev_prov").prop('disabled', true);
-                          }; 
-                        
+                          };                  
                     },
                     error: function(){ 
                       console.log(data);
@@ -3757,6 +3756,10 @@ $('#procesar_ventas').click(function(e){
                                   case '36': 
                                     $("#procesar_colocaciones").prop('disabled',true); // procesar pedido
                                     break;
+                                    
+                                  case '37': 
+                                    $("# procesar_cierre_pedido").prop('disabled',true); // procesar pedido
+                                    break; 
                                   
                                   default:
                                     alert('Nobody Wins!');
@@ -3790,9 +3793,11 @@ $('#procesar_ventas').click(function(e){
                                     break; 
                                   case '36': 
                                     $("#procesar_colocaciones").prop('disabled',false); // procesar pedido
-                                    break;
-                                  
-
+                                    break; 
+                                   case '37': 
+                                    $("#procesar_cierre_pedido").prop('disabled',false); // procesar pedido
+                                    break; 
+                         
                                   default:
                                     alert('Nobody Wins!');
                                   };

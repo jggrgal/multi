@@ -3983,11 +3983,20 @@ def procesar_cierre_pedido(request):
 		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
 		datos = json.loads(TableData)
 
-		if request.POST.get('usr_id') is not None:
-			capturista = request.POST.get('usr_id')
-		else:
+		try:
+			request.POST.get('psw_paso')
+			psw_paso = request.POST.get('psw_paso')
+
+			cursor = connection.cursor()
+			cursor.execute("SELECT usuariono FROM usr_extend WHERE pass_paso=%s;",(psw_paso,))
+			usr_existente = cursor.fetchone()
+			usr_existente = usr_existente[0]
+			capturista = usr_existente
+			cursor.close()
+		except:
+			psw_paso = '999'
 			capturista = 99
-		
+
 		datos_cierre_invalidos = False
 		errores_datos_cierre=[]
 		
@@ -4124,7 +4133,9 @@ def procesar_cierre_pedido(request):
                                                                                                                                                                                                                                                                                                                                                                                                
 			cursor.execute("INSERT INTO prov_ped_cierre (id,referencia,total_articulos,FechaColocacion,HoraColocacion,ColocadoVia,TomadoPor,ConfirmadoPor,CerradoPor,FechaCierre,HoraCierre,NumPedido,Importe,ImporteNC,MontoPagar,Paqueteria,NoGuia,prov_id,almacen,Totartrecibidos,Cerrado,Recepcionado) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",(id_nuevo_cierre,referencia,total_articulos,fecha_llegada,hora_hoy,colocado_via,tomado_por,confirmado_por,capturista,fecha_hoy,hora_hoy,pedido,importe,importe_nc,monto_pagar,paqueteria,no_de_guia,proveedor,almacen,total_articulos,True,False))
 
+			# Registra el evento en log de eventos
 
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values (%s,%s,%s,%s,%s);",(usr_existente,37,fecha_hoy,hora_hoy,"Cerró colocación con cierre número "+str(id_nuevo_cierre)))
 
 	        # Recupera cada diccionario y extrae los valores de la llave a buscar.
 			for j in datos:
