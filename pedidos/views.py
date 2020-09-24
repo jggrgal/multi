@@ -4524,7 +4524,9 @@ def procesar_recepcion(request):
 		datos = json.loads(TableData)
 
 		#capturista = request.session['socio_zapcat'] Esta linea se cambio por la que sigue..porque no se grababa el usuario que hacia la operacion.
-		capturista =  request.POST.get('usr_id')
+
+
+		psw_paso =  request.POST.get('psw_paso')
 
 		almacen = request.POST.get('almacen')
 		almacen = almacen.encode('latin_1')
@@ -4552,6 +4554,19 @@ def procesar_recepcion(request):
 
 
 		cursor = connection.cursor()
+
+
+		cursor.execute("SELECT usuariono FROM usr_extend WHERE pass_paso=%s;",(psw_paso,))
+		usr_existente = cursor.fetchone()
+		usr_existente = usr_existente[0]
+		capturista = usr_existente
+
+
+
+
+
+
+
 
 		''' INICIALIZACION DE VARIABLES '''
 
@@ -4899,8 +4914,12 @@ def procesar_recepcion(request):
 				
 		try:
 
+
+
+
 			"""Si no hay una nueva_fecha_de_llegada, es decir que (f_convertida sea igual a 1901/01/01) no se marca como
 			recepcionado el cierre, de otra manera se marca como recepcionado """
+
 
 			if f_convertida == '1901/01/01': 
 
@@ -4913,6 +4932,8 @@ def procesar_recepcion(request):
 				# De otra manera solo incremeta el contador de recepcionados
 
 					cursor.execute("UPDATE prov_ped_cierre set TotArtRecibidos=%s WHERE id=%s;",(contador_productos_recibidos,cierre))
+					cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) VALUES(%s,%s,%s,%s,%s);",(usr_existente,12,fecha_hoy,hora_hoy,'Recepciono el cierre '+str(cierre)))
+
 
 				cursor.execute("COMMIT;")
 
@@ -12691,14 +12712,20 @@ def agregar_usuario_derecho(request,usuariono):
 		if form.is_valid():
 			
 			derecho = form.cleaned_data['derecho']
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 
 			usr_existente=0
 			permiso_exitoso=0
 
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+			cursor =  connection.cursor()
+
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente=0
+				permiso_exitoso=0
+
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
@@ -12711,11 +12738,16 @@ def agregar_usuario_derecho(request,usuariono):
 
 					raise ValueError
 
+			
 				cursor=connection.cursor()
 
 				cursor.execute('START TRANSACTION')
-				cursor.execute("INSERT INTO usuario_derechos(empresaNo,UsuarioNo,DerechoNo,`Activo?`) VALUES(%s,%s,%s,%s);",(1,usuariono,derecho,1,))
+
+				cursor.execute("INSERT INTO usuario_derechos(empresaNo,UsuarioNo,DerechoNo,`Activo?`) VALUES(%s,%s,%s,%s);",(1,usuariono,derecho,1))
 			
+
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) VALUES(%s,%s,%s,%s,%s);",(usr_existente,33,fecha_hoy,hora_hoy,'Agregó el derecho '+str(derecho)+' al usuario '+str(usuariono)))
+
 							
 				cursor.execute("COMMIT;")
 

@@ -285,7 +285,7 @@ $("#procesar_recepcion").prop('disabled',true)
 
 
 
-      $("#usr_id_pedidos_recepcionar").blur(function() {
+      $("#1usr_id_pedidos_recepcionar").blur(function() {
 
                 var usr_id = $(this).val()
                 $("#procesar_recepcion").prop('disabled',true)
@@ -2583,7 +2583,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                     url: '/pedidos/procesar_recepcion/',
                     type: 'POST',
-                    data: {'TableData':TableData,'almacen':almacen,'nueva_fecha_llegada':nueva_fecha_llegada,'marcartodo_nollego':marcartodo_nollego,'cierre':cierre,'usr_id':$('#usr_id_pedidos_recepcionar').val(),},
+                    data: {'TableData':TableData,'almacen':almacen,'nueva_fecha_llegada':nueva_fecha_llegada,'marcartodo_nollego':marcartodo_nollego,'cierre':cierre,'psw_paso':$('#psw_paso_recepcionar_pedidos').val(),},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3752,6 +3752,9 @@ $('#procesar_ventas').click(function(e){
                                   case '32': 
                                     $("#procesar_recepcion_dev_prov").prop('disabled',true); // procesar pedido
                                     break; 
+                                  case '12': 
+                                    $("#procesar_recepcion").prop('disabled',true); // procesar pedido
+                                    break; 
 
                                   case '36': 
                                     $("#procesar_colocaciones").prop('disabled',true); // procesar pedido
@@ -3760,7 +3763,7 @@ $('#procesar_ventas').click(function(e){
                                   case '37': 
                                     $("# procesar_cierre_pedido").prop('disabled',true); // procesar pedido
                                     break; 
-                                  
+                                 
                                   default:
                                     alert('Nobody Wins!');
                                 }; 
@@ -3794,9 +3797,12 @@ $('#procesar_ventas').click(function(e){
                                   case '36': 
                                     $("#procesar_colocaciones").prop('disabled',false); // procesar pedido
                                     break; 
-                                   case '37': 
+                                  case '37': 
                                     $("#procesar_cierre_pedido").prop('disabled',false); // procesar pedido
                                     break; 
+                                  case '12': 
+                                    $("#procesar_recepcion").prop('disabled',false); // procesar pedido
+                                    break;
                          
                                   default:
                                     alert('Nobody Wins!');

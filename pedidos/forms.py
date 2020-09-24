@@ -3578,7 +3578,7 @@ class DerechosFaltantesUsuarioForm(forms.Form):
 	derecho = forms.ChoiceField(widget=forms.Select(),
 		label='Derecho',required='True' )
 
-	usr_id = forms.IntegerField(label='usr_id',widget=forms.PasswordInput(),required=True)
+	psw_paso = forms.CharField(label='psw_paso',widget=forms.PasswordInput(),max_length=3,required=True)
 
 
 
@@ -3589,7 +3589,7 @@ class DerechosFaltantesUsuarioForm(forms.Form):
 	
 		derecho = cleaned_data.get('derecho')
 		
-		usr_id = cleaned_data.get('usr_id')
+		psw_paso = cleaned_data.get('psw_paso')
 		
 		return self.cleaned_data
 
