@@ -12792,32 +12792,41 @@ def eliminar_usuario_derecho(request,usuariono,derechono):
 		if form.is_valid():
 
 
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 
-
+			
 			usr_existente=0
 			permiso_exitoso=0
 
+			fecha_hoy,hora_hoy = trae_fecha_hora_actual('','')
+			cursor =  connection.cursor()
+
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente=0
+				permiso_exitoso=0
+
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
 					raise ValueError
 
 
-				permiso_exitoso = verifica_derechos_usr(usr_existente,34)
+				permiso_exitoso = verifica_derechos_usr(usr_existente,33)
 
 				if permiso_exitoso ==0:
 
 					raise ValueError
+		
 
 				cursor=connection.cursor()
 
 				cursor.execute('START TRANSACTION')
 
 				cursor.execute('DELETE FROM usuario_derechos WHERE usuariono=%s and derechono=%s;',(usuariono,derechono,))
+				
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) VALUES(%s,%s,%s,%s,%s);",(usr_existente,34,fecha_hoy,hora_hoy,'Eliminó el derecho '+str(derechono)+' al usuario '+str(usuariono)))
 			
 							
 				cursor.execute("COMMIT;")
