@@ -13341,6 +13341,7 @@ def log_eventos_forma(request):
 			derecho = form.cleaned_data['derecho']
 			fechainicial = form.cleaned_data['fechainicial']
 			fechafinal = form.cleaned_data['fechafinal']
+			salida_a = form.cleaned_data['salida_a']
 
 			cursor = connection.cursor()
 
@@ -13359,9 +13360,40 @@ def log_eventos_forma(request):
 
 			else:
 				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s and le.usuariono=%s;",(derecho,usuario,))
-				
+
+			
 			registros = dictfetchall(cursor)
-			return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
+	
+			if salida_a == 'Pantalla':	
+				
+				return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
+
+			else:
+
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="log_eventos.csv"'
+
+				writer = csv.writer(response)
+				writer.writerow(['USUARIO','DERECHO','FECHA','HORA','ACTIVIDAD'])
+				
+				for registro in registros:
+					print registro
+					# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+					llaves_a_mostrar = ['nombre_usuario','nombre_derecho','fecha','hora','accion'] 
+					# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+					lista = [registro[x] for x in llaves_a_mostrar]					
+					writer.writerow(lista)
+				cursor.close()
+				return response			
+
+
+
+
+
+
+
+
+
 
 
 			cursor.close()

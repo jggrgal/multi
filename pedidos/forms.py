@@ -3813,22 +3813,28 @@ class UsuarioLogForm(forms.Form):
 
 		lusuarios =lista_usuarios()
 		lderechos =lista_derechos()
+		lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
+
 
 		super(UsuarioLogForm, self).__init__(*args,**kwargs)
 		
 
 		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 
-		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
-		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
-	
-		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
 
 		self.fields['usuario'] = forms.ChoiceField(widget=forms.Select(),
 			label='Usuario',choices = lusuarios,initial=0,required='True' )
 
 		self.fields['derecho'] = forms.ChoiceField(widget=forms.Select(),
 			label='Derecho',choices = lderechos,initial=0,required='True' )
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+		
+		self.fields['salida_a'] = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
+
 
 		t = datetime.now
 		
@@ -3849,7 +3855,7 @@ class UsuarioLogForm(forms.Form):
 		fechafinal = cleaned_data.get('fechafinal')
 		usuario = cleaned_data.get('usuario')
 		derecho = cleaned_data.get('derecho')
-
+		salida_a = cleaned_data.get('salida_a')
 
 		print "fechas aqui:"
 		print fechainicial
