@@ -1,0 +1,60 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class="row">
+<div class="col-md-12">
+    <h5> Registro de actividad de usuarios: </h5><br>
+    
+
+    <h5>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+            	<tr class='success'>
+            		<th>Usuario</th>
+                    <th>Derecho</th>
+                	<th>Fecha</th>
+                	<th>Hora</th>
+                    <th>Acción ejecutada</th>
+                	                 
+
+            	</tr>
+            	{% for item in registros %}
+                    
+            		<tr>
+                        <td>{{ item.nombre_usuario}}</td>
+                        <td> {{ item.nombre_derecho }}</td>
+                        
+                        {% localize on %}
+                            <td>{{item.fecha| date:'d/M/Y'}}</td>
+                        {% endlocalize %}
+                        
+                        <td> {{item.hora}}
+                        <td>{{ item.accion }}</td>
+                        
+            			                   
+                	</tr>
+                {% endfor %}
+                                
+                
+        	</table>
+           
+        </div>
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/log_eventos_forma" role="button">Regresar</a>
+        </p>
+
+
+   
+</div>
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

@@ -141,5 +141,7 @@ urlpatterns = [
 	url(r'^reasigna_sucursal_apedido/$',views.reasigna_sucursal_apedido,name='reasigna_sucursal_apedido'),
 	url(r'^prueba_mail/$',views.prueba_mail,name='prueba_mail'),
 	url(r'^genera_pass_paso/(?P<usuariono>[0-9]{1,8})$',views.genera_pass_paso,name='genera_pass_paso'),
+	url(r'^log_eventos_forma/$',views.log_eventos_forma,name='log_eventos_forma'),
+
 
 	]

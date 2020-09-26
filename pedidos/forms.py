@@ -245,6 +245,46 @@ def lista_derechos_no_asignados(usr):
 
 			return (lprov)
 
+# FUNCION PARA GENERAR UNA LISTA DE LOS DERECHOS
+
+
+def lista_derechos():
+			cursor=connection.cursor()
+			#cursor.execute('SELECT id,descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT us.id from usuario_derechos us where us.usuariono=%s));'(usr,))
+			cursor.execute('SELECT descripcion from derechos')
+			#cursor.execute('SELECT id,descripcion from derechos;')
+
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'GENERAL ') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
+
+			return (lprov)
+
+
+
 
 f_inicial_init =  date.today()
 
@@ -3754,3 +3794,78 @@ class RpteStatusxMarcaForm(forms.Form):
 		# el numero de documento, siendo este el caso no hay ya validacion.
 
 		return self.cleaned_data
+
+
+
+
+#  FORMA PARA SELECCIONAR USUARIO Y DERECHO PARA REPORTE DE ACTIVIDAD
+
+
+class UsuarioLogForm(forms.Form):
+
+	usuarios = {}
+
+	derechos = {}
+
+	
+	def __init__(self,*args,**kwargs):
+
+		lusuarios =lista_usuarios()
+		lderechos =lista_derechos()
+
+		super(UsuarioLogForm, self).__init__(*args,**kwargs)
+		
+
+		DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+		self.fields['fechainicial'] = forms.DateField(label='Fecha inicial (dd/mm/yyyy)',widget=DateInput(),)
+		fechafinal = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+	
+		self.fields['fechafinal'] = forms.DateField(label = 'Fecha final (dd/mm/yyyy)',widget=DateInput(),)
+
+		self.fields['usuario'] = forms.ChoiceField(widget=forms.Select(),
+			label='Usuario',choices = lusuarios,initial=0,required='True' )
+
+		self.fields['derecho'] = forms.ChoiceField(widget=forms.Select(),
+			label='Derecho',choices = lderechos,initial=0,required='True' )
+
+		t = datetime.now
+		
+	error_messages = {
+	
+	'error_fechafinal': 'La fecha final debe ser mayor o igual a la fecha inicial !',
+	'campo_vacio': 'Esta omitiendo ingresar el valor de fecha en algun campo de fecha, por favor ingrese ambas fechas !',
+	'error_sucursal': 'Seleccione un proveedor..!',
+	'error_porcentaje': 'Seleccione el porcentaje sobre la venta neta que se otorgara como bono',
+	}
+
+	def clean(self):
+
+		
+		cleaned_data = super(UsuarioLogForm, self).clean()
+		
+		fechainicial = cleaned_data.get('fechainicial')
+		fechafinal = cleaned_data.get('fechafinal')
+		usuario = cleaned_data.get('usuario')
+		derecho = cleaned_data.get('derecho')
+
+
+		print "fechas aqui:"
+		print fechainicial
+		print fechafinal
+
+		if fechainicial is not None and fechafinal is not None:
+			
+			if (fechainicial > fechafinal):
+				
+				raise forms.ValidationError(self.error_messages['error_fechafinal'],code='error_fechafinal')
+		else:
+				raise forms.ValidationError(self.error_messages['campo_vacio'],code='campo_vacio')
+		'''if proveedor < '1':
+
+			raise forms.ValidationError(self.error_messages['error_proveedor'],code='error_proveedor')'''
+
+		
+
+		return self.cleaned_data
+

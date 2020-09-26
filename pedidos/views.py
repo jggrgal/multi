@@ -69,7 +69,8 @@ from . forms import (AccesoForm,\
 					DerechosFaltantesUsuarioForm,
 					EliminaUsuarioDerechoForm,
 					DatosUsuarioWebForm,
-					RpteStatusxMarcaForm)
+					RpteStatusxMarcaForm,
+					UsuarioLogForm)
 
 
 
@@ -13326,8 +13327,46 @@ def prueba_mail(request):
 
 
 			
+def log_eventos_forma(request):
 
-						
+	pdb.set_trace()
+
+	if request.method == 'POST':
+
+		form = UsuarioLogForm(request.POST)
+
+		if form.is_valid():
+			
+			usuario = form.cleaned_data['usuario']
+			derecho = form.cleaned_data['derecho']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+
+			cursor = connection.cursor()
+
+			if usuario==u'0' and derecho ==u'0':
+
+				error_msg =" Debe elegir al menos un derecho o un usuario !"
+				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+
+			elif usuario != u'0'  and derecho == u'0':
+
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.usuariono=%s;",(usuario,))
+				registros = dictfetchall(cursor)
+
+				return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
+
+			elif usuario ==u'0' and derecho !=u'0':
+				pass
+
+			else:
+				pass
+
+
+			cursor.close()
+
+	form = UsuarioLogForm()
+	return render(request,'pedidos/log_eventos_forma.html',{'form':form,})
 
 
 
