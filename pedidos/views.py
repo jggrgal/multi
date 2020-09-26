@@ -13329,7 +13329,7 @@ def prueba_mail(request):
 			
 def log_eventos_forma(request):
 
-	pdb.set_trace()
+	#pdb.set_trace()
 
 	if request.method == 'POST':
 
@@ -13352,15 +13352,16 @@ def log_eventos_forma(request):
 			elif usuario != u'0'  and derecho == u'0':
 
 				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.usuariono=%s;",(usuario,))
-				registros = dictfetchall(cursor)
-
-				return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
 
 			elif usuario ==u'0' and derecho !=u'0':
-				pass
+
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s;",(derecho,))
 
 			else:
-				pass
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s and le.usuariono=%s;",(derecho,usuario,))
+				
+			registros = dictfetchall(cursor)
+			return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
 
 
 			cursor.close()

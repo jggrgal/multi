@@ -249,9 +249,10 @@ def lista_derechos_no_asignados(usr):
 
 
 def lista_derechos():
+			#pdb.set_trace()
 			cursor=connection.cursor()
 			#cursor.execute('SELECT id,descripcion from (SELECT d.id,d.descripcion FROM derechos d where d.id not in (SELECT us.id from usuario_derechos us where us.usuariono=%s));'(usr,))
-			cursor.execute('SELECT descripcion from derechos')
+			cursor.execute('SELECT id,descripcion from derechos')
 			#cursor.execute('SELECT id,descripcion from derechos;')
 
 			pr=() # Inicializa una tupla para llenar combo de Proveedores
