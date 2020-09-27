@@ -1512,9 +1512,9 @@ def procesar_pedido(request):
 			
 			viasolicitud = request.POST.get('viasolicitud')
 			viasolicitud = int(viasolicitud) #  se convierte a entero	
-		
-			
+	
 			psw_paso = request.POST.get('psw_paso')
+
 			try:
 				if float(request.POST.get('anticipo')):
 					anticipo = int(request.POST.get('anticipo').encode('latin_1'))
@@ -1546,13 +1546,17 @@ def procesar_pedido(request):
 		sucursal_registro = cursor.fetchone()
 		id_suc = sucursal_registro[0]
 
-		cursor.execute("SELECT usuariono from usr_extend where pass_paso=%s;",(psw_paso,))
-		usr_existente =cursor.fetchone()
-		usr_existente =usr_existente[0]
 
 		if request.session['is_staff']:
+			
+			cursor.execute("SELECT usuariono from usr_extend where pass_paso=%s;",(psw_paso,))
+			usr_existente =cursor.fetchone()
+			usr_existente =usr_existente[0]
 			capturista = usr_existente
 
+		else:
+			usr_existente = 99
+			capturista = 99
 
 
 		cursor.close()
@@ -1663,7 +1667,8 @@ def procesar_pedido(request):
 			cursor.execute("UPDATE pedidosheader SET vtatotal=%s WHERE pedidono=%s;",(v_total,PedidoNuevo,))	
 
 			# crea log de pedido
-			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,35 if socio_a_validar == 3 else 3,fecha_hoy,hora_hoy,'Creó el pedido: '+str(PedidoNuevo) if socio_a_validar != 3 else 'Capturó pieza no solicitada con pedido: '+str(PedidoNuevo)))		
+			if request.session['is_staff']:
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,35 if socio_a_validar == 3 else 5,fecha_hoy,hora_hoy,'Creó el pedido: '+str(PedidoNuevo) if socio_a_validar != 3 else 'Capturó pieza no solicitada con pedido: '+str(PedidoNuevo)))		
 		
 
 
@@ -8628,7 +8633,9 @@ def cancelardocumentoadvertencia(request,NoDocto):
 	#no esta en 
 	#pdb.set_trace()
 	nodocto=NoDocto
-	
+
+	fecha_hoy,hora_hoy =trae_fecha_hora_actual('','')
+
 	status_operation='fail'
 
 	form=CanceladocumentoForm()
@@ -8644,9 +8651,9 @@ def cancelardocumentoadvertencia(request,NoDocto):
 			cursor = connection.cursor()
 			# limpia datos 
 			motivo_cancelacion = form.cleaned_data['motivo_cancelacion']
-			usr_cancela_documento = form.cleaned_data['usr_cancela_documento']
+			psw_paso = form.cleaned_data['psw_paso']
 
-			num_usr_valido = verifica_existencia_usr(usr_cancela_documento) # verifica si existe
+			num_usr_valido = verifica_existencia_usr(psw_paso) # verifica si existe
 
 			if num_usr_valido != 0:
 				tiene_derecho = verifica_derechos_usr(num_usr_valido,25)
@@ -8654,12 +8661,16 @@ def cancelardocumentoadvertencia(request,NoDocto):
 					error_msg = "Usuario sin derechos para cancelar !"
 					return render(request,'pedidos/error.html',{'error_msg':error_msg,})
 			else:
-				error_msg = "Usuario no registrado !"
+				error_msg = "Usuario no registrado con el password proporcionado !"
 				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
-			''' Se cancela documento'''	
+			''' Se cancela documento'''	                                                                  
 			status_operation,error = cancela_documento(request,nodocto,motivo_cancelacion)			
 			'''Se actualiza el usuario que cancela'''
-			cursor.execute("UPDATE documentos SET UsuarioModifico=%s WHERE nodocto=%s;",(usr_cancela_documento,nodocto,))
+			cursor.execute("UPDATE documentos SET UsuarioModifico=%s WHERE nodocto=%s;",(num_usr_valido,nodocto,))
+
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(num_usr_valido,25,fecha_hoy,hora_hoy,'Canceló el documento: '+str(nodocto)))		
+
+
 			cursor.close()
 			
 
@@ -13347,19 +13358,19 @@ def log_eventos_forma(request):
 
 			if usuario==u'0' and derecho ==u'0':
 
-				error_msg =" Debe elegir al menos un derecho o un usuario !"
-				return render(request,'pedidos/error.html',{'error_msg':error_msg,})
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) ORDER BY le.usuariono,le.fecha,le.hora;")
+
 
 			elif usuario != u'0'  and derecho == u'0':
 
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.usuariono=%s;",(usuario,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.usuariono=%s ORDER BY le.fecha,le.hora;",(usuario,))
 
 			elif usuario ==u'0' and derecho !=u'0':
 
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s;",(derecho,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s ORDER BY le.fecha,le.hora;",(derecho,))
 
 			else:
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s and le.usuariono=%s;",(derecho,usuario,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s and le.usuariono=%s ORDER BY le.fecha,le.hora;",(derecho,usuario,))
 
 			
 			registros = dictfetchall(cursor)

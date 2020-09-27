@@ -38,7 +38,7 @@
             <tbody>
         	{% for item in usuarios %}
         		<tr>
-        			<td><a href="{% url 'pedidos:edita_usuario' item.usuariono %}">num_usr</a></td>
+        			<td><a href="{% url 'pedidos:edita_usuario' item.usuariono %}">{{item.usuariono}}</a></td>
                    
         			<td>{{ item.nombre }}</td>
                     <td>{{ item.fechacreacion }}</td>

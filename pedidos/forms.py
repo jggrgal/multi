@@ -2004,13 +2004,13 @@ class RpteVtaNetaSocioxMarcaForm(forms.Form):
 class CanceladocumentoForm(forms.Form):
 
 	motivo_cancelacion = forms.CharField(label='Motivo de cancelacion:',initial=' ',required=True)
-	usr_cancela_documento = forms.IntegerField(widget=forms.PasswordInput,label='usr_id',initial=0,required=True)
+	psw_paso = forms.CharField(widget=forms.PasswordInput,label='Password de paso',max_length=3,initial=0,required=True)
 
 	def clean(self):
 		
 		cleaned_data = super(CanceladocumentoForm,self).clean()
 		motivo_cancelacion = self.cleaned_data.get('motivo_cancelacion')
-		usr_cancela_documento = self.cleaned_data.get('usr_cancela_documento')
+		psw_paso = self.cleaned_data.get('psw_paso')
 
 
 		if not motivo_cancelacion: 	

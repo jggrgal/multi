@@ -3715,6 +3715,10 @@ $('#procesar_ventas').click(function(e){
 
                 var psw_paso = $(this).val()
                 //$("#psw_paso").prop('disabled',true)
+
+                /*if ( is_staff != 1 ){
+                  psw_paso = 99
+                }*/
                 var derecho = $('#derecho').val()
                 var msg_derecho_valido = $('#msg_derecho_valido').val()
             
