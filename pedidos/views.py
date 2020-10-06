@@ -12024,15 +12024,17 @@ def asociado_edita_descuento(request,proveedorno,asociadono):
 
 			descuento =form.cleaned_data['descuento']	
 
-			usr_id =form.cleaned_data['usr_id']
+			psw_paso =form.cleaned_data['psw_paso']
 
 			usr_existente=0
 			permiso_exitoso=0
 
+			fecha_hoy,hora_hoy=trae_fecha_hora_actual('','')
+
 			
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
@@ -12049,6 +12051,7 @@ def asociado_edita_descuento(request,proveedorno,asociadono):
 				cursor.execute('START TRANSACTION')
 				cursor.execute("UPDATE socio_descuento SET descuento_porc = %s\
 				WHERE idsocio=%s and idproveedor=%s;",(descuento,asociadono,proveedorno,))
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,30,fecha_hoy,hora_hoy,'Modificó el descuento a nuevo valor de '+str(descuento)+' para el socio '+str(asociadono)+' en el proveedor '+str(proveedorno)))		
 			
 							
 				cursor.execute("COMMIT;")
@@ -12100,14 +12103,15 @@ def asociado_nuevo_descuento(request,asociadono):
 
 			proveedorno=form.cleaned_data['proveedor']
 			descuento =form.cleaned_data['descuento']	
-			usr_id = form.cleaned_data['usr_id']
+			psw_paso = form.cleaned_data['psw_paso']
 			
+			fecha_hoy,hora_hoy=trae_fecha_hora_actual('','')
 			usr_existente=0
 			permiso_exitoso=0
 
 			try:
 
-				usr_existente = verifica_existencia_usr(usr_id)
+				usr_existente = verifica_existencia_usr(psw_paso)
 
 				if usr_existente==0:
 
@@ -12122,7 +12126,8 @@ def asociado_nuevo_descuento(request,asociadono):
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute("INSERT INTO socio_descuento(idproveedor,idsocio,descuento_porc) VALUES(%s,%s,%s);",(proveedorno,asociadono,descuento,))
-			
+				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,30,fecha_hoy,hora_hoy,'Agregó descuento del '+str(descuento)+' al socio '+str(asociadono)+' en el proveedor '+str(proveedorno)))		
+							
 							
 				cursor.execute("COMMIT;")
 
@@ -13358,26 +13363,28 @@ def log_eventos_forma(request):
 
 			if usuario==u'0' and derecho ==u'0':
 
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) ORDER BY le.usuariono,le.fecha,le.hora;")
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.fecha>= %s and le.fecha <= %s ORDER BY le.usuariono,le.fecha,le.hora;",(fechainicial,fechafinal,))
 
 
 			elif usuario != u'0'  and derecho == u'0':
 
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.usuariono=%s ORDER BY le.fecha,le.hora;",(usuario,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.fecha>= %s and le.fecha <= %s and le.usuariono=%s ORDER BY le.fecha,le.hora;",(fechainicial,fechafinal,usuario,))
 
 			elif usuario ==u'0' and derecho !=u'0':
 
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s ORDER BY le.fecha,le.hora;",(derecho,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.fecha>= %s and le.fecha <= %s and le.derechono=%s ORDER BY le.fecha,le.hora;",(fechainicial,fechafinal,derecho,))
 
 			else:
-				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.derechono=%s and le.usuariono=%s ORDER BY le.fecha,le.hora;",(derecho,usuario,))
+				cursor.execute("SELECT u.nombre as nombre_usuario, d.descripcion as nombre_derecho,le.descripcion as accion,le.fecha,le.hora FROM log_eventos le  INNER JOIN usuarios u  on (le.usuariono=u.usuariono) INNER JOIN derechos d on (le.derechono=d.id) where le.fecha>= %s and le.fecha <= %s and le.derechono=%s and le.usuariono=%s ORDER BY le.fecha,le.hora;",(fechainicial,fechafinal,derecho,usuario,))
 
 			
 			registros = dictfetchall(cursor)
+
+			tot_registros = len(registros)
 	
 			if salida_a == 'Pantalla':	
 				
-				return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,})
+				return render(request,'pedidos/despliega_log_eventos.html',{'registros':registros,'tot_registros':tot_registros,})
 
 			else:
 
