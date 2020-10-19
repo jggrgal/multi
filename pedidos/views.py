@@ -5778,6 +5778,11 @@ def procesar_venta(request):
 		psw_paso = request.POST.get('psw_paso')
 
 
+		if int(totalventas) <= 0:
+			data = {'status_operacion':'fail','error':'La venta está en ceros, su transacción no puede ser procesada, intente nuevamente !',}
+			return HttpResponse(json.dumps(data),content_type='application/json',)
+
+
 		if float(totalcreditos) > 0:
 		
 			if float(totalventas) + float(totalcargos) > float(totalcreditos) :
@@ -11529,8 +11534,8 @@ def edita_asociado(request,asociadono):
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute('UPDATE asociado SET nombre = %s,\
-				apmaterno = %s,\
 				appaterno = %s,\
+				apmaterno = %s,\
 				Direccion = %s,\
 				Colonia = %s,\
 				Ciudad = %s,\
@@ -11678,8 +11683,8 @@ def crea_asociado(request):
 
 
 				cursor.execute('INSERT INTO asociado(empresano,asociadono,nombre,\
-				apmaterno,\
 				appaterno,\
+				apmaterno,\
 				Direccion,\
 				Colonia,\
 				Ciudad,\

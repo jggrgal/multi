@@ -2839,7 +2839,7 @@ $('#procesar_ventas').click(function(e){
         continuar_procesando = 0;
         var tot_gral = $('#totalgral').text();
         var recibido = $('#input_recibido').val();// A este control el cual es un input
-        var usr_id =                                           // a diferencia del anterior que no es input
+                                                  // a diferencia del anterior que no es input
                                                   // debe aplicarsele el metodo val() en lugar
                                                   // del .text() o el .html(), de lo contrario
                                                   // no se traera su valor y la variable "recibido"
