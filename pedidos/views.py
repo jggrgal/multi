@@ -9436,6 +9436,10 @@ def procesar_devolucion_proveedor(request):
 		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
 		datos = json.loads(TableData)
 
+		# Se inicializa la variable cursor 
+		cursor = connection.cursor()
+
+
 		if request.POST.get('psw_paso') is not None:
 			
 				psw_paso = request.POST.get('psw_paso')
@@ -9445,9 +9449,9 @@ def procesar_devolucion_proveedor(request):
 				usr_existente = usr_existente[0]
 				capturista = usr_existente
 
-			else:
-				capturista = 99
-				usr_existente = 0
+		else:
+			capturista = 99
+			usr_existente = 0
 
 		'''if request.POST.get('usr_id') is not None:
 			capturista = request.POST.get('usr_id')
@@ -9466,7 +9470,7 @@ def procesar_devolucion_proveedor(request):
 		num_socio = request.POST.get('num_socio')
 		nombre_socio = request.POST.get('nombre_socio')
 	
-		cursor = connection.cursor()
+		
 
 		''' INICIALIZACION DE VARIABLES '''
 

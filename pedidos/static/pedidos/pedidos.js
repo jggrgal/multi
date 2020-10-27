@@ -3580,8 +3580,9 @@ $('#procesar_ventas').click(function(e){
 
 
 
-        
-        usr_id = $("#usr_id_recepcion_dev_prov").val();
+        psw_paso = $("#psw_paso_recepcionar_dev_aproveedor").val();
+
+        //usr_id = $("#usr_id_recepcion_dev_prov").val();
         guia = $("#id_numero_guia").val();
         observaciones = $("#id_observaciones").val();
 
@@ -3592,7 +3593,7 @@ $('#procesar_ventas').click(function(e){
 
         
         e.preventDefault();
-        var answer=confirm('Se procederá a grabar los articulos recepcionados, si está seguro que todo es correcto acepte, caso contrario cancele y modifique.');
+        var answer=confirm('Se procederá a grabar los articulos seleccioados para su envio, si está seguro que todo es correcto acepte, caso contrario cancele y modifique.');
           if(answer){
 
                   var TableData;
@@ -3606,7 +3607,7 @@ $('#procesar_ventas').click(function(e){
 
                     url: '/pedidos/procesar_devolucion_proveedor/',
                     type: 'POST',
-                    data: {'TableData':TableData,'usr_id':usr_id,'guia':guia,'observaciones':observaciones,'proveedor':proveedor,'almacen':almacen,'num_socio':num_socio,'nombre_socio':nombre_socio,},
+                    data: {'TableData':TableData,'psw_paso':psw_paso,'guia':guia,'observaciones':observaciones,'proveedor':proveedor,'almacen':almacen,'num_socio':num_socio,'nombre_socio':nombre_socio,},
                     datatype:'application/json',
                     //csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     success: function(data){
@@ -3755,6 +3756,7 @@ $('#procesar_ventas').click(function(e){
 
                                   case '32': 
                                     $("#procesar_recepcion_dev_prov").prop('disabled',true); // procesar pedido
+                                    $("#procesar_dev_prov").prop('disabled',true); // procesar pedido
                                     break; 
                                   case '12': 
                                     $("#procesar_recepcion").prop('disabled',true); // procesar pedido
@@ -3797,6 +3799,7 @@ $('#procesar_ventas').click(function(e){
 
                                   case '32': 
                                     $("#procesar_recepcion_dev_prov").prop('disabled',false); // procesar pedido
+                                    $("#procesar_dev_prov").prop('disabled',false); // procesar pedido
                                     break; 
                                   case '36': 
                                     $("#procesar_colocaciones").prop('disabled',false); // procesar pedido
