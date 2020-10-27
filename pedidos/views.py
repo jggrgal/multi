@@ -9436,10 +9436,23 @@ def procesar_devolucion_proveedor(request):
 		# carga la tabla ( la prepara con el formato de lista adecuado para leerla)
 		datos = json.loads(TableData)
 
-		if request.POST.get('usr_id') is not None:
+		if request.POST.get('psw_paso') is not None:
+			
+				psw_paso = request.POST.get('psw_paso')
+			
+				cursor.execute("SELECT usuariono FROM usr_extend where pass_paso=%s;",(psw_paso,))
+				usr_existente = cursor.fetchone()
+				usr_existente = usr_existente[0]
+				capturista = usr_existente
+
+			else:
+				capturista = 99
+				usr_existente = 0
+
+		'''if request.POST.get('usr_id') is not None:
 			capturista = request.POST.get('usr_id')
 		else:
-			capturista = 99
+			capturista = 99'''
 		
 		guia = request.POST.get('guia')
 		guia = guia.encode('latin_1')
@@ -9475,6 +9488,8 @@ def procesar_devolucion_proveedor(request):
 
 			# Crea el registro padre de devoluciones
 			cursor.execute("INSERT INTO devprov (fecha,hora,guia,observaciones,id_proveedor,id_almacen,fecharecepcion,recibio,num_socio,nombre_socio) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",(fecha_hoy,hora_hoy,guia,observaciones,proveedor,almacen,hoy,'',num_socio,nombre_socio))
+
+			cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,32,fecha_hoy,hora_hoy,'Envió una devolución al proveedor: '+str(proveedor)))		
 
 			cursor.execute("SELECT id from devprov ORDER BY id DESC LIMIT 1;")
 			id_devprov = cursor.fetchone()
