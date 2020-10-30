@@ -3872,6 +3872,22 @@ $('#procesar_ventas').click(function(e){
       });
 
 
+      $("#codigo_barras").on("keyup", function() {
+                                  var value = $(this).val().toLowerCase();
+                                  $(".desp").filter(function() {
+                                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                                  });
+           });  
+
+  
+        $("#borrar_codigo_barras").click(function() {
+            
+            $("#codigo_barras").val('');
+        });
+
+
+
+
 
  });
 

@@ -8,7 +8,14 @@
 <div class="col-md-9">
 
 	<h3>VENTAS</h3>
-	
+	<div class='row'>
+	<div class="col-md-3">
+	<input id="codigo_barras" name="codigo_barras" class="form-control" value="" />
+	</div>
+	<div class="col-md-3"><button align='left' id='borrar_codigo_barras' class='btn btn-default'>Borrar</button> </div>
+	<div class="col-md-3"></div>
+	</div>
+
 	<hr>
 <!--<table id='listapedidosgeneral' class='display table table-hover table-bordered table-condensed'>
 	<thead>
@@ -46,7 +53,7 @@
 	        	<tr class='success'>
 
 	        		<th>Pedido Num</th>
-	        		
+	        		<th>Codigo</th>
 	                <th>Fecha Pedido</th>
 	                <th>Fecha Llego</th>
 	                <th>Marca</th>
@@ -65,16 +72,16 @@
 
 	        	</tr>
 	        </thead>
-	        <tbody>
+	        <tbody >
 	        	
 	        	{% for venta in ventas %}
 
 	                
-	        		<tr id='{{ forloop.counter }}'>
+	        		<tr class='desp' id='{{ forloop.counter }}'>
 	        			
 	        			<td {% if venta.es_de_otra_suc == 1  %} style="background-color:#ffff00" {% endif %}> {{ venta.pedido}}</td>
 	        			
-	        			<td style="display: none"> {{ venta.productono}}</td>
+	        			<td style=""> {{ venta.productono}}</td>
 	        			<td style="display: none"> {{ venta.catalogo}}</td>
 	        			<td style="display: none"> {{ venta.nolinea}}</td>
 	    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
