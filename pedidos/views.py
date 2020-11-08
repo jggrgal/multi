@@ -5539,7 +5539,7 @@ def trae_inf_venta(request,num_socio):
 							and l.catalogo=a.catalogo\
 							left join viasolicitud v on (v.id=h.viasolicitud)\
 							inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-							inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+							left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 							WHERE l.status='Aqui' and  h.asociadono=%s;",(id_sucursal,num_socio,))
 	ventas = dictfetchall(cursor)
 

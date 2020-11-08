@@ -1033,8 +1033,8 @@ $(".btn_cancela_pedido").prop('disabled',true)
             precio = Math.round(precio)
             precio_normal = Math.round(precio_normal)
 
-
-
+            $("#codigo_barras").val(''); // borra el campo codigo de barras cuando se selecciona
+            $("#codigo_barras").focus()
             // deshabilita el checkbox de descuento una vez que se selecciono el articulo.
             // Obsrevar que se tiene not(this) para que no deshabilite tambien el checkbox_aplicar_venta
             $(this).parents('tr').find('input[type=checkbox]').not(this).attr('disabled',true)
@@ -3876,6 +3876,10 @@ $('#procesar_ventas').click(function(e){
                                   var value = $(this).val().toLowerCase();
                                   $(".desp").filter(function() {
                                     $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                                    //preuba $(this).parents('tr').find('td:eq(12)').text()                                    
+                                    // prueba$(this).parents('tr').find('input[type=checkbox]').not(this).attr('disabled',true)
+                                    // falla -> $(this).find('input[type=checkbox]').attr('checked',true) 
+
                                   });
            });  
 
