@@ -710,7 +710,7 @@ def lista_Catalogos(id_prov,id_temp,g_numero_socio_zapcat,is_staff):
 	#cursor.execute("SELECT clasearticulo from catalogostemporada where proveedorno=%s and anio=%s;",(id_prov,id_temp))
 	
 	# Hace un primer select de catalogos considerando al socio y si esta activo para estos catalogos
-	cursor.execute("SELECT s.clasearticulo from sociocatalogostemporada s inner join catalogostemporada c on (s.ProveedorNo=c.ProveedorNo and s.Periodo=c.Periodo and s.Anio=c.Anio and s.ClaseArticulo=c.ClaseArticulo)  where s.proveedorno=%s and s.anio=%s and s.AsociadoNo=%s and s.Activo and c.Activo;",[id_prov,id_temp,g_numero_socio_zapcat,])
+	cursor.execute("SELECT s.clasearticulo from sociocatalogostemporada s left join catalogostemporada c on (s.ProveedorNo=c.ProveedorNo and s.Periodo=c.Periodo and s.Anio=c.Anio and s.ClaseArticulo=c.ClaseArticulo)  where s.proveedorno=%s and s.anio=%s and s.AsociadoNo=%s and s.Activo and c.Activo;",[id_prov,id_temp,g_numero_socio_zapcat,])
 	registros = cursor.fetchall()
 
 
@@ -6314,7 +6314,7 @@ def consultavtasxproveedor(request):
 				inner join proveedor p\
 				on (p.empresano=1 and p.proveedorno=a.idproveedor)\
 				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-				inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+				left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 				inner join documentos doc on (l.empresano=doc.empresano and l.remisionno=doc.NoDocto)\
 				where f.fechamvto>=%s and f.fechamvto<=%s\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
@@ -8401,7 +8401,7 @@ def vtaneta_socio(request):
 				inner join proveedor p\
 				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
 				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-				inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+				left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 				where f.fechamvto>=%s and f.fechamvto<=%s and p.proveedorno=%s\
 				group by h.asociadono;",\
 				(fechainicial,fechafinal,proveedor))
@@ -11153,7 +11153,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 		inner join proveedor p\
 		on (p.empresano=1 and p.proveedorno=a.idproveedor)\
 		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+		left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 		where f.fechamvto>=%s and f.fechamvto<=%s\
 		and h.asociadono=%s and a.idproveedor>=%s and a.idproveedor<=%s\
 		group by a.idproveedor ; ",\
