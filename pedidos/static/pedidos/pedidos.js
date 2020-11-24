@@ -3282,6 +3282,14 @@ $('#procesar_ventas').click(function(e){
                  nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
                  psw_paso = $('#psw_paso_cancela_pedido').val();
 
+                 // Las siguiente dos lineas son para guardar paths para usarse desues del llamado a ajax
+                 // porque si hacemos referencia a los elementos despues del llamado a ajax..no los reconoce
+                 // por esto es necesario guardar los valores antes del llamado a ajax
+
+                 cancelado_path = $(this).parents('tr').find('td:eq(12)')
+                 btn_cancelado_path = $(this).parents('tr').find('button') // aqui encuentra el primer boton
+                                                                          // de izq a derecha en el renglon
+                                                                          // (que este caso es el de cancelar)
 
                   //TableData = $.toJSON(TableData);
                   //TableData = JSON.stringify(TableData);
@@ -3302,9 +3310,14 @@ $('#procesar_ventas').click(function(e){
                           alert(data.error);
                           }
                         else {
+                 
                           alert("Cancelacion exitosa !.");
-                          $(".btn_cancela_pedido").prop('disabled',false);
 
+                          // Cambia status y deshabilita boton cancelar
+
+                          cancelado_path.text('Cancelado')
+                          btn_cancelado_path.attr('disabled',true) 
+                 
                           }; 
                         //$("#procesar_recepcion").prop('disabled', true);
                     },
