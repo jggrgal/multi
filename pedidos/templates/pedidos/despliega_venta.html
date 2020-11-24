@@ -54,22 +54,24 @@
 	    	<thead>
 	        	<tr class='success'>
 
-	        		<th>Pedido Num</th>
-	        		<th>Codigo</th>
+	        		
 	                <th>Fecha Pedido</th>
 	                <th>Fecha Llego</th>
 	                <th>Marca</th>
 	                <th>Estilo</th>
-	                <!--<th>Color</th>-->
+	                <th>Color</th>
 	                <th>Talla</th>
 	                <th>Via Solicitud</th>
 	                <th>Precio</th>
 	                <th>Precio_dscto</th>
 	                <th>Facturar</th>
-	                <th>Color</th>
+	            
 	                <th> Dscto % </th>
 	                <th>Suc</th>
 	                <th>Asig. suc Act.</th>
+	                <th>Codigo</th>
+	                <th>Pedido Num</th>
+	        		
 	                                     
 
 	        	</tr>
@@ -81,9 +83,9 @@
 	                
 	        		<tr class='desp' id='{{ forloop.counter }}'>
 	        			
-	        			<td {% if venta.es_de_otra_suc == 1  %} style="background-color:#ffff00" {% endif %}> {{ venta.pedido}}</td>
 	        			
-	        			<td style=""> {{ venta.productono}}</td>
+	        			
+	        			
 	        			<td style="display: none"> {{ venta.catalogo}}</td>
 	        			<td style="display: none"> {{ venta.nolinea}}</td>
 	    				<!-- Las siguientes dos lineas son para guardar las version del registros de pedidos_encontrados y pedidoslines, antes del commit debe revisarse que no hayan cambiado.-->
@@ -97,6 +99,7 @@
 	                    {% endlocalize %}
 	                    <td>{{  venta.idmarca }}</td>
 	        			<td>{{  venta.idestilo }}</td>
+	        			<td>{{ venta.idcolor }}</td>
 	        			
 	            		<td>{% if venta.talla == 'NE' %} {{venta.observaciones}} {% else %} {{venta.talla}} {% endif %}</td>
 	            		<td>{{ venta.descripcion }}</td>
@@ -114,11 +117,14 @@
 						</td>
 						<td style="display: none"> {{ venta.idproveedor }}</td>
 						<td style="display: none"> {{ venta.precio }}</td>
-						<td>{{ venta.idcolor }}</td>
+						
 						<td> {{ venta.porc_dscto }}</td>
 						<td {% if venta.es_de_otra_suc == 1  %} style="background-color:#ffff00" {% endif %}> {{venta.idsucursal}}</td>
 
 	               	    <td><button class="btn btn-default btn-sm btn_cambia_suc_apedido" href="#" role="button" {% if venta.es_de_otra_suc == 0 %} style="display: none;" {% endif %}>Asignar</button> </td>
+	               	    <td style=""> {{ venta.productono}}</td>
+	               	    <td {% if venta.es_de_otra_suc == 1  %} style="background-color:#ffff00" {% endif %}> {{ venta.pedido}}</td>
+
 	            	</tr>
 	            {% endfor %}
 	         </tbody>  

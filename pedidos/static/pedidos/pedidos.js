@@ -1027,8 +1027,8 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
 
 
-            var precio = $(this).parents('tr').find('td:eq(12)').text();
-            var precio_normal = $(this).parents('tr').find('td:eq(15)').text();
+            var precio = $(this).parents('tr').find('td:eq(11)').text();
+            var precio_normal = $(this).parents('tr').find('td:eq(14)').text();
 
             precio = Math.round(precio)
             precio_normal = Math.round(precio_normal)
@@ -1323,17 +1323,17 @@ $(".btn_cancela_pedido").prop('disabled',true)
             var TableData_ventas = new Array();
 
             $('#productos_por_vender tr').each(function(row, tr){
-                if ($(tr).find('td:eq(13)').find('input').prop('checked')){
+                if ($(tr).find('td:eq(12)').find('input').prop('checked')){
 
 
                   TableData_ventas[row]={
-                      "Pedido" : $(tr).find('td:eq(0)').text()  // Agrega el pedido ( columna no visible en tabla)
-                      , "ProductoNo" :$(tr).find('td:eq(1)').text() // Agrega el producto ( no visible en tabla)
-                      , "Catalogo" : $(tr).find('td:eq(2)').text() // Agrega el catalogo ( no visible en tabla)
-                      , "Nolinea" : $(tr).find('td:eq(3)').text() // Agrega el Nolinea (no visible en tabla)
-                      , "status": $(tr).find('td:eq(4)').text() // 
-                      , "precio" : $(tr).find('td:eq(12)').text()
-                      , "vta_elegida": $(tr).find('td:eq(13)').find('input').prop('checked') // Agrega "elegido", como es un checkbox usamos la funcion prop('checked') para traernos el va 
+                      "Pedido" : $(tr).find('td:eq(19)').text()  // Agrega el pedido ( columna no visible en tabla)
+                      , "ProductoNo" :$(tr).find('td:eq(18)').text() // Agrega el producto ( no visible en tabla)
+                      , "Catalogo" : $(tr).find('td:eq(0)').text() // Agrega el catalogo ( no visible en tabla)
+                      , "Nolinea" : $(tr).find('td:eq(1)').text() // Agrega el Nolinea (no visible en tabla)
+                      , "status": $(tr).find('td:eq(2)').text() // 
+                      , "precio" : $(tr).find('td:eq(11)').text()
+                      , "vta_elegida": $(tr).find('td:eq(12)').find('input').prop('checked') // Agrega "elegido", como es un checkbox usamos la funcion prop('checked') para traernos el va 
                   }
                 }    
             }); 
@@ -3653,10 +3653,10 @@ $('#procesar_ventas').click(function(e){
 
                                 
                  
-                 pedido = $(this).parents('tr').find('td:eq(0)').text();
-                 productono = $(this).parents('tr').find('td:eq(1)').text();
-                 catalogo = $(this).parents('tr').find('td:eq(2)').text();
-                 nolinea = $(this).parents('tr').find('td:eq(3)').text(); 
+                 pedido = $(this).parents('tr').find('td:eq(19)').text();
+                 productono = $(this).parents('tr').find('td:eq(18)').text();
+                 catalogo = $(this).parents('tr').find('td:eq(0)').text();
+                 nolinea = $(this).parents('tr').find('td:eq(1)').text(); 
                  var trid = $(this).closest('tr').attr('id')
 
 
@@ -3684,12 +3684,12 @@ $('#procesar_ventas').click(function(e){
                           //alert($('#productos_por_vender tr').eq(data.trid).find('td').eq(18).text())
                           
                           // Con la siguiente linea se asigna refresca el campo sucursal en la tabla(trid guarda el numero de reglon que se subio al servidor via ajax y se vuelve a bajar para usarlo aqui.)
-                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(18).html(data.nueva_suc)
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(16).html(data.nueva_suc)
                           // La siguiente linea muestra nuevamente el checkbox para seleccion para venta.
-                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(13).find("input").css("display","block");
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(12).find("input").css("display","block");
                           // Las siguietes dos lineas cambian al color original el registro procesado
-                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(18).css("background-color", "#f2f2e7")
-                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(0).css("background-color", "#f2f2e7")
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(19).css("background-color", "#f2f2e7")
+                          $('#productos_por_vender tr').eq(data.trid).find('td').eq(16).css("background-color", "#f2f2e7")
                           
                           //console.log(data.nueva_suc)
                           
