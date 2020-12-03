@@ -97,8 +97,8 @@
                             {{item.FechaMaximaEntrega | date:'d/m/y'  }}</td>
                     {% endlocalize %}
                     <td {% if item.OpcionCompra != '1ra.' %} style='background:red;' {% else %} style='background:white;'{% endif %} >{{item.OpcionCompra}}</td>
-                    <td name="encontrado">
-		                 <select class="select form-control sel_encontrado" id="id_encontrado" >
+                    <td  name="encontrado">
+		                 <select class="select form-control sel_encontrado" id="id_encontrado"  {% if tipo_consulta == 6 %} disabled="true" {% endif %} >
 		                 	
                          <option value="" {% if item.encontrado == '' %} selected="selected" {% endif %}>Seleccione</option>
 
@@ -124,7 +124,7 @@
 					<td>{{ item.8 }}</td>
 					<td>{{ item.9 }}</td>
                     <td>{{item.nombre_socio|slice:":16"}}</td>
-					<td name="notas"><input type="text" id="notas" style="width:100px" value="{{ item.notas }}" ></td>
+					<td name="notas"><input type="text" id="notas" style="width:100px" value="{{ item.notas }}"   {% if tipo_consulta == 6 %} disabled="true" {% endif %} ></td>
                     
             	</tr>
                     
@@ -140,16 +140,16 @@
 
 
 
-        <div class="col-md-4">
+        <div class="col-md-4"  {% if tipo_consulta == 6 %} style="display: none" {% endif %}>
             <h3>Marcados previamente como encontrados: <span id="col_art_encont" class="label label-primary">{{reg_encontrados}}</span></h3>
         </div>
 
     
-        <div class="col-md-4" >
+        <div class="col-md-4"  {% if tipo_consulta == 6 %} style="display: none" {% endif %} >
             <h3>Total encontrados: <span id="total_encontrados" class="label label-primary">{{reg_encontrados}}</span></h3>
         </div>
     </div>
-    <div class="row">
+    <div class="row"  {% if tipo_consulta == 6 %} style="display: none" {% endif %}>
         <div class='col-md-4'>
  
             <!--<label for="usr_id">Usuario_id:</label> 

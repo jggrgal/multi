@@ -77,7 +77,7 @@
                           <a id="btn_cancela_pedido" class="btn btn-danger btn-sm " href="/pedidos/cancelarpedidoadvertencia/{{ item.pedido }}/{{item.productono}}/{{item.catalogo}}/{{item.nolinea}}" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
                         </p></td>-->
                     <td><p align="left">
-                          <button id="btn_cancela_pedido" class="btn btn-danger btn-sm btn_cancela_pedido" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' or item.status == 'Devuelto' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</button>
+                          <button id="btn_cancela_pedido" class="btn btn-danger btn-sm btn_cancela_pedido" role="button" {% if item.status == 'Cancelado' or item.status == 'Facturado' or item.status == 'Aqui' or item.status == 'Confirmado' or item.status == 'Devuelto' or item.status == 'Dev a Prov' or item.status == 'RecepEnDevol' or item.status == 'Descontinuado' %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</button>
                         </p></td>
                     <td><form id="imp_pedido_form" action="/pedidos/imprime_ticket/" method="GET">
                         <input id="idpedido" name="p_num_pedido" class="btn-success-btn-lg" type="submit" value="{{item.pedido}}">

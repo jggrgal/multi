@@ -1159,7 +1159,7 @@ class ColocacionesForm(forms.Form):
 	#pdb.set_trace() 
 	proveedores = {}
 
-	lista_tipos_consulta = (('1','Nuevos'),('2','Por Confirmar'),('3','Encontrados'),('4','Colocados'),('5','Descontinuados'),)
+	lista_tipos_consulta = (('1','Nuevos'),('2','Por Confirmar'),('3','Encontrados'),('4','Colocados'),('5','Descontinuados'),('6','Cancelados'))
 	lista_tipos_ordenamiento = (('1','Estilo'),('2','Socio'),('3','Fecha'),)
 
 	lista_almacenes = ((0,'Seleccione'),(1,'Seleccione'),(2,'Seleccione'),(3,'Seleccione'),(4,'Seleccione'),(5,'Seleccione'),(6,'Seleccione'),(7,'Seleccione'),(8,'Seleccione'),(9,'Seleccione'))

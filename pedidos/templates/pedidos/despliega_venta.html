@@ -55,22 +55,22 @@
 	        	<tr class='success'>
 
 	        		
-	                <th>Fecha Pedido</th>
-	                <th>Fecha Llego</th>
+	                <th>Fecha_Ped</th>
+	                <th>Fecha_Ll</th>
 	                <th>Marca</th>
 	                <th>Estilo</th>
 	                <th>Color</th>
 	                <th>Talla</th>
-	                <th>Via Solicitud</th>
+	                <th>Via_Sol</th>
 	                <th>Precio</th>
-	                <th>Precio_dscto</th>
-	                <th>Facturar</th>
+	                <th>Precio_dco</th>
+	                <th>Fact</th>
 	            
-	                <th> Dscto % </th>
+	                <th>%Dcto</th>
 	                <th>Suc</th>
-	                <th>Asig. suc Act.</th>
-	                <th>Codigo</th>
-	                <th>Pedido Num</th>
+	                <th>Asig</th>
+	                <th>Cod.</th>
+	                <th>Pedido</th>
 	        		
 	                                     
 
@@ -92,17 +92,17 @@
 	    				<td style="display: none"> {{  venta.status }}</td>
 	                    
 	                    {% localize on %}
-	                        <td>{{ venta.fechacreacion | date:'d/M/Y'}}</td>
+	                        <td>{{ venta.fechacreacion | date:'d/M/y'}}</td>
 	                    {% endlocalize %}
 	                    {% localize on %}
-	                        <td>{{ venta.fechatentativallegada | date:'d/M/Y'}}</td>
+	                        <td>{{ venta.fechatentativallegada | date:'d/M/y'}}</td>
 	                    {% endlocalize %}
-	                    <td>{{  venta.idmarca }}</td>
-	        			<td>{{  venta.idestilo }}</td>
-	        			<td>{{ venta.idcolor }}</td>
+	                    <td>{{  venta.idmarca | slice:"0:14" }}</td>
+	        			<td>{{  venta.idestilo | slice:"0:20" }}</td>
+	        			<td>{{ venta.idcolor | slice:"0:12"  }}</td>
 	        			
 	            		<td>{% if venta.talla == 'NE' %} {{venta.observaciones}} {% else %} {{venta.talla}} {% endif %}</td>
-	            		<td>{{ venta.descripcion }}</td>
+	            		<td>{{ venta.descripcion | slice:"0:5" }}</td>
 	            		
 	            		<td>
 			                 {{ venta.precio }}
@@ -318,7 +318,7 @@
 	                    {% endlocalize %}
 	                    <td>{{ porconf_conf.razonsocial }}</td>
 	                    <td><p align="left">
-                          <button class="btn btn-danger btn-sm btn_cancela_pedido" href="#" role="button" {% if porconf_conf.status == 'Cancelado' or porconf_conf.status == 'Facturado' or porconf_conf.status == 'Aqui' or porconf_conf.status == 'Confirmado' or porconf_conf.status == 'Devuelto' or porcon_conf.status == 'Descontiunado' %} style="display: none;" {% endif %} > <span class="glyphicon glyphicon-remove-sign"> </span> Cancelar</button>
+                          <button class="btn btn-danger btn-sm btn_cancela_pedido" href="#" role="button" {% if porconf_conf.status == 'Cancelado' or porconf_conf.status == 'Facturado' or porconf_conf.status == 'Aqui' or porconf_conf.status == 'Confirmado' or porconf_conf.status == 'Devuelto' or porconf_conf.status == 'Dev a Prov' or porconf_conf.status == 'RecepEnDevol' or porcon_conf.status == 'Descontinuado' %} style="display: none;" {% endif %} > <span class="glyphicon glyphicon-remove-sign"> </span> Cancelar</button>
                         </p></td>
                         <td>{{ porconf_conf.notas }} </td>
 																		
