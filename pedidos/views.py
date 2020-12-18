@@ -13474,13 +13474,6 @@ def log_eventos_forma(request):
 
 
 
-
-
-
-
-
-
-
 			cursor.close()
 
 	form = UsuarioLogForm()
