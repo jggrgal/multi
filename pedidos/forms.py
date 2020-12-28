@@ -3876,3 +3876,13 @@ class UsuarioLogForm(forms.Form):
 
 		return self.cleaned_data
 
+class UploadFileForm(forms.Form):
+	title = forms.CharField(max_length=50)
+	file = forms.FileField()
+
+	def clean(self):
+		cleaned_data = super(UploadFileForm, self).clean()
+		
+		title = cleaned_data.get('title')
+		file = cleaned_data.get('file')
+		return self.cleaned_data

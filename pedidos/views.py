@@ -70,7 +70,8 @@ from . forms import (AccesoForm,\
 					EliminaUsuarioDerechoForm,
 					DatosUsuarioWebForm,
 					RpteStatusxMarcaForm,
-					UsuarioLogForm)
+					UsuarioLogForm,
+					UploadFileForm)
 
 
 
@@ -13477,7 +13478,44 @@ def log_eventos_forma(request):
 	form = UsuarioLogForm()
 	return render(request,'pedidos/log_eventos_forma.html',{'form':form,})
 
+def handle_uploaded_file(f):
+    pdb.set_trace()
+    with open('pedidos/archivos/chivo.csv', 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
 
+	#data = [row for row in csv.reader(upload_file.read().splitlines())]
 
+	#with open('pedidos/archivos/chivo.csv','rb') as csvfile:
+	spamreader = csv.reader('pedidos/archivos/chivo.csv',delimiter=',')
 
+		print "entra aquiii"
+		
 
+		if spamreader:
+			print "SI OK"
+			print spamreader
+		else:
+			print "niguas"
+		for a,b,c in spamreader:
+
+			print a,b,c
+			
+	
+	'''
+	csv_file = open('pedidos/archivos/chivo.csv', 'r')
+	reader = csv.reader(csv_file)
+	for j in reader:
+		print j/'''
+	
+def upload_file_catalogo(request):
+	#pdb.set_trace()
+	if request.method == 'POST':
+		form = UploadFileForm(request.POST, request.FILES)
+		if form.is_valid():
+			handle_uploaded_file(request.FILES['file'])
+			
+			return HttpResponse("ok")
+	else:
+		form = UploadFileForm()
+	return render(request, 'pedidos/upload_catalogo.html', {'form': form})

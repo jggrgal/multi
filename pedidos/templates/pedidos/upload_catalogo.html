@@ -1,0 +1,58 @@
+{% extends 'pedidos/base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+<div  class="container">
+    
+
+    
+
+    <div class="col-md-4">
+        <br><br>
+        <div class="panel panel-success">
+            <div class="panel-heading">Subir catalogo articulos</div>
+            <div class="panel-body">
+                 {% if error_message %}<p><strong> {{error_message}} </strong></p>{% endif %}
+                
+                <form action="{% url 'pedidos:upload_file_catalogo' %}" method="post" enctype="multipart/form-data">
+                    
+                        {% csrf_token %}
+                        {{ form| crispy }}
+                        
+                    <input  class="btn btn-default "  type="submit" value="Enviar" />                    
+                </form>
+            </div>
+        </div>
+        <div class="alert alert-warning" role="alert"> {{ mensaje }}</div>
+        <p align="right">
+          <a class="btn btn-success btn-lg " href="/pedidos/index" role="button">Regresar</a>
+        </p>
+        
+    </div>
+    <img class='img-responsive' src="{% static 'pedidos/7356-removebg-preview.png' %}" width="612" height="408" alt=""/>
+
+
+	<h2>
+	  <center>
+	   Inf. para socios 
+                        <a href="{% static 'pedidos/triptico.jpeg' %}"><em>click aqui...</em></a>
+
+	  </center>
+	</h2>
+
+	<div><style>
+#c1{
+  background-color: lightgreen;
+}
+</style>
+<body>
+</div>
+<script>
+var is_staff = '{{ is_staff }}';
+</script>
+
+{% endblock content %}
+
+
+
