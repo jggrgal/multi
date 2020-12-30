@@ -13477,45 +13477,61 @@ def log_eventos_forma(request):
 
 	form = UsuarioLogForm()
 	return render(request,'pedidos/log_eventos_forma.html',{'form':form,})
-
-def handle_uploaded_file(f):
-    pdb.set_trace()
-    with open('pedidos/archivos/chivo.csv', 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-	#data = [row for row in csv.reader(upload_file.read().splitlines())]
-
-	#with open('pedidos/archivos/chivo.csv','rb') as csvfile:
-	spamreader = csv.reader('pedidos/archivos/chivo.csv',delimiter=',')
-
-		print "entra aquiii"
-		
-
-		if spamreader:
-			print "SI OK"
-			print spamreader
-		else:
-			print "niguas"
-		for a,b,c in spamreader:
-
-			print a,b,c
-			
-	
-	'''
-	csv_file = open('pedidos/archivos/chivo.csv', 'r')
-	reader = csv.reader(csv_file)
-	for j in reader:
-		print j/'''
-	
+'''	
 def upload_file_catalogo(request):
-	#pdb.set_trace()
+	pdb.set_trace()
 	if request.method == 'POST':
 		form = UploadFileForm(request.POST, request.FILES)
 		if form.is_valid():
-			handle_uploaded_file(request.FILES['file'])
-			
+			uploaded_file = request.FILES['file'].name
+
+			print request.FILES['file'].name
+			#handle_uploaded_file(request.FILES['file'])
+			with open(uploaded_file,'r') as f:
+				csv_file = csv.reader(f)	
+				for row in csv_file:
+					print row 
+					
 			return HttpResponse("ok")
 	else:
 		form = UploadFileForm()
-	return render(request, 'pedidos/upload_catalogo.html', {'form': form})
+	return render(request, 'pedidos/upload_catalogo.html', {'form': form})'''
+
+def upload_file_catalogo(request):
+
+	# prompt is a context variable that can have different values      depending on their context
+	context = {
+        'orden': 'El Orden del  CSV debe ser codigo,, address,    phone, profile',
+        
+              }
+
+	template='pedidos/upload_catalogo.html'
+
+	    # GET request returns the value of the data with the specified key.
+	if request.method == "POST":
+		
+		form = UploadFileForm(request.POST, request.FILES)
+
+		if form.is_valid():
+			csv_file = request.FILES['file']
+			# let's check if it is a csv file
+			if not csv_file.name.endswith('.csv'):
+				messages.error(request, 'THIS IS NOT A CSV FILE')
+
+			data_set = csv_file.read().decode('UTF-8')    # setup a stream which is when we loop through each line we are able to handle a data in a strea
+			io_string = io.StringIO(data_set)
+
+			next(io_string)
+
+			for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+
+				print column[0],column[1]
+
+	form = UploadFileForm()		
+	return render(request,template,{'form': form},)		
+
+
+
+
+    	
+		
