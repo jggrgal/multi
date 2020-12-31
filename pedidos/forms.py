@@ -3877,12 +3877,26 @@ class UsuarioLogForm(forms.Form):
 		return self.cleaned_data
 
 class UploadFileForm(forms.Form):
-	title = forms.CharField(max_length=50)
-	file = forms.FileField()
+
+	#file = forms.FileField()
+
+	def __init__(self,*args,**kwargs):
+
+		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
+		
+		lprov = lista_Proveedores()
+
+		super(UploadFileForm, self).__init__(*args,**kwargs)
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+			label='Proveedor',choices = lprov,initial='0',required='True' )
+		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),label='Temporada',choices=opcion_temporada,required='True',initial='0')
+
+		self.fields['file']= forms.FileField()
 
 	def clean(self):
 		cleaned_data = super(UploadFileForm, self).clean()
 		
-		title = cleaned_data.get('title')
-		file = cleaned_data.get('file')
+		self.proveedor = cleaned_data.get('proveedor')
+		self.temporada = cleaned_data.get('temporada')
+		self.file = cleaned_data.get('file')
 		return self.cleaned_data
