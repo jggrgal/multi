@@ -17,6 +17,45 @@ import re
 # FUNCION PARA GENERAR LISTA DE PROVEEDORES
 # GENERALMENTE PARA EL LLENADO DE COMBOS
 
+def lista_Catalogos(proveedor_parm,temporada_parm):
+			pdb.set_trace()
+			cursor=connection.cursor()
+			cursor.execute('SELECT Proveedorno,ClaseArticulo from catalogostemporada where proveedorno=%s and anio=%s;',(proveedor_parm,temporada_parm))
+	
+			pr=() # Inicializa una tupla para llenar combo de Proveedores
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'Seleccione ') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lprov = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lprov)
+
+# FUNCION PARA GENERAR LISTA DE PROVEEDORES
+# GENERALMENTE PARA EL LLENADO DE COMBOS
+
 def lista_Proveedores():
 			cursor=connection.cursor()
 			cursor.execute('SELECT ProveedorNo,RazonSocial from proveedor;')
@@ -3877,26 +3916,62 @@ class UsuarioLogForm(forms.Form):
 		return self.cleaned_data
 
 class UploadFileForm(forms.Form):
-
-	#file = forms.FileField()
+	#pdb.set_trace()
+	
 
 	def __init__(self,*args,**kwargs):
 
-		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
+		opcion_temporada = (('0','Seleccione...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
 		
 		lprov = lista_Proveedores()
 
 		super(UploadFileForm, self).__init__(*args,**kwargs)
 		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
-			label='Proveedor',choices = lprov,initial='0',required='True' )
+			label='Proveedor',choices = lprov,required='True')
 		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),label='Temporada',choices=opcion_temporada,required='True',initial='0')
+		print "temporada:"
+		print self.fields['temporada']
 
+
+		#lcat = lista_Catalogos(self.proveedor,self.temporada)
+		self.fields['catalogo'] = forms.CharField(max_length=12,required='True',initial='2020ij')
+		'''widget=forms.TextInput(attrs={'placeholder':"AAAATTTTTTTT (Primeros 4 digitos para el año, 8 restantes para texto)"})''',
 		self.fields['file']= forms.FileField()
+		
+
+
+	error_messages = {
+	
+	'error_cero_proveedor': 'Seleccione un proveedor !',
+	'error_cero_temporada': 'Seleccione una temporada !',
+	'error_diagonal_no_permitido': 'No se permiten diagonales (/) en el campo "catalogo", use guión bajo o guión medio en su lugar !',
+
+	}
 
 	def clean(self):
+		#pdb.set_trace()
 		cleaned_data = super(UploadFileForm, self).clean()
 		
-		self.proveedor = cleaned_data.get('proveedor')
-		self.temporada = cleaned_data.get('temporada')
-		self.file = cleaned_data.get('file')
+		proveedor = self.cleaned_data.get('proveedor')
+		temporada = self.cleaned_data.get('temporada')
+		catalogo = self.cleaned_data.get('catalogo')
+		file = self.cleaned_data.get('file')
+
+		
+		if catalogo is not None:
+
+			if '/' in catalogo:
+
+				raise forms.ValidationError(self.error_messages['error_diagonal_no_permitido'],code='error_diagonal_no_permitido')
+
+
+		if proveedor == '0':
+
+			raise forms.ValidationError(self.error_messages['error_cero_proveedor'],code='error_cero_proveedor')
+		
+		if temporada == '0':
+
+			raise forms.ValidationError(self.error_messages['error_cero_temporada'],code='error_cero_temporada')
+
+
 		return self.cleaned_data

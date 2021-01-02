@@ -8,13 +8,25 @@
 
     
 
-    <div class="col-md-4">
+    <div class="col-md-12">
         <br><br>
         <div class="panel panel-success">
-            <div class="panel-heading">Subir catalogo articulos</div>
+            <div class="panel-heading">Importación de artículos</div>
             <div class="panel-body">
+
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+
+
+
                  {% if error_message %}<p><strong> {{error_message}} </strong></p>{% endif %}
-                
+                                 
                 <form action="{% url 'pedidos:upload_file_catalogo' %}" method="post" enctype="multipart/form-data">
                     
                         {% csrf_token %}
@@ -30,17 +42,9 @@
         </p>
         
     </div>
-    <img class='img-responsive' src="{% static 'pedidos/7356-removebg-preview.png' %}" width="612" height="408" alt=""/>
+    
 
-
-	<h2>
-	  <center>
-	   Inf. para socios 
-                        <a href="{% static 'pedidos/triptico.jpeg' %}"><em>click aqui...</em></a>
-
-	  </center>
-	</h2>
-
+	
 	<div><style>
 #c1{
   background-color: lightgreen;

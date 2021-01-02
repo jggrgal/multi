@@ -95,6 +95,7 @@ from decimal import Decimal,getcontext
 import locale  # Se usa para representar cantidades monetarias
   # move the origin up and to the left
 from django.utils.crypto import get_random_string  # genera un string de 3 caract. para password da paso
+from django.contrib import messages 
 
 getcontext().prec = 6# esta linea establece la precision de decimales para numeros decimales,
 					  # leer la funcion getcontext de decimales.
@@ -13511,22 +13512,24 @@ def upload_file_catalogo(request):
 	if request.method == "POST":
 		
 		form = UploadFileForm(request.POST, request.FILES)
-
+		print form.is_valid()
 		if form.is_valid():
 			csv_file = request.FILES['file']
 			# let's check if it is a csv file
 			if not csv_file.name.endswith('.csv'):
-				messages.error(request, 'THIS IS NOT A CSV FILE')
+				messages.error(request, 'Este no es un archivo en formato  CSV !')
 
-			data_set = csv_file.read().decode('UTF-8')    # setup a stream which is when we loop through each line we are able to handle a data in a strea
-			io_string = io.StringIO(data_set)
+			else:
+				data_set = csv_file.read().decode('UTF-8')    # setup a stream which is when we loop through each line we are able to handle a data in a strea
+				io_string = io.StringIO(data_set)
 
-			next(io_string)
+				next(io_string)
 
-			for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+				for column in csv.reader(io_string, delimiter=',', quotechar="|"):
 
-				print column[0],column[1]
-
+					print column[0],column[1]
+		else:
+			return render(request,template,{'form': form},)		
 	form = UploadFileForm()		
 	return render(request,template,{'form': form},)		
 
