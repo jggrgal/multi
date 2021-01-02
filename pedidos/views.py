@@ -13535,6 +13535,35 @@ def upload_file_catalogo(request):
 
 
 
+def combo_catalogos_importacion(request,*args,**kwargs):
+	#pdb.set_trace()
 
-    	
+	if request.is_ajax() and request.method == 'GET':
+		id_prov = request.GET['id_prov_importar']
+		id_temp = request.GET['id_temp_importar']
 		
+
+		cursor=connection.cursor()
+		cursor.execute('SELECT clasearticulo FROM catalogostemporada WHERE proveedorno=%s and anio=%s',(id_prov,id_temp))
+	
+		resultado = cursor.fetchall()
+
+		listacat=()
+    	
+		for row in resultado:
+			elemento = tuple(row)
+			listacat=listacat+elemento
+		listacat=('Seleccione...',)+listacat
+		
+		h = {'listacat':listacat,}
+
+		data = json.dumps(h)
+		
+		#data = {'Mensaje':"El id proveedor recibido fue %s" % request.GET['id_prov']}
+				
+		# En el siguiente return utilizo content_type. Intente usar 'mimetype'
+		# en lugar de 'content_type' y no funciono.
+
+	return HttpResponse(data,content_type='application/json')
+
+

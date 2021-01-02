@@ -26,13 +26,21 @@
 
 
                  {% if error_message %}<p><strong> {{error_message}} </strong></p>{% endif %}
-                                 
+                 {% if form.non_field_error %}  { { form.non_field_errors }} {% endif %}                
                 <form action="{% url 'pedidos:upload_file_catalogo' %}" method="post" enctype="multipart/form-data">
-                    
-                        {% csrf_token %}
-                        {{ form| crispy }}
                         
-                    <input  class="btn btn-default "  type="submit" value="Enviar" />                    
+                        {% csrf_token %}
+                        {{ form.proveedor| as_crispy_field}}
+                        {{ form.temporada | as_crispy_field}}
+                        <label for="catalogo">Catalogo:</label>
+
+                        <select name="catalogo" id="id_catalogo_importar">
+                          <option ></option>
+                        </select>    
+
+                        {{ form.file | as_crispy_field}}
+                                                
+                                            <input  class="btn btn-default "  type="submit" value="Enviar" />                    
                 </form>
             </div>
         </div>
@@ -54,6 +62,7 @@
 </div>
 <script>
 var is_staff = '{{ is_staff }}';
+
 </script>
 
 {% endblock content %}

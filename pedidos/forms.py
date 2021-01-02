@@ -3926,15 +3926,17 @@ class UploadFileForm(forms.Form):
 		lprov = lista_Proveedores()
 
 		super(UploadFileForm, self).__init__(*args,**kwargs)
-		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(attrs={'id':'id_prov_importar'}),
 			label='Proveedor',choices = lprov,required='True')
-		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),label='Temporada',choices=opcion_temporada,required='True',initial='0')
+		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(attrs={'id':'id_temp_importar'}),label='Temporada',choices=opcion_temporada,required='True',initial='0')
 		print "temporada:"
 		print self.fields['temporada']
 
 
 		#lcat = lista_Catalogos(self.proveedor,self.temporada)
-		self.fields['catalogo'] = forms.CharField(max_length=12,required='True',initial='2020ij')
+		#self.fields['catalogo'] = forms.CharField(max_length=12,required='True',initial='2020ij')
+		self.fields['catalogo'] = forms.CharField(max_length=12,label='Catalogo',required='True')
+
 		'''widget=forms.TextInput(attrs={'placeholder':"AAAATTTTTTTT (Primeros 4 digitos para el año, 8 restantes para texto)"})''',
 		self.fields['file']= forms.FileField()
 		
@@ -3957,13 +3959,13 @@ class UploadFileForm(forms.Form):
 		catalogo = self.cleaned_data.get('catalogo')
 		file = self.cleaned_data.get('file')
 
-		
+		'''
 		if catalogo is not None:
 
 			if '/' in catalogo:
 
 				raise forms.ValidationError(self.error_messages['error_diagonal_no_permitido'],code='error_diagonal_no_permitido')
-
+		'''	
 
 		if proveedor == '0':
 
@@ -3975,3 +3977,4 @@ class UploadFileForm(forms.Form):
 
 
 		return self.cleaned_data
+
