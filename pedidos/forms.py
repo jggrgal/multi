@@ -18,7 +18,7 @@ import re
 # GENERALMENTE PARA EL LLENADO DE COMBOS
 
 def lista_Catalogos(proveedor_parm,temporada_parm):
-			pdb.set_trace()
+			#pdb.set_trace()
 			cursor=connection.cursor()
 			cursor.execute('SELECT Proveedorno,ClaseArticulo from catalogostemporada where proveedorno=%s and anio=%s;',(proveedor_parm,temporada_parm))
 	
