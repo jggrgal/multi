@@ -3903,6 +3903,54 @@ $('#procesar_ventas').click(function(e){
         });
 
 
+      // ******************************
+      // Logica para cuando cambia combo temporada en importacion catalogos
+      //*******************************
+
+      // observar que la funcion tiene el parametro 'e' ya que es utilizado en el llamado eventPrevent(e)..mas abajo.
+      $('#id_temp_importar').change(function(e){
+        
+         //alert("funciona jquery");
+        // Inicializa elementos subsecuentes para obligar a su captura.  
+        
+        id_prov_importar = $('#id_prov_importar').val();
+        id_temp_importar = $('#id_temp_importar').val(); // inicializa la variebla temp con el valor que tenga.
+        
+        
+        $.ajax({
+          url: '/pedidos/combo_catalogos_importacion/',
+          type: 'GET',
+          data:{'id_prov_importar':id_prov_importar,'id_temp_importar':id_temp_importar},
+          dataType:'json',
+          success: function(data){
+
+            var procesar = 1;
+            console.log("valores de data:")
+            console.log(data)
+            $.each(data, function(index, value) {
+
+                
+            if ( procesar == 1) {
+
+              $('#id_catalogo_importar').empty(); // vacia el combo catalogo preparandolo a recibir nuevos valores.
+        
+              for (var i=0;i<data.listacat.length;i++){
+                $('<option/>').val(data.listacat[i]).html(data.listacat[i]).appendTo('#id_catalogo_importar');
+              }
+             
+            } 
+        
+          }) 
+
+            
+          },
+          error: console.log("error en recepcion de datos de catalogos"),
+
+        });
+                              
+
+      });
+
 
 
 

@@ -142,6 +142,9 @@ urlpatterns = [
 	url(r'^prueba_mail/$',views.prueba_mail,name='prueba_mail'),
 	url(r'^genera_pass_paso/(?P<usuariono>[0-9]{1,8})$',views.genera_pass_paso,name='genera_pass_paso'),
 	url(r'^log_eventos_forma/$',views.log_eventos_forma,name='log_eventos_forma'),
+	url(r'^upload_file_catalogo/$',views.upload_file_catalogo,name='upload_file_catalogo'),
+	url(r'^combo_catalogos_importacion/$',views.combo_catalogos_importacion,name='combo_catalogos_importacion'),
+
 
 
 	]

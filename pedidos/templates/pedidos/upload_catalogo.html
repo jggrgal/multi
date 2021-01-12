@@ -1,0 +1,71 @@
+{% extends 'pedidos/base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+<div  class="container">
+    
+
+    
+
+    <div class="col-md-12">
+        <br><br>
+        <div class="panel panel-success">
+            <div class="panel-heading">Importación de artículos</div>
+            <div class="panel-body">
+
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+
+
+
+                 {% if error_message %}<p><strong> {{error_message}} </strong></p>{% endif %}
+                 {% if form.non_field_error %}  { { form.non_field_errors }} {% endif %}                
+                <form action="{% url 'pedidos:upload_file_catalogo' %}" method="post" enctype="multipart/form-data">
+                        
+                        {% csrf_token %}
+                        {{ form.proveedor| as_crispy_field}}
+                        {{ form.temporada | as_crispy_field}}
+                        <label for="catalogo">Catalogo:</label>
+
+                        <select name="catalogo" id="id_catalogo_importar">
+                          <option ></option>
+                        </select>    
+
+                        {{ form.file | as_crispy_field}}
+                                                
+                                            <input  class="btn btn-default "  type="submit" value="Enviar" />                    
+                </form>
+            </div>
+        </div>
+        <div class="alert alert-warning" role="alert"> {{ mensaje }}</div>
+        <p align="right">
+          <a class="btn btn-success btn-lg " href="/pedidos/index" role="button">Regresar</a>
+        </p>
+        
+    </div>
+    
+
+	
+	<div><style>
+#c1{
+  background-color: lightgreen;
+}
+</style>
+<body>
+</div>
+<script>
+var is_staff = '{{ is_staff }}';
+
+</script>
+
+{% endblock content %}
+
+
+
