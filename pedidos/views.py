@@ -1601,7 +1601,7 @@ def procesar_pedido(request):
 			
 			# Se actualiza el encabezado del pedido.
 			
-			cursor.execute("INSERT INTO pedidosheader (EmpresaNo,PedidoNo,FechaPedido,HoraPedido,Saldototal,VtaTotal,UsuarioCrea,FechaUltimaModificacion,FechaCreacion,HoraCreacion,horamodificacion,UsuarioModifica,idSucursal,AsociadoNo,tiposervicio,viasolicitud) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (1,PedidoNuevo,fecha_hoy,hora_hoy,total,total,capturista,fecha_hoy,fecha_hoy,hora_hoy,hora_hoy,capturista,id_suc,socio_a_validar,tiposervicio,viasolicitud))
+			cursor.execute("INSERT INTO pedidosheader (EmpresaNo,PedidoNo,FechaPedido,HoraPedido,Saldototal,VtaTotal,UsuarioCrea,FechaUltimaModificacion,FechaCreacion,HoraCreacion,horamodicacion,UsuarioModifica,idSucursal,AsociadoNo,tiposervicio,viasolicitud) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (1,PedidoNuevo,fecha_hoy,hora_hoy,total,total,capturista,fecha_hoy,fecha_hoy,hora_hoy,hora_hoy,capturista,id_suc,socio_a_validar,tiposervicio,viasolicitud))
 			
 			# Si hay anticipo, genera el documento correspondiente
 
@@ -3931,7 +3931,7 @@ def procesar_colocaciones(request):
 
 						# Actualiza pedidos
 
-						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido,])							
+						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido,])							
 						cursor.execute("UPDATE pedidoslines SET status=%s,FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,fecha_probable,pedido,productono,catalogo,nolinea))
 						cursor.execute("UPDATE pedidos_notas set Observaciones=%s where EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(notas,pedido,productono,catalogo,nolinea))
 
@@ -4233,7 +4233,7 @@ def procesar_cierre_pedido(request):
 						
 						# Actualiza pedidos
 
-						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET status=%s,FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,fecha_llegada,pedido,productono,catalogo,nolinea))
 
 
@@ -4558,7 +4558,7 @@ def procesar_recepcion(request):
 	# rutina para grabar header y lines 
 	def graba_header_lines():
 
-		cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+		cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 		cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
 		return
 
@@ -4730,7 +4730,7 @@ def procesar_recepcion(request):
 						
 						fecha_anterior_llegada= cursor.fetchone()
 
-						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET FechaTentativaLLegada=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(f_convertida,pedido,productono,catalogo,nolinea))
 						
 						
@@ -4755,7 +4755,7 @@ def procesar_recepcion(request):
 						PedidoNuevo = registro[0]+1
 
 						# Trae  datos de pedidosheader para replicarlos en un nuevov registro con el nuevo numero de pedido;
-						cursor.execute("SELECT EmpresaNo,PedidoNo,FechaPedido,HoraPedido,Saldototal,VtaTotal,UsuarioCrea,FechaUltimaModificacion,FechaCreacion,HoraCreacion,horamodificacion,UsuarioModifica,idSucursal,AsociadoNo,tiposervicio,viasolicitud  from pedidosheader WHERE empresano=1 and pedidono=%s;",[pedido])
+						cursor.execute("SELECT EmpresaNo,PedidoNo,FechaPedido,HoraPedido,Saldototal,VtaTotal,UsuarioCrea,FechaUltimaModificacion,FechaCreacion,HoraCreacion,horamodicacion,UsuarioModifica,idSucursal,AsociadoNo,tiposervicio,viasolicitud  from pedidosheader WHERE empresano=1 and pedidono=%s;",[pedido])
 						
 						registroh = cursor.fetchone()
 						
@@ -4829,7 +4829,7 @@ def procesar_recepcion(request):
 																Saldototal,VtaTotal,
 																UsuarioCrea,FechaUltimaModificacion,
 																FechaCreacion,HoraCreacion,
-																horamodificacion,UsuarioModifica,
+																horamodicacion,UsuarioModifica,
 																idSucursal,AsociadoNo,
 																tiposervicio,viasolicitud)
 																VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
@@ -4916,7 +4916,7 @@ def procesar_recepcion(request):
 
 						# CAMBIA STATUS AL PRODUCTO ACTUAL
 						cursor.execute("UPDATE pedidoslines SET status='Por Devolver' WHERE empresano=1 and pedido=%s and productono=%s and catalogo=%s and nolinea=%s;",[pedido,productono,catalogo,nolinea])
-						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("""INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,
 																ProductoNo,Status,
 																catalogo,NoLinea,
@@ -5941,7 +5941,7 @@ def procesar_venta(request):
 					
 						# Actualiza pedidos
 
-						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
 
 
@@ -7167,7 +7167,7 @@ def procesar_devolucion_socio(request):
 	# rutina para grabar header y lines 
 	def graba_header_lines():
 
-		cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+		cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 		cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
 		return
 
@@ -9305,7 +9305,7 @@ def procesar_recepcion_devolucion_proveedor(request):
 				# Comienza acceso a BD.
 
 
-					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 					cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
 
 
@@ -9560,7 +9560,7 @@ def procesar_devolucion_proveedor(request):
 				# Comienza acceso a BD.
 
 
-					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodificacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
+					cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 					cursor.execute("UPDATE pedidoslines SET status=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_status_pedido,pedido,productono,catalogo,nolinea))
 
 
