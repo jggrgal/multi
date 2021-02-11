@@ -1786,6 +1786,8 @@ def busca_socio(request):
 
 def registro_socio(request):
 	
+	#pdb.set_trace()
+
 	socio_a_dar_de_alta = request.session['socio_a_dar_de_alta']
 	is_staff =  request.session['is_staff']
 	if request.method == 'POST':
@@ -13534,7 +13536,9 @@ def upload_file_catalogo(request):
 				messages.error(request, 'Este no es un archivo en formato  CSV !')
 
 			else:
-				data_set = csv_file.read().decode('UTF-8')    # setup a stream which is when we loop through each line we are able to handle a data in a strea
+
+				data_set = csv_file.read().decode('latin-1')   # setup a stream which is when we loop through each line we are able to handle a data in a strea
+				
 				io_string = io.StringIO(data_set)
 
 				#next(io_string) #permite empezar a leer desde la segunda linea del psv ( omite leer 1er linea o encabezado )
@@ -13552,6 +13556,14 @@ def upload_file_catalogo(request):
 						lista_elementos.append(columna)
 
 					i+=1	
+
+					# SE QUITAN COMAS (EN CASO DE QUE TRAIGAN) DE PRECIO Y PRECIO OPCIONAL 
+					# PARA QUE LOS PUEDA CONVERTIR A DECIMAL SIN PROBLEMAS ANTES DE GRABAR A BASE DE DATOS.
+					columna[7]=columna[7].replace(',','')
+					columna[9]=columna[9].replace(',','')
+
+
+
 				str1=",".join(str(j) for j in lista_error)	
 				messages.error(request, 'Existen registros con una diagonal en el campo codigo_articulo, lineas: '+str1)
 				
