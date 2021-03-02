@@ -144,6 +144,7 @@ urlpatterns = [
 	url(r'^log_eventos_forma/$',views.log_eventos_forma,name='log_eventos_forma'),
 	url(r'^upload_file_catalogo/$',views.upload_file_catalogo,name='upload_file_catalogo'),
 	url(r'^combo_catalogos_importacion/$',views.combo_catalogos_importacion,name='combo_catalogos_importacion'),
+	url(r'^rpteVtasCatalogosxSocio/$',views.rpteVtasCatalogosxSocio,name='rpteVtasCatalogosxSocio'),
 
 
 

@@ -71,7 +71,9 @@ from . forms import (AccesoForm,\
 					DatosUsuarioWebForm,
 					RpteStatusxMarcaForm,
 					UsuarioLogForm,
-					UploadFileForm)
+					RpteVtaCatXSocioForm,
+					UploadFileForm,
+					RpteVtaCatXSocioForm)
 
 
 
@@ -13684,5 +13686,127 @@ def combo_catalogos_importacion(request,*args,**kwargs):
 		# en lugar de 'content_type' y no funciono.
 
 	return HttpResponse(data,content_type='application/json')
+
+"""
+
+def rpteVtasCatalogoxSocio(request):
+
+	#pdb.set_trace()		
+	if request.method == 'POST':
+		form = RpteVtaCatXSocioForm(request.POST)
+		'''
+		Si la forma es valida se normalizan los campos numpedido, status y fecha,
+		de otra manera se envia la forma con su contenido erroreo para que el validador
+		de errores muestre los mansajes correspondientes '''
+
+		if form.is_valid():
+		
+			# limpia datos 
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			salida_a = form.cleaned_data['salida_a']
+			
+			# Convierte el string '1901-01-01' a una fecha valida en python
+			# para ser comparada con la fecha ingresada 
+
+			fecha_1901 =datetime.strptime('1901-01-01', '%Y-%m-%d').date()
+			hoy = date.today()
+
+
+			# Establece conexion con la base de datos
+			cursor=connection.cursor()
+
+		
+			# Comienza a hacer selects en base a criterios 
+
+
+			
+			cursor.execute("SELECT h.asociadono,a.idProveedor,SUM(p.precio) AS total FROM pedidos_status_fechas f  INNER JOIN pedidoslines p  ON (p.EmpresaNo=f.EmpresaNo and p.Pedido=f.Pedido and p.ProductoNo=f.ProductoNo and f.Status=p.Status and p.catalogo=f.catalogo) INNER JOIN articulo a on (a.EmpresaNo=p.EmpresaNo and a.CodigoArticulo=p.ProductoNo and a.catalogo=p.catalogo) INNER JOIN pedidosheader h on (p.EmpresaNo=h.EmpresaNo and h.PedidoNo=p.pedido) WHERE f.FechaMvto>=':1' and f.FechaMvto<=':2' and p.Status='Facturado'  GROUP BY h.asociadono,a.idProveedor")
+							
+			pedidos = dictfetchall(cursor)
+			elementos = len(pedidos)
+
+			
+
+			cursor.execute("SELECT nombre as nombresuc from sucursal where sucursalNo=%s;",(sucursal,))
+			suc_nom=cursor.fetchone()
+			
+			cursor.execute("SELECT razonsocial from proveedor where empresano=1 and proveedorno=%s;",(marca,))
+			proveedor_nombre=cursor.fetchone()
+
+
+
+
+
+			if not pedidos:# or not nombre_socio[0]:
+				mensaje = 'No se encontraron registros !'
+				
+				return render(request,'pedidos/lista_pedidos_StatusxMarca.html',{'form':form,'mensaje':mensaje,})
+			else:
+				mensaje ='Registros encontrados:'
+				context = {'pedidos':pedidos,'subxsocio':subxsocio,'mensaje':mensaje,'elementos':elementos,'sucursal':suc_nom[0],'titulo':'Consulta de pedidos con status de '+status,'fechainicial':fechainicial,'fechafinal':fechafinal,'total_gral':total_gral,'elementos':elementos,'proveedor_nombre':proveedor_nombre[0] if marca!=u'0' else 'General',}
+
+				if salida_a == 'Pantalla':
+
+					return render(request,'pedidos/lista_pedidos_StatusxMarca.html',context)
+				else:
+
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="PedidosStatusxMarca.csv"'
+
+					writer = csv.writer(response)
+					writer.writerow(['SUCURSAL','SOCIO_NUMERO','SOCIO_NOMBRE','SOCIO_APPATERNO','SOCIO_APMATERNO','PEDIDO','FECHA_MVTO','STATUS','CATALOGO','PAGINA','MARCA','ESTILO','COLOR','TALLA','PRECIO',])
+					
+					for registro in pedidos:
+						print registro
+						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+						llaves_a_mostrar = ['sucursal','asociadoNo','Nombre','appaterno','apmaterno','pedido','fechamvto','status','catalogo','pagina','idmarca','idestilo','idcolor','talla','precio',] 
+						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+						lista = [registro[x] for x in llaves_a_mostrar]					
+						writer.writerow(lista)
+					cursor.close()
+					return response			
+
+
+
+			# Cierra la conexion a la base de datos
+			cursor.close()
+			
+		
+	else:
+		form = RpteStatusxMarcaForm()
+		#cursor.close()
+		
+	return render(request,'pedidos/pedidos_por_status_xmarca_form.html',{'form':form,})
+
+"""
+
+def rpteVtasCatalogosxSocio(request):
+
+	pdb.set_trace()
+
+	if request.method=='POST':
+
+		form = RpteVtaCatXSocioForm(request.POST)
+
+		if form.is_valid():
+
+			 socioinicial = form.cleaned_data['socioinicial']
+			 sociofinal = form.cleaned_data['sociofinal']
+
+			 fechainicial = form.cleaned_data['fechainicial']
+			 fechafinal = form.cleaned_data['fechafinal']
+			 marca = form.cleaned_data['marca']
+
+		else:
+		
+			form = RpteVtaCatXSocioForm()
+
+	else:
+
+		form = RpteVtaCatXSocioForm()
+
+	return render(request,'pedidos/VtaCatxSocioForm.html',{'form':form,})
+	
 
 

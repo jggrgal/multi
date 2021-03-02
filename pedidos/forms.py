@@ -3978,3 +3978,95 @@ class UploadFileForm(forms.Form):
 
 		return self.cleaned_data
 
+
+
+''' ***********   RPTE_VTACATALOGO POR SOCIO   *************'''
+
+class RpteVtaCatXSocioForm(forms.Form):
+
+	#pdb.set_trace()
+	
+	lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
+
+	hoy =  date.today()	
+	#t = datetime.now
+	f_inicial_init =  date.today()
+
+	f_final_init = f_inicial_init + timedelta(days=30)
+
+
+	socioinicial = forms.IntegerField(label='Socio inicial',initial=1,required=True)
+	sociofinal = forms.IntegerField(label='Socion final',initial=999999,required=True)
+
+
+
+
+	# Prepara el campo para utilizar datepicker
+	DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+	#fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),initial=f_inicial_init.strftime('%d/%m/%Y'),required=False)
+	#fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),initial=f_final_init.strftime('%d/%m/%Y'),required=False)
+
+	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
+	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
+
+	#salida_a = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
+ 
+
+	error_messages = {'FechaInicial':'Ingrese una fecha inicial !',
+					'FechaFinal':'Ingrese una fecha final !',
+					'FechIniMayor':'La fecha final debe ser mayor o igual a la fecha inicial !',
+					'SocioFinal':'Socio final no puede ser menor que el socio inicial !'
+					}
+
+	def __init__(self,*args,**kwargs):
+
+		lmar=lista_Proveedores()	
+		super(RpteVtaCatXSocioForm, self).__init__(*args,**kwargs)	
+
+		# Se define la marca pero se pone un id cualquiera para que no reaccione a jquery ya que el default es id_marca y se habilita en jquery.
+		self.fields['marca'] = forms.ChoiceField(widget=forms.Select(attrs={'id':'id_cualquiera',}),
+			label='Marca',choices = lmar,initial=0,required='True' )
+			
+
+	def clean(self):
+		
+		cleaned_data = super(RpteVtaCatXSocioForm, self).clean()
+		
+		fechainicial = self.cleaned_data.get('fechainicial')
+		fechafinal = self.cleaned_data.get('fechafinal')
+		socioinicial= self.cleaned_data.get('socioinicial')
+		sociofinal = self.cleaned_data.get('sociofinal')
+		marca = self.cleaned_data.get('marca')		
+		
+
+		'''if sucursal =='0':
+			raise  forms.ValidationError(self.error_messages['CombinacionSucursalInvalida'],code='CombinacionSucursalInvalida')'''
+
+		''' Se valida socioinicial vs socio final'''
+
+		if socioinicial > sociofinal:
+			raise  forms.ValidationError(self.error_messages['SocioFinal'],code='SocioFinal')
+
+			
+		if not(fechainicial and fechafinal):
+
+			if not fechainicial:
+				raise  forms.ValidationError(self.error_messages['FechaInicial'],code='FechaInicial')
+			if not fechafinal:
+				raise forms.ValidationError(self.error_messages['FechaFinal'],code='FechaFinal')
+			
+		else:
+			if fechainicial > fechafinal:
+				raise forms.ValidationError(self.error_messages['FechIniMayor'],code='FechIniMayor')
+			
+		# De otra manera, quiere decir que el socio es cero y quien tiene un valor es
+		# el numero de documento, siendo este el caso no hay ya validacion.
+
+		return self.cleaned_data
+
+
+
+
+
+
