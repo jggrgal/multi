@@ -1,0 +1,85 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+
+{% load l10n %}
+<div class=row>
+    <div class='col-md-4'>
+         <h4 class='success'>VENTA DE CATALOGOS</h4>   
+                
+    </div>
+    <div class='col-md-4'>
+    </div>
+    <div class='col-md-4'>
+        <h4>{{mensaje}} {% if elementos > 0 %} {{elementos}} {% endif %}  </h4>   
+        
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+    	<!--<table id="lista_documentos" class='display table table-hover table-bordered table-condensed'>-->
+        <table id="lista_documentos" class='table'>
+        
+            <thead>
+            	<tr class='success'>
+            		<th>Documento Num</th>
+                    <th>Fecha</th>
+                    <th>Socio Num</th>
+                    <th>Nombre</th>
+                	<th>Proveedor</th>
+                	<th>Monto</th>
+                                   
+            	</tr>
+            </thead>
+        <tbody>
+
+        	{% for item in resultados %}
+                 
+                
+        		<tr  {% if item.Cancelado == "Cancelado" %} style='color:red' {% else %} style='color:black' {% endif %}>
+                    <td>{{item.nodocto}}</td>
+                    
+                    {% localize on %}
+                        <td>{{item.fechacreacion | date:'d/M/Y'}}</td>
+                    {% endlocalize %}
+                    <td>{{item.asociado}}</td>
+                    <td>{{item.nombre_socio}}</td>
+                    <td>{{item.razonsocial}}
+                   
+                    <td>{% if item.monto > 0 %}{{ item.monto }}{% else %} 0 {% endif %}</td>
+
+                    <!--<td>{% if item.Cancelado == '1' %} {{item.Cancelado}} {% else %} ACTIVO {% endif %} <td>
+                    <td>{{item.Cancelado}}</td>
+                  
+                    <td><p align="left">
+                          <a class="btn btn-danger btn-sm " href="/pedidos/cancelardocumentoadvertencia/{{ item.NoDocto }}" role="button" {% if  not item.cancelar %} style="display: none;" {% endif %}><span class="glyphicon glyphicon-remove-sign"></span> Cancelar</a>
+                        </p></td>
+                    <td><p align="left">
+                          <form id="imp_venta_form"  role="button" {% if  item.TipoDeDocumento == 'Remision' or  item.TipoDeDocumento == 'Cargo' %}  action= "{% url 'pedidos:imprime_venta' %}" {% else %} action="{% url 'pedidos:imprime_credito' %}" {% endif %} method="GET"><input id ='idventa' {% if  item.TipoDeDocumento == 'Remision' or  item.TipoDeDocumento == 'Cargo'  %} name ='p_num_venta' {% else %} name ='p_num_credito' {% endif %} class="glyphicon glyphicon-print" type="submit"  value={{item.NoDocto}} />
+                            </form>
+                          <!--
+                          <form id="imp_venta_form" action="{% url 'pedidos:imprime_venta' %}" method="GET">class="btn btn-success btn-sm" 
+                                <input id ='idventa' name ='p_num_venta' class=btn-success-btn-lg" type="submit"  value="000000" />
+                
+
+                            </form><br>-->
+        
+
+
+
+                        </p></td>
+                    
+            	</tr>
+            {% endfor %}
+        </tbody>
+    	</table>
+    </div>
+   
+
+    <p align='right'>
+        <a class="btn btn-default" href="/pedidos/rpteVtasCatalogosxSocio" role="button">Salir</a>
+    </p>
+
+
+{% endblock %}

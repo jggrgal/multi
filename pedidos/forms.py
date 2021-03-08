@@ -3986,7 +3986,6 @@ class RpteVtaCatXSocioForm(forms.Form):
 
 	#pdb.set_trace()
 	
-	lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
 
 	hoy =  date.today()	
 	#t = datetime.now
@@ -4010,7 +4009,6 @@ class RpteVtaCatXSocioForm(forms.Form):
 	fechainicial = forms.DateField(label='Fecha inicial(dd/mm/yyyy)',widget=DateInput(),required=False)
 	fechafinal = forms.DateField(label='Fecha final (dd/mm/yyyy)',widget=DateInput(),required=False)
 
-	#salida_a = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
  
 
 	error_messages = {'FechaInicial':'Ingrese una fecha inicial !',
@@ -4021,12 +4019,16 @@ class RpteVtaCatXSocioForm(forms.Form):
 
 	def __init__(self,*args,**kwargs):
 
+		lista_salida_imp =(('Pantalla','Pantalla'),('Archivo','Archivo'),)
+
 		lmar=lista_Proveedores()	
 		super(RpteVtaCatXSocioForm, self).__init__(*args,**kwargs)	
 
 		# Se define la marca pero se pone un id cualquiera para que no reaccione a jquery ya que el default es id_marca y se habilita en jquery.
 		self.fields['marca'] = forms.ChoiceField(widget=forms.Select(attrs={'id':'id_cualquiera',}),
-			label='Marca',choices = lmar,initial=0,required='True' )
+			label='Marca (seleccione una o se incluirán todas)',choices = lmar,initial=0,required='True' )
+	
+		self.fields['salida_a'] = forms.ChoiceField(label="Enviar a",widget=forms.Select(),choices=lista_salida_imp,initial='Pantalla',required=True)
 			
 
 	def clean(self):
@@ -4038,7 +4040,7 @@ class RpteVtaCatXSocioForm(forms.Form):
 		socioinicial= self.cleaned_data.get('socioinicial')
 		sociofinal = self.cleaned_data.get('sociofinal')
 		marca = self.cleaned_data.get('marca')		
-		
+		salida_a = self.cleaned_data.get('salida_a')
 
 		'''if sucursal =='0':
 			raise  forms.ValidationError(self.error_messages['CombinacionSucursalInvalida'],code='CombinacionSucursalInvalida')'''

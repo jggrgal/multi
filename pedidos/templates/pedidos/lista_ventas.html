@@ -16,7 +16,7 @@
         	<table class='table table-hover table-bordered table-condensed'>
             	<tr class='success'>
             		<th>Documento Num.</th>
-                    <th>Remision Num.</th>
+                    
                 	<th>Fecha</th>
                     <th>Socio</th>
                 	<th>Nombre</th>
@@ -33,7 +33,7 @@
                     
             		<tr>
                         <td>{{ item.NoDocto}}</td>
-                        <td> {{ item.Consecutivo }}</td>
+                        
                         {% localize on %}
                             <td>{{item.FechaCreacion| date:'d/M/Y'}}</td>
                         {% endlocalize %}

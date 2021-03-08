@@ -5344,6 +5344,12 @@ def crea_documento(request):
 
 					reg_catalogos = dictfetchall(cursor)	
 
+					''''Vta_catalogo'''
+
+					cursor.execute("INSERT INTO vta_catalogo (empresano,nodocto,proveedorno) values(%s,%s,%s);",(1,ultimodocto[0]+1,proveedor))
+
+
+
 					for reg_catalogo in reg_catalogos:
 
 						cursor.execute("INSERT INTO sociocatalogostemporada\
@@ -13783,7 +13789,7 @@ def rpteVtasCatalogoxSocio(request):
 
 def rpteVtasCatalogosxSocio(request):
 
-	pdb.set_trace()
+	#pdb.set_trace()
 
 	if request.method=='POST':
 
@@ -13791,12 +13797,60 @@ def rpteVtasCatalogosxSocio(request):
 
 		if form.is_valid():
 
-			 socioinicial = form.cleaned_data['socioinicial']
-			 sociofinal = form.cleaned_data['sociofinal']
+			socioinicial = form.cleaned_data['socioinicial']
+			sociofinal = form.cleaned_data['sociofinal']
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			marca = form.cleaned_data['marca']
+			salida_a = form.cleaned_data['salida_a']
 
-			 fechainicial = form.cleaned_data['fechainicial']
-			 fechafinal = form.cleaned_data['fechafinal']
-			 marca = form.cleaned_data['marca']
+			cursor=connection.cursor()
+
+			if marca != u'0':
+
+				if socioinicial== sociofinal:
+
+					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(marca,socioinicial,fechainicial,fechafinal))
+				else:
+					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(marca,socioinicial,sociofinal,fechainicial,fechafinal))
+
+				resultados = dictfetchall(cursor)
+
+				#cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,SUM(d.monto) AS monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by d.asociado;",(marca,socioinicial,sociofinal,fechainicial,fechafinal))
+
+			else:
+					
+				if socioinicial== sociofinal:
+
+					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(socioinicial,fechainicial,fechafinal))
+				else:
+					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by vc.proveedorno,d.asociado;",(socioinicial,sociofinal,fechainicial,fechafinal))
+
+				resultados = dictfetchall(cursor)	
+	
+			cursor.close()
+	
+			if 	salida_a != 'Pantalla':
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="vta_catalogos.csv"'
+
+				writer = csv.writer(response)
+				writer.writerow(['REMISION','FECHA_CREACION','NUM_SOCIO','NOMBRE','CATALOGO','MONTO'])
+				
+				for registro in resultados:
+					print registro
+					# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+					llaves_a_mostrar = ['nodocto','fechacreacion','asociado','nombre_socio','razonsocial','monto'] 
+					# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+					lista = [registro[x] for x in llaves_a_mostrar]					
+					writer.writerow(lista)
+				
+				return response			
+
+			else:	
+			
+				return render(request,'pedidos/muestra_vta_catalogos.html',{'resultados':resultados,})
+
 
 		else:
 		
