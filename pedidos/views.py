@@ -13569,9 +13569,14 @@ def upload_file_catalogo(request):
 					# PARA QUE LOS PUEDA CONVERTIR A DECIMAL SIN PROBLEMAS ANTES DE GRABAR A BASE DE DATOS.
 					columna[7]=columna[7].replace(',','')
 					columna[9]=columna[9].replace(',','')
-
-
-
+					
+					columna[8]=columna[8].strip() # elimina espacios iniciales y finales a la talla.
+					columna[1]=columna[1].strip() # elimina espacios iniciales y finales al codigo del art.
+					columna[4]=columna[4].strip() # elimina espacios iniciales y finales a la marca.
+					columna[3]=columna[3].strip() # elimina espacios iniciales y finales a la estilo.
+					columna[5]=columna[5].strip() # elimina espacios iniciales y finales a la color.
+					columna[6]=columna[6].strip() # elimina espacios iniciales y finales a la acabado.
+				
 				str1=",".join(str(j) for j in lista_error)	
 				messages.error(request, 'Existen registros con una diagonal en el campo codigo_articulo, lineas: '+str1)
 				
@@ -13806,27 +13811,54 @@ def rpteVtasCatalogosxSocio(request):
 
 			cursor=connection.cursor()
 
+			totales=()
+			resultados=()
+			titulo_total=''
+			total_socio = 0
+
 			if marca != u'0':
 
 				if socioinicial== sociofinal:
 
 					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(marca,socioinicial,fechainicial,fechafinal))
+					resultados = dictfetchall(cursor)
+				 	
+				 	
+				 	titulo_total='TOTAL:'
 				else:
 					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(marca,socioinicial,sociofinal,fechainicial,fechafinal))
+					resultados = dictfetchall(cursor)
 
-				resultados = dictfetchall(cursor)
+				 	cursor.execute("SELECT vc.proveedorno as numero, p.razonsocial,SUM(d.monto) AS monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by vc.proveedorno,p.razonsocial;",(marca,socioinicial,sociofinal,fechainicial,fechafinal))
+				 	#cursor.execute("SELECT vc.proveedorno as numero,p.razonsocial,SUM(d.monto) AS monto FROM vta_catalogo vc inner JOIN documentos d on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by vc.proveedorno,p.razonsocial;",(socioinicial,sociofinal,fechainicial,fechafinal))
 
-				#cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,SUM(d.monto) AS monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE vc.proveedorno=%s and d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by d.asociado;",(marca,socioinicial,sociofinal,fechainicial,fechafinal))
+				 	totales=dictfetchall(cursor)
+				 	titulo_total='TOTAL DEL SOCIO:'
 
 			else:
 					
 				if socioinicial== sociofinal:
 
 					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by d.asociado,vc.proveedorno;",(socioinicial,fechainicial,fechafinal))
+					resultados = dictfetchall(cursor)
+
+				 	cursor.execute("SELECT d.asociado as numero,CONCAT(aso.nombre,' ',aso.appaterno) as razonsocial,SUM(d.monto) AS monto FROM vta_catalogo vc inner JOIN documentos d on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by d.asociado,aso.nombre,aso.appaterno;",(socioinicial,sociofinal,fechainicial,fechafinal))
+				 	totales=dictfetchall(cursor)
+				 	titulo_total='TOTALES POR SOCIO:'
+
 				else:
 					cursor.execute("SELECT d.asociado,CONCAT(trim(aso.nombre),' ',trim(aso.appaterno),' ',trim(aso.apmaterno)) as nombre_socio,p.razonsocial,d.nodocto,d.fechacreacion,d.monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s order by vc.proveedorno,d.asociado;",(socioinicial,sociofinal,fechainicial,fechafinal))
+					resultados = dictfetchall(cursor)
 
-				resultados = dictfetchall(cursor)	
+					'''cursor.execute("SELECT p.proveedorno as numero,vc.proveedorno, p.razonsocial as nombre,SUM(d.monto) AS monto FROM documentos d inner JOIN vta_catalogo vc on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by vc.proveedorno;",(socioinicial,sociofinal,fechainicial,fechafinal))
+				 	totales=dictfetchall(cursor)'''
+				 	cursor.execute("SELECT vc.proveedorno as numero,p.razonsocial,SUM(d.monto) AS monto FROM vta_catalogo vc inner JOIN documentos d on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by vc.proveedorno,p.razonsocial;",(socioinicial,sociofinal,fechainicial,fechafinal))
+				 	totales=dictfetchall(cursor)
+				 	titulo_total='TOTALES POR PROVEEDOR:'
+
+
+
+				#resultados = dictfetchall(cursor)	
 	
 			cursor.close()
 	
@@ -13849,7 +13881,7 @@ def rpteVtasCatalogosxSocio(request):
 
 			else:	
 			
-				return render(request,'pedidos/muestra_vta_catalogos.html',{'resultados':resultados,})
+				return render(request,'pedidos/muestra_vta_catalogos.html',{'resultados':resultados,'totales':totales,'titulo_total':titulo_total,})
 
 
 		else:

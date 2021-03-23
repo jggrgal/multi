@@ -2086,7 +2086,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
       $('#id_talla').change(function(){
 
-        if($(this).val() == "NE")
+        if($(this).val().trim() == "NE")
         {
             $("#id_tallaalt").show();
         }
@@ -2157,7 +2157,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
            hayerror = 1;
           }              
            // de otra manera entoces graba registro en tmp.
-        else if(id_talla == 'NE' && id_tallaalt.trim() == ''){
+        else if(id_talla.trim() == 'NE' && id_tallaalt.trim() == ''){
              alert("En artículo no especifica la talla, por favor ingrese una talla alternativa !");
               hayerror = 1;
              }
@@ -2190,7 +2190,7 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
                             //$("#cesto").append("<tr id='"+ data.id+"'><td>"+ data.id +"</td><td>"+ data.id_pag +"</td><td>"+ data.id_est +"</td><td>"+ data.id_mar +"</td><td>"+ data.id_col +"</td><td>"+ data.id_talla +"</td><td>"+ data.precio +"</td>"+"<td><input type='checkbox' class='case'/></td></tr>");
                             console.log(data);
-                            if(data.id_talla == 'NE') { talla_var = data.id_tallaalt;
+                            if(data.id_talla.trim() == 'NE') { talla_var = data.id_tallaalt;
                              } else { talla_var = data.id_talla;
                                 };
                             console.log(data.descontinuado);

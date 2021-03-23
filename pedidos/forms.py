@@ -1697,7 +1697,7 @@ class CreaDocumentoForm(forms.Form):
 		return
 
 	def clean(self):
-		#pdb.set_trace()
+		pdb.set_trace()
 		
 		cleaned_data = super(CreaDocumentoForm, self).clean()
 
@@ -1708,6 +1708,11 @@ class CreaDocumentoForm(forms.Form):
 		self.concepto =  cleaned_data.get('doc_concepto')
 		self.monto =  cleaned_data.get('doc_monto')
 		self.psw_paso = cleaned_data.get('psw_paso')
+		self.proveedor = cleaned_data.get('doc_proveedor')
+		self.anio = cleaned_data.get('doc_anio')
+		self.temporada = cleaned_data.get('doc_temporada')
+
+
 
 		try:
 			self.longitud_concepto = len(self.concepto.strip())
@@ -1722,9 +1727,10 @@ class CreaDocumentoForm(forms.Form):
 
 		elif not (self.monto>0):
 			raise forms.ValidationError(self.error_messages['err_monto'],code='err_monto')
-		else:
-			if self.ventadecatalogo==1 and int(self.doc_anio)<2019:
-				raise forms.ValiationError("Ingrese un anio")
+		elif self.ventadecatalogo==1 and int(self.anio)<2019:
+			raise forms.ValidationError("Ingrese un anio")
+		elif self.ventadecatalogo == u'1' and (self.proveedor==u'0' or self.anio<2019 or self.temporada=='0'):
+			raise forms.ValidationError("Ingrese el proveedor, el año y la temporada !")
 
 
 		return self.cleaned_data
