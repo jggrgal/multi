@@ -13811,10 +13811,12 @@ def rpteVtasCatalogosxSocio(request):
 
 			cursor=connection.cursor()
 
+			# Inicializacion de totales y variables de trabajo en queries
 			totales=()
 			resultados=()
 			titulo_total=''
 			total_socio = 0
+			gran_total = 0
 
 			if marca != u'0':
 
@@ -13833,6 +13835,9 @@ def rpteVtasCatalogosxSocio(request):
 				 	#cursor.execute("SELECT vc.proveedorno as numero,p.razonsocial,SUM(d.monto) AS monto FROM vta_catalogo vc inner JOIN documentos d on (vc.empresano=d.empresano and vc.nodocto=d.nodocto) INNER JOIN asociado aso on (d.empresano=aso.empresano and d.asociado=aso.asociadono) inner join proveedor p on (d.empresano=p.empresano and p.proveedorno=vc.proveedorno) WHERE d.asociado>=%s and d.asociado<=%s  and d.vtadecatalogo=1 and d.fechaCreacion>=%s and d.fechacreacion<=%s group by vc.proveedorno,p.razonsocial;",(socioinicial,sociofinal,fechainicial,fechafinal))
 
 				 	totales=dictfetchall(cursor)
+
+
+
 				 	titulo_total='TOTAL DEL SOCIO:'
 
 			else:
@@ -13856,6 +13861,11 @@ def rpteVtasCatalogosxSocio(request):
 				 	totales=dictfetchall(cursor)
 				 	titulo_total='TOTALES POR PROVEEDOR:'
 
+			#pdb.set_trace()
+
+			'''Calcula el monto del gran total por proveedor o socio'''
+			for j in totales:
+				gran_total += j['monto']	 	
 
 
 				#resultados = dictfetchall(cursor)	
@@ -13881,7 +13891,7 @@ def rpteVtasCatalogosxSocio(request):
 
 			else:	
 			
-				return render(request,'pedidos/muestra_vta_catalogos.html',{'resultados':resultados,'totales':totales,'titulo_total':titulo_total,})
+				return render(request,'pedidos/muestra_vta_catalogos.html',{'resultados':resultados,'totales':totales,'titulo_total':titulo_total,'gran_total':gran_total,})
 
 
 		else:
