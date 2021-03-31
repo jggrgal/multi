@@ -727,11 +727,13 @@ def lista_Catalogos(id_prov,id_temp,g_numero_socio_zapcat,is_staff):
 	# y la bandera de adquirio_catalogo la hace falsa ( le pone cero )
 	
 
-	if not registros or is_staff:
+	#if not registros or is_staff:
+
+	if not registros:
 		try:
 
 			cursor.execute("SELECT c.clasearticulo from catalogostemporada c  where c.proveedorno=%s and c.anio=%s  and c.Activo=1 group by c.proveedorno,c.anio,c.clasearticulo  ;",[id_prov,id_temp,])
-					
+			registros=cursor.fetchall()		
 			
 			adquirio_catalogo = 0
 		
@@ -741,7 +743,7 @@ def lista_Catalogos(id_prov,id_temp,g_numero_socio_zapcat,is_staff):
 
 
 	# Convierte el diccionario en tupla
-	for row in cursor:
+	for row in registros:
 		elemento = tuple(row)
 		listacat=listacat+elemento
 	listacat=('SELECCIONE...',)+listacat
