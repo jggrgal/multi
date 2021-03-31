@@ -73,7 +73,8 @@ from . forms import (AccesoForm,\
 					UsuarioLogForm,
 					RpteVtaCatXSocioForm,
 					UploadFileForm,
-					RpteVtaCatXSocioForm)
+					RpteVtaCatXSocioForm,
+					CreaAsociadoForm)
 
 
 
@@ -11561,6 +11562,7 @@ def edita_asociado(request,asociadono):
 			essocio = form.cleaned_data['essocio']
 			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
 			numeroweb = form.cleaned_data['numeroweb']
+			usr_activo = form.cleaned_data['activo']
 			
 			if numeroweb is None:
 				numeroweb =0
@@ -11627,6 +11629,8 @@ def edita_asociado(request,asociadono):
 				nocontrol=%s\
 				WHERE asociadono=%s;',(nombre.upper().lstrip(),appaterno.upper().lstrip(),apmaterno.upper().lstrip(),direccion.upper().lstrip(),colonia.upper().lstrip(),ciudad.upper().lstrip(),estado.upper().lstrip(),pais.upper().lstrip(),telefono1,telefono2,fax,cel,radio.lstrip(),direccionelectronica.lower().lstrip(),essocio,forzarcobroanticipo,numeroweb,numcontrol.upper().lstrip(),asociadono,))
 
+				cursor.execute("UPDATE auth_user SET is_active=%s where id=%s;",(usr_activo,numeroweb,))
+
 				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,3,fecha_hoy,hora_hoy,'Se modifico el socio: '+str(asociado)))		
 							
 				cursor.execute("COMMIT;")
@@ -11669,22 +11673,32 @@ def edita_asociado(request,asociadono):
 								p.ForzarCobroAnticipo,\
 								p.num_web\
 								from asociado p where p.asociadono=%s;",(asociadono,))
+
 		asociado = cursor.fetchone()
+		#pdb.set_trace()
 		
-		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'numcontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],})
+		try:
+			cursor.execute("SELECT is_active FROM auth_user where id=%s;",(asociado[18],))
+			elemento = cursor.fetchone()
+			activo = elemento[0]
+
+		except:
+			activo = 0
+		
+		form = DatosAsociadoForm(initial={'asociadono':asociado[0],'nombre':asociado[1],'appaterno':asociado[2],'apmaterno':asociado[3],'direccion':asociado[4],'colonia':asociado[5],'ciudad':asociado[6],'estado':asociado[7],'pais':asociado[8],'telefono1':asociado[9],'telefono2':asociado[10],'fax':asociado[11],'celular':asociado[12],'radio':asociado[13],'direccionelectronica':asociado[14],'numcontrol':asociado[15], 'essocio':asociado[16],'forzaranticipo':False if asociado[17] else True,'numeroweb':asociado[18],'forzarcobroanticipo':asociado[17],'activo':activo,})
 					
 	return render(request,'pedidos/edita_asociado.html',{'form':form,'asociadono':asociadono,})
 
 
 def crea_asociado(request):
-
+	#pdb.set_trace()
 	msg = ''
 
 	hoy = date.today()
 
 	if request.method == 'POST':
 
-		form = DatosAsociadoForm(request.POST)
+		form = CreaAsociadoForm(request.POST)
 		if form.is_valid():
 			asociadoo = form.cleaned_data['asociadono']
 			numcontrol = form.cleaned_data['numcontrol']
@@ -11707,11 +11721,13 @@ def crea_asociado(request):
 			essocio = form.cleaned_data['essocio']
 			forzarcobroanticipo = form.cleaned_data['forzarcobroanticipo']
 			numeroweb = form.cleaned_data['numeroweb']
+
+
+
 			
 
 			if numeroweb is None:
 				numeroweb =0
-
 			
 			'''VALIDA USUARIO Y DERECHOS '''
 
