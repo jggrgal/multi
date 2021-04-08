@@ -145,7 +145,8 @@ urlpatterns = [
 	url(r'^upload_file_catalogo/$',views.upload_file_catalogo,name='upload_file_catalogo'),
 	url(r'^combo_catalogos_importacion/$',views.combo_catalogos_importacion,name='combo_catalogos_importacion'),
 	url(r'^rpteVtasCatalogosxSocio/$',views.rpteVtasCatalogosxSocio,name='rpteVtasCatalogosxSocio'),
-
+	url(r'^valida_credenciales/$',views.valida_credenciales,name='valida_credenciales'),
+	url(r'^creditos_vivos/$',views.creditos_vivos,name='creditos_vivos'),
 
 
 	]

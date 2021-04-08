@@ -99,6 +99,7 @@ import locale  # Se usa para representar cantidades monetarias
   # move the origin up and to the left
 from django.utils.crypto import get_random_string  # genera un string de 3 caract. para password da paso
 from django.contrib import messages 
+from django.contrib.auth.models import User
 
 getcontext().prec = 6# esta linea establece la precision de decimales para numeros decimales,
 					  # leer la funcion getcontext de decimales.
@@ -309,6 +310,7 @@ def acceso(request):
 					request.session['cnf_dias_plazo_vmto_aqui_socio_sincredito'] = configuracion[24]	
 					request.session['cnf_mostrar_socio_en_ticket'] = configuracion[25]
 					
+
 					
 					if not socio_datos:
 						return HttpResponse("Ud. no tiene asignado un numero de socio, por favor consulte al administrador el sistema")					
@@ -8301,7 +8303,17 @@ def edita_catalogo(request,p_ProveedorNo,p_Anio,p_Periodo,p_ClaseArticulo):
 								ct.catalogo_promociones \
 								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(p_ProveedorNo,p_Periodo,p_Anio,p_ClaseArticulo,))
 		catalogostemporada = cursor.fetchone()
-		type(catalogostemporada)
+		try:
+			type(catalogostemporada)
+		except TypeError as e:
+						
+			error_msg = 'Ocurrió el siguiente error: '+str(e)
+			context = {'error_msg':error_msg,}
+			return render(request,'pedidos/error.html',context)
+
+
+
+		#type(catalogostemporada)
 		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
 	context = {'form':form,'ProveedorNo':p_ProveedorNo,'Anio':p_Anio,'Periodo':p_Periodo,'ClaseArticulo':p_ClaseArticulo,}			
 	
@@ -13922,5 +13934,78 @@ def rpteVtasCatalogosxSocio(request):
 
 	return render(request,'pedidos/VtaCatxSocioForm.html',{'form':form,})
 	
+
+#def valida_credenciales(request,*args,**kwargs):
+def valida_credenciales(request):
+
+	#pdb.set_trace()
+
+	print "es ajax"
+
+	'''usuario = request.GET['usuario'].encode('latin_1')
+	contrasena = request.GET['password'].encode('latin_1')'''
+
+	try:
+		usuario = request.GET.get('usuario').encode('latin_1')
+		contrasena = request.GET.get('contrasena').encode('latin_1')
+	except:
+		data= 'usuario o contrasena no recibidos...'
+		data = json.dumps(data)	
+
+		return HttpResponse(data,content_type='application/json')
+	
+
+
+	activo =1
+	valido= 1
+	socio_datos =[]
+	
+	user=authenticate(username=usuario,password=contrasena)
+
+	if user is None:
+		valido=0
+		activo=0
+		socio_datos.append('')	
+	else:
+
+		valido = 1
+
+		if user.is_active:
+					login(request, user)
+					
+					cursor = connection.cursor()
+
+					cursor.execute("SELECT asociadono,EsSocio FROM asociado where num_web=%s;",[request.user.id])
+					socio_datos = cursor.fetchone()
+
+					cursor.close()
+		else:
+			activo = 0
+			socio_datos.append('')			
+
+	r ={'login_valido':valido,'activo':activo,'num_socio':socio_datos[0],}	
+	data = json.dumps(r)	
+
+	return HttpResponse(data,content_type='application/json')
+
+
+"""TRAE CREDITOS VIVOS SOCIO PARA API"""
+
+login_required
+def creditos_vivos(request):
+	pdb.set_trace()
+	print type(request.user )
+	
+	cursor = connection.cursor()
+
+	cursor.execute("SELECT * FROM documentos where asociado=%s;",(288,))
+	socio_datos = dictfetchall(cursor)
+
+	cursor.close()
+	x= request.user
+	print(data)
+	data= json.dumps(socio_datos)
+	return HttpResponse(json.dumps(data,cls=DjangoJSONEncoder),content_type='application/json')
+
 
 
