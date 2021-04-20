@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from django.shortcuts import render,redirect,render_to_response
-from django.http import HttpResponse,HttpResponseRedirect,Http404
+from django.http import HttpResponse,HttpResponseRedirect,Http404,JsonResponse
 from django.template import RequestContext,loader
 from django.core.urlresolvers import reverse
 from django.core import serializers
@@ -13991,21 +13991,31 @@ def valida_credenciales(request):
 
 """TRAE CREDITOS VIVOS SOCIO PARA API"""
 
-login_required
-def creditos_vivos(request):
-	pdb.set_trace()
-	print type(request.user )
+def creditos_vivos1(request,num_socio):
+	
 	
 	cursor = connection.cursor()
 
-	cursor.execute("SELECT * FROM documentos where asociado=%s;",(288,))
+	cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
+	#socio_datos = cursor.fetchall()
 	socio_datos = dictfetchall(cursor)
+	print socio_datos
+	total=0
+	for j in socio_datos:
+		total+=j['Monto']
+
+	socio_datos.append({'total':total})
 
 	cursor.close()
 	x= request.user
-	print(data)
-	data= json.dumps(socio_datos)
-	return HttpResponse(json.dumps(data,cls=DjangoJSONEncoder),content_type='application/json')
+	#print(data)
+	#serialized=serializers.serialize("json",socio_datos,fields=('Asociado','Concepto'))
+	#data = json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	#return HttpResponse(data,content_type='application/json')
+	return socio_datos
 
-
-
+def creditos_vivos(request):
+	num_socio = request.GET.get('num_socio')
+	socio_datos=creditos_vivos1(request,num_socio)
+	data =json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	return HttpResponse(data,content_type='application/json')

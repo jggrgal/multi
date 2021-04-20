@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     # 3ed party app
     'crispy_forms',
+    'rest_framework',
     #'django_tables2',
     # My app
     #'reportes',
