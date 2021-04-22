@@ -9186,7 +9186,7 @@ def recepcion_dev_prov(request):
 										and l.pedido=pe.pedido
 										and l.productono=pe.productono
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
-										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+										inner join almacen al on (1=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
 										where h.idsucursal=%s and (l.status='Devuelto' or l.status='Por Devolver')
 										and psf.fechamvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,concat(a.idmarca,a.idestilo));"""
 					parms =(sucursal,ordenarpor)
@@ -9221,7 +9221,7 @@ def recepcion_dev_prov(request):
 										and l.pedido=pe.pedido
 										and l.productono=pe.productono
 										and l.catalogo=pe.catalogo and l.nolinea=pe.nolinea)
-										inner join almacen al on (l.empresano=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
+										inner join almacen al on (1=al.empresano and a.idproveedor=al.proveedorno and al.almacen=pe.bodegaencontro)
 										where (l.status='Devuelto' or l.status='Por Devolver') and h.idsucursal>=1 and h.idsucursal<=999
 										and psf.fechaMvto>'20191201' ORDER BY if(%s='Estilo',a.idestilo,concat(a.idmarca,a.idestilo));"""
 					parms =(ordenarpor,)
