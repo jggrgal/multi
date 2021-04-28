@@ -146,7 +146,7 @@ urlpatterns = [
 	url(r'^combo_catalogos_importacion/$',views.combo_catalogos_importacion,name='combo_catalogos_importacion'),
 	url(r'^rpteVtasCatalogosxSocio/$',views.rpteVtasCatalogosxSocio,name='rpteVtasCatalogosxSocio'),
 	url(r'^valida_credenciales/$',views.valida_credenciales,name='valida_credenciales'),
-	url(r'^creditos_vivos/$',views.creditos_vivos,name='creditos_vivos'),
+	url(r'^consulta_api/$',views.consulta_api,name='consulta_api'),
 
 
 	]

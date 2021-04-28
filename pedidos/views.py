@@ -13991,7 +13991,7 @@ def valida_credenciales(request):
 
 """TRAE CREDITOS VIVOS SOCIO PARA API"""
 
-def creditos_vivos1(request,num_socio):
+def consulta_creditos_vivos_api(request,num_socio):
 	
 	
 	cursor = connection.cursor()
@@ -14014,8 +14014,62 @@ def creditos_vivos1(request,num_socio):
 	#return HttpResponse(data,content_type='application/json')
 	return socio_datos
 
-def creditos_vivos(request):
-	num_socio = request.GET.get('num_socio')
-	socio_datos=creditos_vivos1(request,num_socio)
+def consulta_pedidos_api(request,num_socio,opcion):
+	
+	#pdb.set_trace()
+
+	if opcion==1:
+		statusval='Aqui'
+	elif opcion==2:
+		statusval='Confirmado'
+	elif opcion==3:
+		statusval='Encontrado'
+	else:
+		statusval ='Por Confirmar'
+	
+	cursor = connection.cursor()
+
+
+	#cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
+	#socio_datos = cursor.fetchall()
+	cursor.execute("SELECT l.pedido,l.precio,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.asociadono=%s and l.status=%s and l.status=psf.status  ORDER BY h.pedidono DESC;",(num_socio,statusval,))
+
+	socio_datos = dictfetchall(cursor)
+	print socio_datos
+	total=0
+	for j in socio_datos:
+		total+=j['precio']
+
+	socio_datos.append({'total':total})
+
+	cursor.close()
+	x= request.user
+	#print(data)
+	#serialized=serializers.serialize("json",socio_datos,fields=('Asociado','Concepto'))
+	#data = json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	#return HttpResponse(data,content_type='application/json')
+	return socio_datos
+#@login_required(login_url = "/pedidos/consulta_api/")
+def consulta_api(request):
+	#pdb.set_trace()
+	try:
+		num_socio = request.GET.get('num_socio')
+		opcion = request.GET.get('opcion').encode('latin_1')
+	
+	
+		if num_socio ==u'' or (opcion<'1' or opcion>'5'):
+			raise TypeError
+	except:
+		data = json.dumps({'Error':'Algun parametro recibido sin valor o incorrecto !'})
+		return HttpResponse(data,content_type='application/json')
+	
+	opcion = int(opcion)
+
+	if opcion<5:
+
+		socio_datos=consulta_pedidos_api(request,num_socio,opcion)			
+	else:
+
+		socio_datos=consulta_creditos_vivos_api(request,num_socio)
 	data =json.dumps(socio_datos,cls=DjangoJSONEncoder)
 	return HttpResponse(data,content_type='application/json')
