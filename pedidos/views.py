@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from django.shortcuts import render,redirect,render_to_response
-from django.http import HttpResponse,HttpResponseRedirect,Http404
+from django.http import HttpResponse,HttpResponseRedirect,Http404,JsonResponse
 from django.template import RequestContext,loader
 from django.core.urlresolvers import reverse
 from django.core import serializers
@@ -99,6 +99,7 @@ import locale  # Se usa para representar cantidades monetarias
   # move the origin up and to the left
 from django.utils.crypto import get_random_string  # genera un string de 3 caract. para password da paso
 from django.contrib import messages 
+from django.contrib.auth.models import User
 
 getcontext().prec = 6# esta linea establece la precision de decimales para numeros decimales,
 					  # leer la funcion getcontext de decimales.
@@ -309,6 +310,7 @@ def acceso(request):
 					request.session['cnf_dias_plazo_vmto_aqui_socio_sincredito'] = configuracion[24]	
 					request.session['cnf_mostrar_socio_en_ticket'] = configuracion[25]
 					
+
 					
 					if not socio_datos:
 						return HttpResponse("Ud. no tiene asignado un numero de socio, por favor consulte al administrador el sistema")					
@@ -8301,7 +8303,17 @@ def edita_catalogo(request,p_ProveedorNo,p_Anio,p_Periodo,p_ClaseArticulo):
 								ct.catalogo_promociones \
 								from catalogostemporada ct where ct.ProveedorNo=%s and ct.Periodo=%s and ct.Anio=%s and ct.ClaseArticulo=%s;",(p_ProveedorNo,p_Periodo,p_Anio,p_ClaseArticulo,))
 		catalogostemporada = cursor.fetchone()
-		type(catalogostemporada)
+		try:
+			type(catalogostemporada)
+		except TypeError as e:
+						
+			error_msg = 'Ocurrió el siguiente error: '+str(e)
+			context = {'error_msg':error_msg,}
+			return render(request,'pedidos/error.html',context)
+
+
+
+		#type(catalogostemporada)
 		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
 	context = {'form':form,'ProveedorNo':p_ProveedorNo,'Anio':p_Anio,'Periodo':p_Periodo,'ClaseArticulo':p_ClaseArticulo,}			
 	
@@ -13923,4 +13935,141 @@ def rpteVtasCatalogosxSocio(request):
 	return render(request,'pedidos/VtaCatxSocioForm.html',{'form':form,})
 	
 
+#def valida_credenciales(request,*args,**kwargs):
+def valida_credenciales(request):
 
+	#pdb.set_trace()
+
+	print "es ajax"
+
+	'''usuario = request.GET['usuario'].encode('latin_1')
+	contrasena = request.GET['password'].encode('latin_1')'''
+
+	try:
+		usuario = request.GET.get('usuario').encode('latin_1')
+		contrasena = request.GET.get('contrasena').encode('latin_1')
+	except:
+		data= 'usuario o contrasena no recibidos...'
+		data = json.dumps(data)	
+
+		return HttpResponse(data,content_type='application/json')
+	
+
+
+	activo =1
+	valido= 1
+	socio_datos =[]
+	
+	user=authenticate(username=usuario,password=contrasena)
+
+	if user is None:
+		valido=0
+		activo=0
+		socio_datos.append('')	
+	else:
+
+		valido = 1
+
+		if user.is_active:
+					login(request, user)
+					
+					cursor = connection.cursor()
+
+					cursor.execute("SELECT asociadono,EsSocio FROM asociado where num_web=%s;",[request.user.id])
+					socio_datos = cursor.fetchone()
+
+					cursor.close()
+		else:
+			activo = 0
+			socio_datos.append('')			
+
+	r ={'login_valido':valido,'activo':activo,'num_socio':socio_datos[0],}	
+	data = json.dumps(r)	
+
+	return HttpResponse(data,content_type='application/json')
+
+
+"""TRAE CREDITOS VIVOS SOCIO PARA API"""
+
+def consulta_creditos_vivos_api(request,num_socio):
+	
+	
+	cursor = connection.cursor()
+
+	cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
+	#socio_datos = cursor.fetchall()
+	socio_datos = dictfetchall(cursor)
+	print socio_datos
+	total=0
+	for j in socio_datos:
+		total+=j['Monto']
+
+	socio_datos.append({'total':total})
+
+	cursor.close()
+	x= request.user
+	#print(data)
+	#serialized=serializers.serialize("json",socio_datos,fields=('Asociado','Concepto'))
+	#data = json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	#return HttpResponse(data,content_type='application/json')
+	return socio_datos
+
+def consulta_pedidos_api(request,num_socio,opcion):
+	
+	#pdb.set_trace()
+
+	if opcion==1:
+		statusval='Aqui'
+	elif opcion==2:
+		statusval='Confirmado'
+	elif opcion==3:
+		statusval='Encontrado'
+	else:
+		statusval ='Por Confirmar'
+	
+	cursor = connection.cursor()
+
+
+	#cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
+	#socio_datos = cursor.fetchall()
+	cursor.execute("SELECT l.pedido,l.precio,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.asociadono=%s and l.status=%s and l.status=psf.status  ORDER BY h.pedidono DESC;",(num_socio,statusval,))
+
+	socio_datos = dictfetchall(cursor)
+	print socio_datos
+	total=0
+	for j in socio_datos:
+		total+=j['precio']
+
+	socio_datos.append({'total':total})
+
+	cursor.close()
+	x= request.user
+	#print(data)
+	#serialized=serializers.serialize("json",socio_datos,fields=('Asociado','Concepto'))
+	#data = json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	#return HttpResponse(data,content_type='application/json')
+	return socio_datos
+#@login_required(login_url = "/pedidos/consulta_api/")
+def consulta_api(request):
+	#pdb.set_trace()
+	try:
+		num_socio = request.GET.get('num_socio')
+		opcion = request.GET.get('opcion').encode('latin_1')
+	
+	
+		if num_socio ==u'' or (opcion<'1' or opcion>'5'):
+			raise TypeError
+	except:
+		data = json.dumps({'Error':'Algun parametro recibido sin valor o incorrecto !'})
+		return HttpResponse(data,content_type='application/json')
+	
+	opcion = int(opcion)
+
+	if opcion<5:
+
+		socio_datos=consulta_pedidos_api(request,num_socio,opcion)			
+	else:
+
+		socio_datos=consulta_creditos_vivos_api(request,num_socio)
+	data =json.dumps(socio_datos,cls=DjangoJSONEncoder)
+	return HttpResponse(data,content_type='application/json')

@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #'rest_framework'
     # 3ed party app
     'crispy_forms',
     #'django_tables2',
