@@ -3192,6 +3192,15 @@ class DatosAsociadoForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['celular'],code='celular')
 			elif numeroweb > 32767:
 				 raise forms.ValidationError("Numero web debe ser menor a 32767")	
+			elif ',' in direccion:
+				 raise forms.ValidationError("No se permite poner comas en el campo direccion, quitelas")
+			elif ',' in ciudad:
+				 raise forms.ValidationError("No se permite poner comas en el campo ciudad, quitelas")
+			elif ',' in colonia:
+				 raise forms.ValidationError("No se permite poner comas en el campo colonia, quitelas")
+			elif ',' in estado:
+				 raise forms.ValidationError("No se permite poner comas en el campo estado, quitelas")
+
 			else:
 				pass
 		else:
@@ -3292,8 +3301,18 @@ class CreaAsociadoForm(forms.Form):
 				raise forms.ValidationError(self.error_messages['celular'],code='celular')
 			elif numeroweb > 32767:
 				 raise forms.ValidationError("Numero web debe ser menor a 32767")	
-			else:
-				pass
+			elif ',' in direccion:
+				 raise forms.ValidationError("No se permite poner comas en el campo direccion, quitelas")
+			elif ',' in ciudad:
+				 raise forms.ValidationError("No se permite poner comas en el campo ciudad, quitelas")
+			elif ',' in colonia:
+				 raise forms.ValidationError("No se permite poner comas en el campo colonia, quitelas")
+			elif ',' in estado:
+				 raise forms.ValidationError("No se permite poner comas en el campo Estado, quitelas")
+
+	 		else:
+	 			pass
+	
 		else:
 			raise forms.ValidationError("Ingrese un valor en todos los campos telefonicos !")
 

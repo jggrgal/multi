@@ -3078,8 +3078,9 @@ def imprime_ticket(request):
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
 
+		cursor.execute("SELECT nombre,direccion,colonia,ciudad,estado,telefono1 FROM SUCURSAL WHERE empresano=1 and sucursalno=%s;",(pedido_header[4],))
+		datos_sucursal = cursor.fetchone()
 
-		
 		if pedido_detalle is not(None):
 
 			for elem in  pedido_detalle:
@@ -5180,9 +5181,13 @@ def detalle_documento(request,NoDocto):
 def crea_documento(request):
 	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	msg = ''
+	try:
+		capturista = request.session['socio_zapcat']
+		id_sucursal = request.session['sucursal_activa']
+	except KeyError:
+		error_msg='Se perdió parte de la información de su sesión, para asegurar que todo vaya bien por favor cierre su navegador completamete y vuelva a entrar al sistema..'
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,}) 
 
-	capturista = request.session['socio_zapcat']
-	id_sucursal = request.session['sucursal_activa']
 
 	test_suc = int(id_sucursal)
 	
@@ -6808,8 +6813,12 @@ def modifica_cierre(request,id):
 
 def imprime_venta(request):
 	#pdb.set_trace()
+	try:
+		is_staff = request.session['is_staff']
 	
-	is_staff = request.session['is_staff']
+	except KeyError:
+		error_msg='Se perdió parte de la información de su sesión, para asegurar que todo vaya bien por favor cierre su navegador completamete y vuelva a entrar al sistema..'
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,}) 
 
 	if request.method =='GET':
 		p_num_venta = request.GET.get('p_num_venta') 
@@ -6823,7 +6832,7 @@ def imprime_venta(request):
 
 	#p_num_venta = p_num_venta.encode('latin_1')
 	
-	
+
 	response = HttpResponse(content_type='application/pdf')
 	response['Content-Disposition'] = 'inline; filename="mypdf.pdf"'
 
@@ -7102,8 +7111,6 @@ def devolucion_socio(request):
 	# Asigna is_staff para validacines
 	is_staff = request.session['is_staff']
 
-
-	
 	 
 	if request.method == 'POST':
 
@@ -8314,7 +8321,13 @@ def edita_catalogo(request,p_ProveedorNo,p_Anio,p_Periodo,p_ClaseArticulo):
 
 
 		#type(catalogostemporada)
-		form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
+		try:
+			form = DatosCatalogoForm(initial={'ProveedorNo':catalogostemporada[0],'Anio':catalogostemporada[1],'Periodo':catalogostemporada[2],'ClaseArticulo':catalogostemporada[3],'Activo':1 if catalogostemporada[4]=='\x01' else 0,'no_maneja_descuentos':1 if catalogostemporada[5]=='\x01' else 0,'catalogo_promociones':1 if catalogostemporada[6]=='\x01' else 0,})
+		except TypeError as e:
+			error_msg = 'Ocurrió el siguiente error: '+str(e)+ ', Ref. 8323, no existe información completa de la temporada. '
+			context = {'error_msg':error_msg,}
+			return render(request,'pedidos/error.html',context)
+			
 	context = {'form':form,'ProveedorNo':p_ProveedorNo,'Anio':p_Anio,'Periodo':p_Periodo,'ClaseArticulo':p_ClaseArticulo,}			
 	
 	return render(request,'pedidos/edita_catalogo.html',context)
@@ -13982,10 +13995,14 @@ def valida_credenciales(request):
 		else:
 			activo = 0
 			socio_datos.append('')			
+	try:
+		r ={'login_valido':valido,'activo':activo,'num_socio':socio_datos[0],}	
+		data = json.dumps(r)	
 
-	r ={'login_valido':valido,'activo':activo,'num_socio':socio_datos[0],}	
-	data = json.dumps(r)	
+	except TypeError:
 
+		data = "Existe un problema con el numero de socio, ref.13999, comunique este problema a tienda."
+		
 	return HttpResponse(data,content_type='application/json')
 
 
@@ -13996,7 +14013,7 @@ def consulta_creditos_vivos_api(request,num_socio):
 	
 	cursor = connection.cursor()
 
-	cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
+	cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where empresano=1 and asociado=%s and tipodedocumento='Credito' and saldo<>0 and cancelado=0;",(num_socio,))
 	#socio_datos = cursor.fetchall()
 	socio_datos = dictfetchall(cursor)
 	print socio_datos
@@ -14032,7 +14049,7 @@ def consulta_pedidos_api(request,num_socio,opcion):
 
 	#cursor.execute("SELECT NoDocto,FechaCreacion,Concepto,Monto FROM documentos where asociado=%s and TipoDeDocumento='Credito';",(num_socio,))
 	#socio_datos = cursor.fetchall()
-	cursor.execute("SELECT l.pedido,l.precio,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.asociadono=%s and l.status=%s and l.status=psf.status  ORDER BY h.pedidono DESC;",(num_socio,statusval,))
+	cursor.execute("SELECT l.pedido,l.precio,a.idmarca,a.idestilo,a.idcolor,IF(TRIM(a.talla)='NE',l.Observaciones,a.talla) as talla,l.FechaTentativallegada,l.Observaciones from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.asociadono=%s and l.status=%s and l.status=psf.status  ORDER BY h.pedidono DESC;",(num_socio,statusval,))
 
 	socio_datos = dictfetchall(cursor)
 	print socio_datos
@@ -14056,9 +14073,12 @@ def consulta_api(request):
 		num_socio = request.GET.get('num_socio')
 		opcion = request.GET.get('opcion').encode('latin_1')
 	
-	
-		if num_socio ==u'' or (opcion<'1' or opcion>'5'):
+		z=int(num_socio)
+
+		if num_socio == u'' or (opcion<'1' or opcion>'5'):
 			raise TypeError
+
+
 	except:
 		data = json.dumps({'Error':'Algun parametro recibido sin valor o incorrecto !'})
 		return HttpResponse(data,content_type='application/json')
