@@ -1794,9 +1794,13 @@ def busca_socio(request):
 def registro_socio(request):
 	
 	#pdb.set_trace()
+	try:
+		socio_a_dar_de_alta = request.session['socio_a_dar_de_alta']
+		is_staff =  request.session['is_staff']
+	except KeyError:
+		return	HttpResponse("Ocurrió un error de conexión con el servidor, Por favor cierre completamente de su navegador y vuelva a abrir y entre a la página !")
 
-	socio_a_dar_de_alta = request.session['socio_a_dar_de_alta']
-	is_staff =  request.session['is_staff']
+
 	if request.method == 'POST':
 		form = Forma_RegistroForm(request.POST)
 		
@@ -3078,7 +3082,7 @@ def imprime_ticket(request):
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
 
-		cursor.execute("SELECT nombre,direccion,colonia,ciudad,estado,telefono1 FROM SUCURSAL WHERE empresano=1 and sucursalno=%s;",(pedido_header[4],))
+		cursor.execute("SELECT nombre,direccion,colonia,ciudad,estado,telefono1 FROM sucursal WHERE empresano=1 and sucursalno=%s;",(pedido_header[4],))
 		datos_sucursal = cursor.fetchone()
 
 		if pedido_detalle is not(None):
@@ -3139,17 +3143,17 @@ def imprime_ticket(request):
 	if (pedido_header and pedido_detalle and usuario):
 		p.drawString(50,linea, request.session['cnf_razon_social'])
 		linea -=20
-		p.drawString(60,linea, 'SUC. '+request.session['sucursal_nombre'])
+		p.drawString(60,linea, 'SUC. '+datos_sucursal[0])
 		linea -=20
 		p.setFont("Helvetica",12)
 		p.drawString(20,linea, "*** PEDIDO NUM."+p_num_pedido+" ***")
 		linea -=20
 		p.setFont("Helvetica",10)
-		p.drawString(20,linea,request.session['sucursal_direccion'])
+		p.drawString(20,linea,datos_sucursal[1])
 		linea -= 10
-		p.drawString(20,linea,"COL. "+request.session['sucursal_colonia'])
+		p.drawString(20,linea,"COL. "+datos_sucursal[2])
 		linea -= 10
-		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+		p.drawString(20,linea,datos_sucursal[3]+", "+datos_sucursal[4])
 		linea -= 20
 		p.drawString(20,linea,pedido_header[1].strftime("%d-%m-%Y")+' '+pedido_header[2].strftime("%H:%M:%S")+' '+'Tel '+str(request.session['sucursal_telefono']))
 		#p.drawString(100,linea,)
@@ -6855,6 +6859,10 @@ def imprime_venta(request):
 		cursor.execute("SELECT NoDocto,FechaCreacion,HoraCreacion,monto,concepto FROM documentos where PagoAplicadoARemisionNo=%s;",(p_num_venta,))
 		creditos_aplicados = cursor.fetchall()	
 
+		cursor.execute("SELECT nombre,direccion,colonia,ciudad,estado,telefono1 FROM sucursal where sucursalno=%s;",(datos_documento[6],))
+		datos_sucursal =  cursor.fetchone()
+
+
 
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
@@ -6919,17 +6927,17 @@ def imprime_venta(request):
 
 		p.drawString(45,linea, request.session['cnf_razon_social'])
 		linea -=20
-		p.drawString(45,linea," SUC. "+request.session['sucursal_nombre'])
+		p.drawString(45,linea," SUC. "+datos_sucursal[0])
 		linea -=20
 		p.setFont("Helvetica",12)
 		p.drawString(20,linea, "*** "+("VENTA" if tipodedocumento=='Remision' else "CARGO")+" NUM."+p_num_venta+" ***")
 		linea -=20
 		p.setFont("Helvetica",8)
-		p.drawString(20,linea,request.session['sucursal_direccion'])
+		p.drawString(20,linea,datos_sucursal[1])
 		linea -= 10
-		p.drawString(20,linea,"COL. "+request.session['sucursal_colonia'])
+		p.drawString(20,linea,"COL. "+datos_sucursal[2])
 		linea -= 10
-		p.drawString(20,linea,request.session['sucursal_ciudad']+", "+request.session['sucursal_estado'])
+		p.drawString(20,linea,datos_sucursal[3]+", "+datos_sucursal[4])
 		linea -= 10
 		p.drawString(20,linea,datos_documento[8].strftime("%d-%m-%Y")+' '+datos_documento[9].strftime("%H:%M:%S")+' '+'Tel '+str(request.session['sucursal_telefono']))
 		#p.drawString(100,linea,)

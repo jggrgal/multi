@@ -23,12 +23,12 @@
             
             <form action="{% url 'pedidos:crea_asociado' %}" method="POST">
                 
-                    <!--<div class="alert alert-danger" role="alert">
+                    <div class="alert alert-danger" role="alert">
                       {% for error in form.non_field_errors %}
                         {{ error }}
                       {% endfor %}
             
-                     </div>-->
+                     </div>
                       {% csrf_token %}   
               <div class='form-row'> 
 

@@ -3159,7 +3159,7 @@ class DatosAsociadoForm(forms.Form):
 		direccion = cleaned_data.get('direccion')
 		colonia = cleaned_data.get('colonia')
 		ciudad = cleaned_data.get('ciudad')
-		estado = cleaned_data.get('num_socio')
+		estado = cleaned_data.get('estado')
 		pais = cleaned_data.get('pais')
 		codigopostal = cleaned_data.get('codigopostal')
 		telefono1 = cleaned_data.get('telefono1')
@@ -3223,7 +3223,7 @@ class CreaAsociadoForm(forms.Form):
 		super(CreaAsociadoForm, self).__init__(*args,**kwargs)
 
 		self.fields['asociadono'].widget.attrs['readonly'] = True
-
+		
 
 	asociadono = forms.IntegerField(label='Socio Num.',required=False)
 	numcontrol = forms.CharField(label='Numero de control',required=True,max_length=12)
@@ -3232,9 +3232,9 @@ class CreaAsociadoForm(forms.Form):
 	apmaterno = forms.CharField(label='Apellido Materno',required=True,max_length=45)	
 	direccion = forms.CharField(label='Direccion',required=True,max_length=45)
 	colonia = forms.CharField(label='Colonia',required=True,max_length=45)
-	ciudad = forms.CharField(label='Ciudad',required=True,max_length=45)
-	estado = forms.CharField(label='Estado',required=True,max_length=45)
-	pais = forms.CharField(label='Pais',required=True,max_length=11)
+	ciudad = forms.CharField(label='Ciudad',required=True,max_length=45,initial= 'NUEVO LAREDO')
+	estado = forms.CharField(label='Estado',required=True,max_length=45,initial='TAMAULIPAS')
+	pais = forms.CharField(label='Pais',required=True,max_length=11,initial='MEXICO')
 	#codigopostal = forms.IntegerField(label='C.P.',required=True)
 	telefono1 = forms.CharField(label='Telefono 1',required=True,max_length=15)
 	telefono2 = forms.CharField(label='Telefono 2',required=True,max_length=15)
@@ -3269,7 +3269,7 @@ class CreaAsociadoForm(forms.Form):
 		direccion = cleaned_data.get('direccion')
 		colonia = cleaned_data.get('colonia')
 		ciudad = cleaned_data.get('ciudad')
-		estado = cleaned_data.get('num_socio')
+		estado = cleaned_data.get('estado')
 		pais = cleaned_data.get('pais')
 		codigopostal = cleaned_data.get('codigopostal')
 		telefono1 = cleaned_data.get('telefono1')
