@@ -4669,7 +4669,6 @@ def procesar_recepcion(request):
 				incidencia = j.get('incidencia').encode('latin_1')
 				# Comienza acceso a BD.
 
-				
 				# verifica version actual pedidos_encontrados y de una vez traemos id_cierre que se usara mas adelante
 				cursor.execute("SELECT id_cierre from pedidos_encontrados WHERE EmpresaNo=1 and Pedido=%s and  ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(pedido,productono,catalogo,nolinea))
 				registro = cursor.fetchone()
@@ -4759,7 +4758,12 @@ def procesar_recepcion(request):
 
 					elif incidencia > '2':
 						# Si el producto llego pero no pasa el control de calidad
-
+						if int(incidencia)==3:
+							incidencia_texto='Llegaron pares incorrectos'
+						elif int(incidencia)==4:
+							incidencia_texto='llegaron con talla desigual'
+						else:
+							incidencia_texto='llegó producto de mala calidad'
 						# GENERA UN NUEVO PRODUCTO CON STATUS DE 'Por Confirmar'
 						# Y CAMBIA EL STATUS DEL ACTUAL A "Por Devolver"
 
@@ -4930,6 +4934,8 @@ def procesar_recepcion(request):
 
 						# CAMBIA STATUS AL PRODUCTO ACTUAL
 						cursor.execute("UPDATE pedidoslines SET status='Por Devolver' WHERE empresano=1 and pedido=%s and productono=%s and catalogo=%s and nolinea=%s;",[pedido,productono,catalogo,nolinea])
+						cursor.execute("UPDATE pedidos_encontrados SET observaciones=%s WHERE empresano=1 and pedido=%s and productono=%s and catalogo=%s and nolinea=%s;",[incidencia_texto,pedido,productono,catalogo,nolinea])
+					
 						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
 						cursor.execute("""INSERT INTO pedidos_status_fechas (EmpresaNo,Pedido,
 																ProductoNo,Status,
@@ -4939,6 +4945,10 @@ def procesar_recepcion(request):
 																	%s,%s,%s,%s,%s);""",
 																[1,pedido,reg_ProductoNo,'Por Devolver',
 																catalogo,nolinea,fecha_hoy,hora_hoy,capturista])
+						cursor.execute(""" UPDATE pedidos_notas SET observaciones=%s WHERE EmpresaNo=1 AND pedido=%s and
+												ProductoNo=%s and catalogo=%s and 
+												NoLinea=%s;""",[incidencia_texto,pedido,productono,catalogo,nolinea])									
+
 					else:
 						pass	
 					
