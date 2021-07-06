@@ -3153,9 +3153,9 @@ $('#procesar_ventas').click(function(e){
       else { 
             //if(new Date(x_fechafinal).getTime() < new Date(x_fechainicial).getTime()){
             if(Date.parse(x_fechafinal)< Date.parse(x_fechainicial)){
-                alert("La fecha final no puede ser menor a la fecha inicial, por favor rectifique !");
-                hayerror = 1;
-              e.preventDefault();
+               /// alert(" ok La fecha final no puede ser menor a la fecha inicial, por favor rectifique !");
+                hayerror = 0;
+              //e.preventDefault();
             
 
               }

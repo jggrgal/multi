@@ -3550,6 +3550,11 @@ def muestra_colocaciones(request):
 		# Igualmente, las fechas se convierten a un formato adecuado para ser grabadas en la BD
 		fechainicial = datetime.strptime(fechainicial, "%d/%m/%Y").date()
 		fechafinal = datetime.strptime(fechafinal, "%d/%m/%Y").date()
+		if fechainicial > fechafinal:
+			error_msg="Error en rango de fechas, fecha inicial debe ser menor o igual a fecha final !"
+			return render(request,'pedidos/error.html',{'error_msg':error_msg},)		
+
+			#return HttpResponse("Error en rango de fechas, fecha inicial debe ser menor o igual a fecha final !")
 	except ValueError:
 
 		error_msg="Fechas con formato incorrecto, use dd/mm/AAAA"
