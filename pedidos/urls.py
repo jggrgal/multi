@@ -90,7 +90,7 @@ urlpatterns = [
 	url(r'^consultadsctos/$',views.consultadsctos,name='consultadsctos'),
 	url(r'^consultavtasxproveedor/$',views.consultavtasxproveedor,name='consultavtasxproveedor'),
 	url(r'^valida_usr/$',views.valida_usr,name='valida_usr'),
-	url(r'^detallevtaxproveedor/(?P<idproveedor>[0-9]{1,8})/(?P<fechainicial>[\w\-]+)/(?P<fechafinal>[\w\-]+)/(?P<sucursalinicial>[0-9]{1,8})/(?P<sucursalfinal>[0-9]{1,8})/$',views.detallevtaxproveedor,name='detallevtaxproveedor'),
+	url(r'^detallevtaxproveedor/(?P<idproveedor>[0-9]{1,8})/(?P<fechainicial>[\w\-]+)/(?P<fechafinal>[\w\-]+)/(?P<sucursalinicial>[0-9]{1,8})/(?P<sucursalfinal>[0-9]{1,8})/(?P<asociadono>[0-9]{1,8})/$',views.detallevtaxproveedor,name='detallevtaxproveedor'),
 	url(r'^trae_nombre_socio/$',views.trae_nombre_socio,name='trae_nombre_socio'),
 	url(r'^modifica_cierre/(?P<id>[0-9]{1,8})/$',views.modifica_cierre,name='modifica_cierre'),
 	url(r'^imprime_venta/$',views.imprime_venta,name='imprime_venta'),
@@ -147,6 +147,4 @@ urlpatterns = [
 	url(r'^rpteVtasCatalogosxSocio/$',views.rpteVtasCatalogosxSocio,name='rpteVtasCatalogosxSocio'),
 	url(r'^valida_credenciales/$',views.valida_credenciales,name='valida_credenciales'),
 	url(r'^consulta_api/$',views.consulta_api,name='consulta_api'),
-
-
 	]

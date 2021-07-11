@@ -6600,7 +6600,7 @@ def consultavtasxproveedor(request):
 
 # DETALLE DE LA VTA X PROVEEDOR.
 
-def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalinicial,sucursalfinal):
+def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalinicial,sucursalfinal,asociadono):
 
 	#pdb.set_trace()
 	cursor=connection.cursor()
@@ -6614,7 +6614,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 
 	try:
 		
-		cursor.execute("SELECT h.pedidono,l.remisionno as remision_num,h.asociadono,h.fechapedido,h.horapedido,a.idmarca, a.idestilo,idcolor,a.talla,l.preciooriginal,l.observaciones from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
+		cursor.execute("SELECT h.pedidono,l.remisionno as remision_num,h.asociadono,h.fechapedido,h.horapedido,a.idmarca, a.idestilo,idcolor,a.talla,l.preciooriginal,l.observaciones from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s and h.asociadono=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,asociadono))
 		'''cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
 		inner join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
 		where f.fechamvto>=%s and f.fechamvto<=%s and f.horamvto>='12:00:01' and f.horamvto<='13:59:59' and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))'''
@@ -6648,7 +6648,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 		vtasresult = dictfetchall(cursor)
 
 		# DETERMINA EL TOTAL DE LA VENTA
-		cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,))
+		cursor.execute("SELECT l.preciooriginal from pedidoslines l inner join pedidosheader h on (h.empresano=1 and h.pedidono=l.pedido) inner join pedidos_status_fechas f on (f.empresano=1 and f.pedido=l.pedido and f.productono=l.productono and f.status='Facturado' and f.catalogo=l.catalogo and f.nolinea=l.nolinea) inner join articulo a on (a.empresano=1 and a.codigoarticulo=l.productono and a.catalogo=l.catalogo) inner join proveedor p on (p.empresano=1 and p.proveedorno=a.idproveedor) inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea) where f.fechamvto>=%s and f.fechamvto<=%s and h.idsucursal>=%s and h.idsucursal<=%s and a.idproveedor=%s and h.asociadono=%s;",(fechainicial,fechafinal,sucursalinicial,sucursalfinal,idproveedor,asociadono,))
 
 		total_registros = dictfetchall(cursor)
 		
@@ -6661,7 +6661,7 @@ def detallevtaxproveedor(request,idproveedor,fechainicial,fechafinal,sucursalini
 		print (e)
 		vtasresult =0
 
-	context = {'vtasresult':vtasresult,'totalvta':totalvta,'proveedor':proveedor,'fechainicial':fechainicial,'fechafinal':fechafinal,}	
+	context = {'vtasresult':vtasresult,'totalvta':totalvta,'proveedor':proveedor,'fechainicial':fechainicial,'fechafinal':fechafinal,'idproveedor':idproveedor,}	
 
 
 	return render(request,'pedidos/detalle_vtasxproveedor.html',context)
@@ -8721,7 +8721,7 @@ def vtaneta_socio(request):
 
 			
 
-			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':nombre_proveedor[0]}	
+			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':nombre_proveedor[0],'idproveedor':proveedor}	
 		
 			return render(request,'pedidos/lista_vtaneta_socio_xmarca.html',context)
 

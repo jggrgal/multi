@@ -39,7 +39,9 @@
 
                     {% if  vta.ventas != 0 or vta.venta_FD != 0   or vta.venta_bruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.venta_neta != 0  %}
             		<tr>
-                        <td><a href="/pedidos/detallevtaxproveedor/{{ vta.idproveedor }}/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/{{ sucursalinicial }}/{{ sucursalfinal }}"> {{ vta.asociadono }} </a></td>
+                        <!-- En el siguiente link se envia solamente
+                        como rango desde la sucursal 1 a la 10 -->
+                        <td><a href="/pedidos/detallevtaxproveedor/{{idproveedor }}/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/1/10/{{ vta.asociadono }}"> {{ vta.asociadono }} </a></td>
                         <td> {{vta.nombre }}</td>
                         <td>{{ vta.ventas | intcomma }}</td>
                         <td>{{ vta.descuento | intcomma }}</td>
