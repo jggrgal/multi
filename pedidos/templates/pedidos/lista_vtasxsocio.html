@@ -6,9 +6,9 @@
 {% load l10n %}
 <div class="row">
 <!--<div class="col-md-4"> -->
-    <h5>VENTAS NETAS POR SOCIO DE {{ nombre_proveedor }}  </h5>  <h6> Del {% localize on %}
+    <h5> RESUMEN DE VENTAS POR PROVEEDOR ( SUC. {{ sucursal_nombre }} )</h5>  <h6> Entre el {% localize on %}
                             {{fechainicial | date:'d/M/Y'}}
-             {% endlocalize %} al
+             {% endlocalize %} y el
              {% localize on %}
                             {{fechafinal | date:'d/M/Y'}}
              {% endlocalize %}
@@ -22,13 +22,11 @@
         	<table class='table table-hover table-bordered table-condensed'>
                 <thead>
             	<tr class='success'>
-                    <th>Socio num.</th>
-                    <th>Nombre</th>
+                    <th>Proveedor.</th>
                 	<th>Venta Bruta</th>
                     <th>Descuentos</th>
                     <th>Devoluciones</th>
                     <th>Venta Neta</th>
-                   
                 
                
             	</tr>
@@ -37,17 +35,13 @@
                 
             	{% for vta in vtasresult %}
 
-                    {% if  vta.ventas != 0 or vta.venta_FD != 0   or vta.venta_bruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.venta_neta != 0  %}
+                    {% if  vta.ventas != 0 or vta.venta_FD != 0 or  vta.ventabruta  or vta.ventabruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.vtaneta != 0  %}
             		<tr>
-                        <!-- En el siguiente link se envia solamente
-                        como rango desde la sucursal 1 a la 10 -->
-                        <td><a href="/pedidos/detallevtaxsocio/{{idproveedor }}/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/1/10/{{ vta.asociadono }}"> {{ vta.asociadono }} </a></td>
-                        <td> {{vta.nombre }}</td>
+                        <td><a href="/pedidos/detallevtaxsocio/{{ vta.idproveedor }}/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/{{ sucursalinicial }}/{{ sucursalfinal }}"> {{ vta.nombreprov }} </a></td>
                         <td>{{ vta.ventas | intcomma }}</td>
                         <td>{{ vta.descuento | intcomma }}</td>
                         <td>{{ vta.devoluciones | intcomma }}</td>
-                        <td>{{ vta.venta_neta | intcomma }} </td>
-                        
+                        <td>{{ vta.ventaneta | intcomma }} </td>
                                                                                          
                 	</tr>
                     {% endif %}
@@ -56,15 +50,13 @@
                     <!-- El siguiente renglon se usa para los totales
                          por eso va fuera del for  -->
                     <tr>
-                        <td><h4> </h4></td>
-                        <td><h4> TOTALES:</h4> </td>
+                        <td><h4> TOTALES: </h4></td>
                         <td><h4>{{  tot_vtas | intcomma }}</h4></td>
                         <td><h4>{{ tot_descuento | intcomma }}</h4></td>
                         <td><h4>{{ tot_devoluciones | intcomma }}</h4></td>
                         <td><h4>{{ tot_ventaneta | intcomma }}</h4> </td>
-                        
+
                     </tr>
-<!--
                     <tr>
                         <td>Comisiones: </td>
                         <td></td>
@@ -80,7 +72,7 @@
                         <td></td>
                         <td>{{ TotalVtaCatalogos | intcomma }} </td>
 
-                    </tr>-->
+                    </tr>
 
 
              </tbody>                   
@@ -93,7 +85,7 @@
         </div>        
 
         <p align='right'>
-            <a class="btn btn-default" href="/pedidos/vtaneta_socio" role="button">Regresar</a>
+            <a class="btn btn-default" href="/pedidos/consultavtasxproveedor" role="button">Regresar</a>
         </p>
         
             
