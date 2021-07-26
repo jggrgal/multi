@@ -1334,7 +1334,9 @@ $(".btn_cancela_pedido").prop('disabled',true)
                       , "status": $(tr).find('td:eq(2)').text() // 
                       , "precio" : $(tr).find('td:eq(11)').text()
                       , "vta_elegida": $(tr).find('td:eq(12)').find('input').prop('checked') // Agrega "elegido", como es un checkbox usamos la funcion prop('checked') para traernos el va 
+                      , "dcto%" : $(tr).find('td:eq(15)').text()
                   }
+
                 }    
             }); 
             TableData_ventas.shift();  // first row will be empty - so remove

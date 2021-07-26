@@ -5906,6 +5906,13 @@ def procesar_venta(request):
 		error = False
 		pedidos_cambiados = 0  
 
+		# Las siguiente variables ( que llevan una 'r' antepuesta) se usan mas adelante
+		#para recalcular ventas y descuentos
+		# ya que en ocasiones no se calculan bien del lado del cliente.
+
+		r_totalventa = 0 # venta recalculada
+		r_totaldcto = 0 # decuento recuculado 
+
 		''' FIN DE INCIALIZACION DE VARIABLES '''
 
 
@@ -5956,13 +5963,13 @@ def procesar_venta(request):
 					nolinea = j.get('Nolinea').encode('latin_1')
 					venta_elegida = j.get('venta_elegida')
 					version_original_pedidos_lines = j.get('status').strip() # Traemos version anterior del registro pedidoslines, para esto usamos el campo 'status' con el que hacemos una comparacion con una nueva lectura al mismo para ver si cambio
-
+					precio_final = j.get('precio').encode('latin_1')
 					# Comienza acceso a BD.
 
 					
 
 					# verifica version actual pedidoslines y de una vez se trae el estatus actual para ser mostrado en caso de que la version actual difiera de la anterior
-					cursor.execute("SELECT status from pedidoslines WHERE EmpresaNo=1 and Pedido=%s and  ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(pedido,productono,catalogo,nolinea))
+					cursor.execute("SELECT status,precio,PrecioOriginal from pedidoslines WHERE EmpresaNo=1 and Pedido=%s and  ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(pedido,productono,catalogo,nolinea))
 					registro = cursor.fetchone()
 
 					# Crea variables de  version actual asi como el actual_estatus para pedidoslines
@@ -5977,7 +5984,14 @@ def procesar_venta(request):
 						
 					else:
 
-					
+						# Recalcula subtotales para asegurar el correcto
+						# regisro de la transaccion.
+						# las variables se nombran una r 
+
+						r_totalventa = r_totalventa + registro[1]
+						r_totaldcto = r_totaldcto + (registro[2]-Decimal(precio_final))	
+
+
 						# Actualiza pedidos
 
 						cursor.execute("UPDATE pedidosheader SET FechaUltimaModificacion=%s,horamodicacion=%s WHERE EmpresaNo=1 and pedidono=%s;",[fecha_hoy,hora_hoy,pedido])							
@@ -6002,10 +6016,24 @@ def procesar_venta(request):
 			nuevo_docto = ultimo_docto[0]+1
 			nueva_remision = nuevo_docto # se usa nueva_remision para retornala via ajax en diccionario.
 
-			# Trae el ultimo documento
+			# Trae el ultimo consecutivo
 			cursor.execute("SELECT consecutivo from documentos WHERE empresano=1 and tipodedocumento=%s  ORDER BY consecutivo DESC LIMIT 1 FOR UPDATE;",('Remision',))
 			ultimo_consec = cursor.fetchone()
 			Nuevo_consec = ultimo_consec[0]+1	
+
+			# Resgiana total vtas y totaldsctos y calcula recalcula el totalgral
+			# para asegurar la consistencia en la transaccion.
+
+			totalventas = Decimal(round(r_totalventa,0))
+			totaldsctos = Decimal(round(r_totaldcto,0))
+			totalgral = totalventas + Decimal(totalcargos) - totaldsctos - Decimal(totalcreditos)
+
+
+
+
+
+
+
 
 			# Genera el documento.
 			# Ojo: observar que el campo `UsuarioQueCreoDcto.` se coloco entre apostrofes inversos y el nombre del campo tal y como esta definido en la tabla (casesensitive) dado que si
