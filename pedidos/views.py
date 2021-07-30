@@ -5649,21 +5649,64 @@ def trae_inf_venta(request,num_socio):
 			#  CALCULA LA BASE PARA COMPRAS DEL MES ANTERIOR
 
 			fi,ff = traePrimerUltimoDiasMesAnterior()
-			compras =calcula_compras_socio_por_proveedor(num_socio,hoy,2,p_idproveedor,fi,ff)
+			compras3=0
+			ventas3=0
+			compras_mes_ant3=0
+			compras_mes_ant10 = 0
+			''' La siguiente decision es pera calcular las compras netas del mes anterior
+			    para fines del porcentaje del descuento, 
+			    con la excepcion de que si el socio compro productos de los proveedores Andrea (3) o Andrea Sport (10)
+			    la compra neta del mes anterior sera la suma de las comprasnetas 
+			    de ambos proveedores, esta se tomara como base.
+			    Para las compras de otros proveedores solamente se toma como base las compras netas
+			    del mismo proveedor'''			
 
-			for compra in compras:
+			if (p_idproveedor == 3 or p_idproveedor == 10):
+
+
+				#  calculas compras del mes anterior Andrea
+
+				compras3 =calcula_compras_socio_por_proveedor(num_socio,hoy,2,3,fi,ff)
+
+				for compra in compras3:
 				
-				if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
-					'''
-					p.drawString(20,linea,str(compra['nombreprov'])[:7])
-					p.drawString(55,linea,str(compra['ventabruta']-compra['descuento']))
-					p.drawString(86,linea,str(compra['devoluciones'] if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
-					p.drawString(117,linea,str((compra['ventabruta']-compra['descuento']-compra['devoluciones']) if compra['ventabruta']-compra['descuento']>compra['devoluciones'] else 0))
-					linea-=10
-					'''
-					compras_mes_ant = compra['ventabruta']-compra['descuento']-compra['devoluciones']
-				else:
-					compras_mes_ant = 0
+					if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
+						
+						compras_mes_ant3 = compra['ventabruta']-compra['descuento']-compra['devoluciones']
+					else:
+						compras_mes_ant3 = 0
+
+				# Calcula compras del mes anterior AndreaSport
+
+				compras10 =calcula_compras_socio_por_proveedor(num_socio,hoy,2,10,fi,ff)
+					
+				for compra in compras10:
+				
+					if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
+						
+						compras_mes_ant10 = compra['ventabruta']-compra['descuento']-compra['devoluciones']
+					else:
+						compras_mes_ant10 = 0
+
+				# Determina la compra total del mes anterior
+				compras_mes_ant = compras_mes_ant3 + compras_mes_ant10
+
+
+			
+			else:
+
+				# Calcula compras mes anterior para cualquier proveedor distinto de Andrea o AndreaSport
+
+				compras =calcula_compras_socio_por_proveedor(num_socio,hoy,2,p_idproveedor,fi,ff)
+				
+
+				for compra in compras:
+					
+					if compra['ventabruta']-compra['descuento']-compra['devoluciones']>0:
+						
+						compras_mes_ant = compra['ventabruta']-compra['descuento']-compra['devoluciones']
+					else:
+						compras_mes_ant = 0
 
 			#   CALCULA EL PORCENTAJE DE DESCUENTO
 
