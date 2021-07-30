@@ -5650,7 +5650,7 @@ def trae_inf_venta(request,num_socio):
 
 			fi,ff = traePrimerUltimoDiasMesAnterior()
 			compras3=0
-			ventas3=0
+			compras10=0
 			compras_mes_ant3=0
 			compras_mes_ant10 = 0
 			''' La siguiente decision es pera calcular las compras netas del mes anterior
