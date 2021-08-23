@@ -1018,6 +1018,102 @@ $(".btn_cancela_pedido").prop('disabled',true)
 
 
 
+
+
+// Funcion para recalcular CAMPOS DE VENTA.
+  //$('#btn_recalc_vta').click(function recalcula_vta(){
+  function recalcula_vta(){  
+  tot_precio = 0;
+  tot_precio_normal =0
+  tot_dscto = 0
+  tot_creditos = 0;
+  tot_cargos = 0;
+  v_totalgeneral = 0;
+
+  //loop en tabla de ventas
+  //Recorro todos los tr ubicados en el tbody
+  $('#productos_por_vender tbody').find('tr').each(function (i, el) {
+             
+  //    Se selecciona unicamente el renglon que haya sido marcado para venta  
+        if ($(this).find('input[type="checkbox"]').is(':checked')){
+          
+        // Acumula precio con dscto.
+        tot_precio += Math.round(parseFloat($(this).find('td').eq(11).text()));
+
+        // Acumula precio normal
+        tot_precio_normal+= Math.round(parseFloat($(this).find('td').eq(14).text()));
+
+
+        // Acumula dscto
+
+        v_precio = Math.round(parseFloat($(this).find('td').eq(11).text()));
+        v_precio_normal = Math.round(parseFloat($(this).find('td').eq(14).text()));
+
+        tot_dscto += Math.round(v_precio_normal - v_precio);
+
+        // Fin acumula dscto.
+
+        };
+
+
+    });
+
+//loop en tabla de creditos
+  //Recorro todos los tr ubicados en el tbody
+  $('#creditos_vta tbody').find('tr').each(function (i, el) {
+            
+        
+
+        //Toma en cuenta solamente los registros previamente marcados.     
+
+        if ($(this).find('input[type="checkbox"]').is(':checked')){
+
+
+        tot_creditos += parseFloat($(this).find('td').eq(3).text());
+
+        };
+        
+
+    });
+
+
+//loop en tabla de cargos
+  //Recorro todos los tr ubicados en el tbody
+  $('#cargos_vta tbody').find('tr').each(function (i, el) {
+           
+        
+        //Tomo en cuenta solo los registros previamente marcados     
+        if ($(this).find('input[type="checkbox"]').is(':checked')){
+          tot_cargos += parseFloat($(this).find('td').eq(3).text());
+        };
+        
+    });
+
+
+//calcula totales    
+$("#totalventas").text(tot_precio_normal);
+$("#totalcreditos").text(tot_creditos);
+$("#totaldsctos").text(tot_dscto);
+$("#totalcargos").text(tot_cargos);
+
+//v_totalgeneral =totalventas+if ($(this).find('input[type="checkbox"]').is(':checked'))
+
+v_totalgeneral = Math.round(tot_precio_normal+tot_cargos-tot_dscto-tot_creditos);
+alert('Total a cobrar: $ '+v_totalgeneral);
+$("#totalgral").text(v_totalgeneral);
+
+   
+   };
+  //});
+
+
+
+
+
+
+
+
+
 // ACTUALIZA CONTADOR DE REGISTROS SELECCIONADOS PARA VENTAS
 
 
@@ -2837,6 +2933,10 @@ $('#procesar_ventas').click(function(e){
         // valida que el anticipo sea menor al monto del pedido.
         // observar que se puede comparar un contenido html con un valor
         // al menos aqui si hace la comparacion.
+
+        recalcula_vta();
+
+
         
         continuar_procesando = 0;
         var tot_gral = $('#totalgral').text();

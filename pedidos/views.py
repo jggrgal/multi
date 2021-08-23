@@ -3077,7 +3077,7 @@ def imprime_ticket(request):
 		datos_socio = cursor.fetchone()
 
 		
-		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,a.precio FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
+		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,a.precio,l.precio as precio_en_detalle FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
 		pedido_detalle = dictfetchall(cursor)
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
@@ -3193,7 +3193,7 @@ def imprime_ticket(request):
 			if datos_socio[3] != 1:
 				precio_imprimir = elemento['subtotal']
 			else:
-				precio_imprimir = elemento['precio']	
+				precio_imprimir = elemento['precio_en_detalle']	
 			monto_total += float(precio_imprimir)
 			#pdb.set_trace()
 			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
