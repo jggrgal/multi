@@ -3568,7 +3568,7 @@ def muestra_colocaciones(request):
 		#cursor.execute("SELECT COUNT(*) FROM pedidos_encontrados e INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) on (a.EmpresaNo=1 and e.ProductoNo=a.CodigoArticulo and e.Catalogo=a.Catalogo)  WHERE e.empresano=1 and e.encontrado='S' and  trim(e.observaciones)<>'Cancelado' and  e.id_cierre=0 and a.idproveedor=%s and e.BodegaEncontro=%s;",(proveedor,almacen))
 		#cursor.execute("SELECT COUNT(*) FROM pedidos_encontrados e INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) on (a.EmpresaNo=1 and e.ProductoNo=a.CodigoArticulo and e.Catalogo=a.Catalogo)  WHERE e.empresano=1 and e.encontrado='S' and  trim(e.observaciones)<>'Cancelado' and  e.id_cierre=0 and a.idproveedor=%s and e.BodegaEncontro=%s;",(proveedor,almacen))
 		
-		cursor.execute("SELECT razonsocial from proveedor where proveedorno=%s;",(proveedor))
+		cursor.execute("SELECT razonsocial from proveedor where proveedorno=%s;",[proveedor,])
 		prov_nombre=cursor.fetchone()
 
 		cursor.execute("SELECT razonsocial from almacen where proveedorno=%s and almacen=%s;",(proveedor,almacen,))
@@ -10631,7 +10631,7 @@ def rpte_ventas(request):
 						paso-=10
 
 						
-						locale.setlocale( locale.LC_ALL, '' )
+						locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
 						p.drawString(10,paso,"Venta Bruta: ")
 						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
 
@@ -10769,7 +10769,7 @@ def rpteStatusPedidosPorSocio(request):
 				and psf.fechamvto>=%s and psf.fechamvto<=%s\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
 				ORDER BY aso.asociadoNo,\
-				h.PedidoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
+				h.PedidoNo;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
 							
 			pedidos = dictfetchall(cursor)
 			elementos = len(pedidos)
@@ -10796,7 +10796,7 @@ def rpteStatusPedidosPorSocio(request):
 				 WHERE p.status>=%s and p.status<=%s\
 				and psf.fechamvto>=%s and psf.fechamvto<=%s\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
-				GROUP BY aso.asociadoNo ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
+				GROUP BY aso.asociadoNo;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,))
 							
 			subxsocio = dictfetchall(cursor)
 			
@@ -11201,7 +11201,7 @@ def vtasporusuario(request):
 						paso-=10
 
 						
-						locale.setlocale( locale.LC_ALL, '' )
+						locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
 						p.drawString(10,paso,"Venta Bruta: ")
 						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
 
@@ -12636,10 +12636,10 @@ def rpte_remisiones_especiales(request):
 							paso-=10
 
 							p.setFont("Helvetica",12)
-							locale.setlocale( locale.LC_ALL, '' )
+							locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
 							p.drawString(10,paso,"Total: ")
 							p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
-
+								
 
 
 							p.showPage()
@@ -13388,7 +13388,7 @@ def rpteStatusxMarca(request):
 				and psf.fechamvto>=%s and psf.fechamvto<=%s\
 				and h.idsucursal>=%s and h.idsucursal<=%s\
 				and a.idproveedor>=%s and a.idproveedor<=%s\
-				GROUP BY a.idproveedor ASC;", (status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,))
+				GROUP BY a.idproveedor;", [status,status,fechainicial,fechafinal,suc_ini,suc_fin,marca_ini,marca_fin,])
 							
 			subxsocio = dictfetchall(cursor)
 			
