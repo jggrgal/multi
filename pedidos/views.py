@@ -1293,6 +1293,8 @@ def genera_documento(cursor,
 	Nuevo_consec = ultimo_consec[0]+1
 
 
+
+
 	# Genera el documento.
 	# Ojo: observar que el campo `UsuarioQueCreoDcto.` se coloco entre apostrofes inversos y el nombre del campo tal y como esta definido en la tabla (casesensitive) dado que si
 	# se pone sin apostrofes marca error!
@@ -3860,7 +3862,7 @@ def procesar_colocaciones(request):
 			version_original_pedidos_lines = j.get('status').strip() # Traemos version anterior del registro pedidoslines, para esto usamos el campo 'status' con el que hacemos una comparacion con una nueva lectura al mismo para ver si cambio
 
 			notas = j.get('notas').strip()
-			notas = notas.encode('latin_1')
+			notas = notas.encode('UTF-8')
 
 			if encontrado != '':
 
@@ -7496,7 +7498,7 @@ def procesar_devolucion_socio(request):
 							fecha_hoy,
 							hora_hoy,
 							usr_existente,
-							'Com. prod. no recogido '+registro[2]+' '+registro[3]+' '+registro[4],
+							'Com. prod. no recogido '+registro[2].strip(),
 							Decimal(cuotadiasextemp),
 							Decimal(cuotadiasextemp),
 							0,
@@ -11200,8 +11202,8 @@ def vtasporusuario(request):
 
 						paso-=10
 
-						
 						locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
+						
 						p.drawString(10,paso,"Venta Bruta: ")
 						p.drawString(90,paso,locale.currency(TotalVtaBruta,grouping=True))
 
@@ -13761,8 +13763,10 @@ def upload_file_catalogo(request):
 				for columna in csv.reader(io_string, delimiter=',', quotechar='"'):
 
 					if '/' in columna[1]:
-						lista_error.append(i)
+						lista_error.append(" La linea "+str(i)+" lleva una diagonal en el codigo del producto ! ")
 
+					elif columna[1].strip()=='':
+						lista_error.append(" La linea "+str(i)+" esta en blanco !")
 					
 					else:
 						lista_elementos.append(columna)
@@ -13782,7 +13786,8 @@ def upload_file_catalogo(request):
 					columna[6]=columna[6].strip() # elimina espacios iniciales y finales a la acabado.
 				
 				str1=",".join(str(j) for j in lista_error)	
-				messages.error(request, 'Existen registros con una diagonal en el campo codigo_articulo, lineas: '+str1)
+				
+				messages.error(request,str1)
 				
 				""" Empieza actualizando Bd"""
 				if not lista_error:
@@ -13812,7 +13817,7 @@ def upload_file_catalogo(request):
 											precio,\
 											catalogo,\
 											costo,\
-											descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE descontinuado=%s;",(1,columna[1],fecha_hoy,fecha_hoy,columna[0],'',idproveedor,columna[4],columna[3],columna[5],columna[6],'',columna[8],Decimal(columna[7]),catalogo,0,0,0))
+											descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE descontinuado=%s,idmarca=%s,idestilo=%s,idcolor=%s,talla=%s,precio=%s;",(1,columna[1],fecha_hoy,fecha_hoy,columna[0],'',idproveedor,columna[4],columna[3],columna[5],columna[6],'',columna[8],Decimal(columna[7]),catalogo,0,0,0,columna[4],columna[3],columna[5],columna[8],Decimal(columna[7])))
 							
 							cursor.execute("INSERT INTO preciobase (Empresano,\
 																proveedorid,\
@@ -13832,7 +13837,7 @@ def upload_file_catalogo(request):
 																idmarca,\
 																idcolor,\
 																talla\
-																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s;",(1,idproveedor,temporada,columna[1],0,Decimal(columna[7]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,0,0,columna[0],catalogo,columna[3],columna[4],columna[5],columna[8],hora_hoy))
+																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s,estilo=%s,idmarca=%s,idcolor=%s,talla=%s;",(1,idproveedor,temporada,columna[1],0,Decimal(columna[7]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,0,0,columna[0],catalogo,columna[3],columna[4],columna[5],columna[8],hora_hoy,Decimal(columna[7]),columna[3],columna[4],columna[5],columna[8]))
 												
 							cursor.execute("INSERT INTO preciosopcionales (Empresano,\
 																proveedor,\
@@ -13845,7 +13850,7 @@ def upload_file_catalogo(request):
 																fechamodificacion,\
 																horamodificacion,\
 																catalogo\
-																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s;",(1,idproveedor,temporada,columna[1],'Cliente',Decimal(columna[9]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,catalogo,hora_hoy))
+																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s;",(1,idproveedor,temporada,columna[1],'Cliente',Decimal(columna[9]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,catalogo,hora_hoy,Decimal(columna[9])))
 
 
 						cursor.execute("COMMIT;")
