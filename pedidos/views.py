@@ -7539,43 +7539,44 @@ def procesar_devolucion_socio(request):
 
 
 			if tipoconsulta == u'1':		
-				nuevo_credito = genera_documento(cursor,
-				'Credito',
-				'Contado',
-				socio,
-				fecha_hoy,
-				hora_hoy,
-				usr_existente,
-				fecha_hoy,
-				hora_hoy,
-				usr_existente,
-				'Credito generado por concepto de devolucion sobre venta',
-				total_devuelto_dinero,
-				total_devuelto_dinero,
-				0,
-				0,
-				0,
-				0,
-				0,
-				0,
-				0,
-				sucursal,
-				0)
+				if total_devuelto_dinero > 0:  # 01.OCT.21 SE AGREGO EL IF PARA QUE GENERE NOTA SOLO SI TIENE MONTO MAYOR A CERO. 
+					nuevo_credito = genera_documento(cursor,
+					'Credito',
+					'Contado',
+					socio,
+					fecha_hoy,
+					hora_hoy,
+					usr_existente,
+					fecha_hoy,
+					hora_hoy,
+					usr_existente,
+					'Credito generado por concepto de devolucion sobre venta',
+					total_devuelto_dinero,
+					total_devuelto_dinero,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					sucursal,
+					0)
 
-				''' Una vez generado el documento, asigna este a cada producto seleccionado
-				para ser devuelto '''
+					''' Una vez generado el documento, asigna este a cada producto seleccionado
+					para ser devuelto '''
 
-				for j in datos:
-								
-					pedido = j.get("Pedido").encode('latin_1')
+					for j in datos:
+									
+						pedido = j.get("Pedido").encode('latin_1')
 
-					productono = j.get('ProductoNo').strip()
-					catalogo =j.get('Catalogo').strip()
-					nolinea = j.get('Nolinea').encode('latin_1')
-					incidencia = j.get('incidencia').encode('latin_1')
+						productono = j.get('ProductoNo').strip()
+						catalogo =j.get('Catalogo').strip()
+						nolinea = j.get('Nolinea').encode('latin_1')
+						incidencia = j.get('incidencia').encode('latin_1')
 
-					if incidencia != 'Seleccionar':
-						cursor.execute("UPDATE pedidoslines SET NoNotaCreditoPorDevolucion=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_credito,pedido,productono,catalogo,nolinea))
+						if incidencia != 'Seleccionar':
+							cursor.execute("UPDATE pedidoslines SET NoNotaCreditoPorDevolucion=%s WHERE EmpresaNo=1 and Pedido=%s and ProductoNo=%s and Catalogo=%s and NoLinea=%s;",(nuevo_credito,pedido,productono,catalogo,nolinea))
 
 			
 
