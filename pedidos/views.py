@@ -956,7 +956,7 @@ def combo_colores(request,*args,**kwargs):
 def lista_Tallas(id_prov,id_temp,id_pag,id_cat,id_est,id_mar,id_col):
 	
 	
-	
+	#pdb.set_trace()	
 	cursor=connection.cursor()
 	cursor.execute("SELECT talla from preciobase where empresano=1 and proveedorid=%s and temporada=%s and pagina=%s and catalogo=%s and estilo=%s and idmarca=%s and idcolor=%s;",[id_prov,id_temp,id_pag,id_cat,id_est,id_mar,id_col])
 	listatall=() # Inicializa una tupla para llenar combo de Estilos
@@ -966,12 +966,14 @@ def lista_Tallas(id_prov,id_temp,id_pag,id_cat,id_est,id_mar,id_col):
 		elemento = tuple(row)
 		listatall=listatall+elemento
 	listatall=('SELECCIONE...',)+listatall
-	
+	print listatall
 	return (listatall)	
 
 
 
 def combo_tallas(request,*args,**kwargs):
+
+	#pdb.set_trace()
 	if request.is_ajax() and request.method == 'GET':
 		id_prov = request.GET['id_prov']
 		id_temp = request.GET['id_temp']
@@ -11411,26 +11413,14 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 	#print "descuentos:",registros_venta[3]
 	
 	elementos = len(registros_venta)
+	
 	#TRAE DEVOLUCIONES GRAL
-	'''cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
-	 from (SELECT psf.empresano,psf.pedido,\
-	 psf.productono,\
-	 psf.nolinea,\
-	 psf.catalogo,\
-	 psf.fechamvto from\
-	 pedidos_status_fechas as psf \
-	 INNER JOIN pedidosheader as h \
-	 ON h.empresano=psf.empresano and h.pedidono=psf.pedido WHERE (psf.status='Devuelto' or psf.status='Dev a Prov' or psf.status='RecepEnDevol') and psf.fechamvto>= %s and psf.fechamvto<= %s and h.asociadono=%s) as t2\
-	 INNER JOIN pedidos_status_fechas as t3 on\
-	 (t2.pedido=t3.pedido and t2.productono=t3.productono\
-	 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
-     INNER JOIN pedidoslines as l\
-     on (t2.empresano=t3.empresano and l.pedido=t3.pedido and l.productono=t3.productono\
-     and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
-     INNER JOIN articulo as art\
-     on (art.empresano= t3.empresano and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
-     WHERE t3.status='Facturado'\
-     GROUP BY art.idproveedor;",(fechainicial,fechafinal,sociono))'''
+
+	# 2021.Oct.02...Se modifica la siguiente consulta. Se agrega el inner join a la tabla
+	# psf2 para que solo incluya devoluciones sobre productos facturados
+	# excluyendo devoluciones hechas a productos con status de aqui solamente.
+
+	
 	cursor.execute("SELECT art.idproveedor,'',sum(l.precio) as devgral,0\
 	from (SELECT psf.empresano,psf.pedido,\
 	psf.productono,\
@@ -11443,6 +11433,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 	INNER JOIN pedidoslines as l\
 	on (t2.empresano=l.empresano and l.pedido=t2.pedido and l.productono=t2.productono\
 	and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
+	INNER JOIN pedidos_status_fechas as psf2 on (psf2.empresano=l.empresano and l.pedido=psf2.pedido and l.productono=psf2.productono and psf2.status='Facturado')\
 	INNER JOIN articulo as art\
 	on (art.empresano= t2.empresano and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
 	WHERE art.idproveedor>=%s and art.idproveedor<=%s\
@@ -11477,8 +11468,7 @@ def calcula_compras_socio_por_proveedor(sociono,fechavta,p_opt,p_idprov=0,p_fech
 			
 			if (float(registro['venta']) != 0.0):
 				TotalRegVentas = TotalRegVentas + 1'''
-
-
+		
 	if not registros_devgral:
 		
 		pass
