@@ -3081,7 +3081,7 @@ def imprime_ticket(request):
 		datos_socio = cursor.fetchone()
 
 		
-		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,a.pagina,a.idmarca,a.idestilo,a.idcolor,a.talla,a.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,a.precio,l.precio as precio_en_detalle FROM pedidoslines l INNER JOIN articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo) INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
+		cursor.execute("SELECT l.subtotal,l.NoNotaCreditoPorPedido,l.Observaciones,l.Status,pb.pagina,pb.idmarca,pb.estilo,pb.idcolor,pb.talla,pb.catalogo,so.nombre,so.appaterno,so.apmaterno,suc.nombre,pb.precio,l.precio as precio_en_detalle FROM pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join  articulo a ON (l.empresano = a.empresano and l.productono = a.codigoarticulo and l.catalogo = a.catalogo)  INNER JOIN asociado so ON (so.empresano=1 and so.asociadono = %s) INNER JOIN sucursal suc ON (suc.empresano=1 and suc.sucursalno = %s) WHERE l.pedido = %s;",(pedido_header[5],pedido_header[4],p_num_pedido))
 		pedido_detalle = dictfetchall(cursor)
 		# la siguiente variable  se asigna para ser pasada a la rutina que 
 		# imprimira la nota de credito ( en caso de que exista )
@@ -3200,7 +3200,7 @@ def imprime_ticket(request):
 				precio_imprimir = elemento['precio_en_detalle']	
 			monto_total += float(precio_imprimir)
 			#pdb.set_trace()
-			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['idestilo']) 
+			p.drawString(20,paso,elemento['pagina']+' '+elemento['idmarca']+' '+elemento['estilo']) 
 			p.drawString(20,paso-10,elemento['idcolor'][0:7]+' '+talla)
 			p.drawString(130,paso-10,'$ '+str(precio_imprimir))
 			paso -= 30
@@ -7311,7 +7311,7 @@ def devolucion_socio(request):
 
 				else:
 
-					cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,l.status,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,p.idSucursal,l.Observaciones,suc.nombre,psf.fechamvto FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( e.EmpresaNo=l.EmpresaNo and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) LEFT JOIN pedidos_status_fechas psf on (psf.empresano=l.empresano and psf.pedido=l.pedido and psf.productono=l.productono and psf.nolinea=l.nolinea and psf.status='Aqui') INNER JOIN pedidosheader p ON (e.EmpresaNo= p.EmpresaNo and e.Pedido=p.PedidoNo) INNER JOIN articulo a ON (e.EmpresaNo=a.EmpresaNo and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN sucursal suc on (p.idSucursal=suc.SucursalNo) WHERE e.empresano=1 and p.asociadono=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and  l.Status=%s order by a.idestilo;",(socio,finicial,ffinal,tc))
+					cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,l.status,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,p.idSucursal,l.Observaciones,suc.nombre,psf.fechamvto FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( e.EmpresaNo=l.EmpresaNo and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) LEFT JOIN pedidos_status_fechas psf on (psf.empresano=l.empresano and psf.pedido=l.pedido and psf.productono=l.productono and psf.nolinea=l.nolinea and psf.status=%s) INNER JOIN pedidosheader p ON (e.EmpresaNo= p.EmpresaNo and e.Pedido=p.PedidoNo) INNER JOIN articulo a ON (e.EmpresaNo=a.EmpresaNo and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN sucursal suc on (p.idSucursal=suc.SucursalNo) WHERE e.empresano=1 and p.asociadono=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and  l.Status=%s order by a.idestilo;",(tc,socio,finicial,ffinal,tc))
 					#cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,l.status,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,p.idSucursal,l.Observaciones,suc.nombre FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( e.EmpresaNo=l.EmpresaNo and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p ON (e.EmpresaNo= p.EmpresaNo and e.Pedido=p.PedidoNo) INNER JOIN articulo a ON (e.EmpresaNo=a.EmpresaNo and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN sucursal suc on (p.idSucursal=suc.SucursalNo) WHERE e.empresano=1 and p.asociadono=%s and p.fechacreacion>=%s and p.fechacreacion<=%s and  l.Status=%s order by a.idestilo;",(socio,finicial,ffinal,tc))
 
 			except DatabaseError as e:
