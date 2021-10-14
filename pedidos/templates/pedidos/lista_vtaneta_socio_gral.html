@@ -1,0 +1,111 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+{% load humanize %}
+
+{% load l10n %}
+<div class="row">
+<!--<div class="col-md-4"> -->
+    <h5>VENTAS NETAS POR SOCIO {{ nombre_proveedor }}  </h5>  <h6> Del {% localize on %}
+                            {{fechainicial | date:'d/M/Y'}}
+             {% endlocalize %} al
+             {% localize on %}
+                            {{fechafinal | date:'d/M/Y'}}
+             {% endlocalize %}
+    </h6><br><br>
+    
+
+    <h5>{{mensaje}} {% if TotalRegistros > 0 %} {{TotalRegistros}} {% endif %}  </h5>
+
+        <div class="table-responsive" font-size: 14px;>
+        
+        	<table class='table table-hover table-bordered table-condensed'>
+                <thead>
+            	<tr class='success'>
+                    <th>Socio num.</th>
+                    <th>Nombre</th>
+                	<th>Venta Bruta</th>
+                    <th>Descuentos</th>
+                    <th>Devoluciones</th>
+                    <th>Venta Neta</th>
+                   
+                
+               
+            	</tr>
+                </thead>
+                <tbody>
+                
+            	{% for vta in vtasresult %}
+
+                    {% if  vta.ventas != 0 or vta.venta_FD != 0   or vta.venta_bruta != 0 or venta.descuento != 0 or vta.devoluciones != 0 or vta.venta_neta != 0  %}
+            		<tr>
+                        <!-- En el siguiente link se envia solamente
+                        como rango desde la sucursal 1 a la 10 -->
+                        <td><a href="/pedidos/vtaneta_socio_proveedor_gral/{{ fechainicial | date:'Ymd' }}/{{ fechafinal | date:'Ymd' }}/{{ vta.asociadono }}/{{ vta.asociadono }}"> {{ vta.asociadono }} </a></td>
+                        <td> {{vta.nombre }}</td>
+                        <td>{{ vta.ventas | intcomma }}</td>
+                        <td>{{ vta.descuento | intcomma }}</td>
+                        <td>{{ vta.devoluciones | intcomma }}</td>
+                        <td>{{ vta.venta_neta | intcomma }} </td>
+                        
+                                                                                         
+                	</tr>
+                    {% endif %}
+                
+                {% endfor %}
+                    <!-- El siguiente renglon se usa para los totales
+                         por eso va fuera del for  -->
+                    <tr>
+                        <td><h4> </h4></td>
+                        <td><h4> TOTALES:</h4> </td>
+                        <td><h4>{{  tot_vtas | intcomma }}</h4></td>
+                        <td><h4>{{ tot_descuento | intcomma }}</h4></td>
+                        <td><h4>{{ tot_devoluciones | intcomma }}</h4></td>
+                        <td><h4>{{ tot_ventaneta | intcomma }}</h4> </td>
+                        
+                    </tr>
+<!--
+                    <tr>
+                        <td>Comisiones: </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>{{ TotalCargos | intcomma }} </td>
+
+                    </tr>
+                    <tr>
+                        <td>Catalogos: </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>{{ TotalVtaCatalogos | intcomma }} </td>
+
+                    </tr>-->
+
+
+             </tbody>                   
+                
+        	</table>
+           
+        </div><br>
+        <div>
+            
+        </div>        
+
+        <p align='right'>
+            <a class="btn btn-default" href="/pedidos/vtaneta_socio_gral" role="button">Regresar</a>
+        </p>
+        
+            
+
+
+
+   
+<!-- </div> -->
+<!--<div class="col-md-4">
+</div>
+<div class="col-md-4">
+</div>-->
+
+</div>
+ {% endblock %}

@@ -74,7 +74,8 @@ from . forms import (AccesoForm,\
 					RpteVtaCatXSocioForm,
 					UploadFileForm,
 					RpteVtaCatXSocioForm,
-					CreaAsociadoForm)
+					CreaAsociadoForm,
+					RpteVtaNetaSocioGralForm)
 
 
 
@@ -2718,27 +2719,27 @@ def pedidosgeneral(request):
 
 
 				if numpedido != 0:
-					cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and  psf.status=l.status and h.pedidono=%s;", (sucursal_activa,numpedido,))
+					cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas from pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h  on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and  psf.status=l.status and h.pedidono=%s;", (sucursal_activa,numpedido,))
 					
 				else:
 					
 					if socionum != 0:
 
 						if  status == 'Todos':
-							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and h.asociadono=%s and  psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,socionum,fechainicial,fechafinal))
+							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas from pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and h.asociadono=%s and  psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,socionum,fechainicial,fechafinal))
 							
 						else:
-							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and h.asociadono=%s and l.status=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,socionum,status,fechainicial,fechafinal))
+							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l inner join pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h  on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo) INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and h.asociadono=%s and l.status=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,socionum,status,fechainicial,fechafinal))
 
 					else:
 						if estiloalt.strip() == '':
 
-							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and l.status=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,status,fechainicial,fechafinal))
+							cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h  on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and l.status=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,status,fechainicial,fechafinal))
 						else:
 							if status != 'Todos':
-								cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and l.status=%s and a.idestilo=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,status,estiloalt,fechainicial,fechafinal))
+								cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h  on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and l.status=%s and a.idestilo=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and l.status=psf.status ORDER BY h.pedidono DESC;", (sucursal_activa,status,estiloalt,fechainicial,fechafinal))
 							else:
-								cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l inner join pedidosheader h inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and a.idestilo=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and psf.status=l.status ORDER BY h.pedidono DESC;", (sucursal_activa,estiloalt,fechainicial,fechafinal))
+								cursor.execute("SELECT l.pedido,l.productono,l.catalogo,l.precio,l.status,l.nolinea,h.asociadono,psf.fechamvto,h.pedidono,h.fechaultimamodificacion,a.codigoarticulo,a.catalogo,pb.idmarca,a.idestilo,pb.idcolor,pb.talla,l.FechaTentativallegada,l.FechaMaximaEntrega,l.Observaciones,concat(aso.nombre,' ',aso.appaterno,' ',aso.apmaterno) as socionomb,z.Observaciones as notas  from pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) inner join pedidosheader h  on (plt.empresano=h.empresano and plt.pedido=h.pedidono) inner join articulo a on (l.pedido=h.pedidono and l.productono=a.codigoarticulo and l.catalogo=a.catalogo)  INNER JOIN asociado aso on (h.asociadono=aso.asociadono) inner join pedidos_status_fechas psf on (l.empresano=psf.empresano and l.pedido=psf.pedido and l.productono=psf.productono and l.catalogo=psf.catalogo and l.nolinea=psf.nolinea) left join pedidos_notas z on (l.empresano=z.empresano and l.pedido=z.pedido and l.productono=z.productono and l.catalogo=z.catalogo and l.nolinea=z.nolinea) where h.empresano = 1 and h.idsucursal=%s and a.idestilo=%s and psf.fechamvto>=%s and psf.fechamvto<=%s and psf.status=l.status ORDER BY h.pedidono DESC;", (sucursal_activa,estiloalt,fechainicial,fechafinal))
 
 
 									
@@ -3603,9 +3604,9 @@ def muestra_colocaciones(request):
 
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 			if ordenado_por == 1:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY a.idestilo;",(proveedor,))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=plt.Pedido and e.ProductoNo=plt.ProductoNo and e.Catalogo=plt.catalogo and e.NoLinea=plt.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY a.idestilo;",(proveedor,))
 			elif ordenado_por == 2:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY p.asociadono;",(proveedor,))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=plt.Pedido and e.ProductoNo=plt.ProductoNo and e.Catalogo=plt.catalogo and e.NoLinea=plt.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY p.asociadono;",(proveedor,))
 			else:
 				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal, l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidoslines l LEFT JOIN  pedidos_encontrados e on ( e.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo = 1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE l.empresano = 1 and a.idProveedor= %s and l.Status='Por Confirmar'  and (e.encontrado='' or e.encontrado='P' or e.encontrado IS NULL) ORDER BY p.FechaPedido;",(proveedor,))
 
@@ -3619,11 +3620,11 @@ def muestra_colocaciones(request):
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
 			if ordenado_por == 1:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
 			elif ordenado_por == 2:	
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=plt.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal))
 			else:					
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo = 1 and e.Pedido=plt.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='N'   and l.Status='Por Confirmar'  and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal))
 	
 		# PEDIDOS ENCONTRADOS		
 		elif tipo_consulta == 3:
@@ -3635,11 +3636,11 @@ def muestra_colocaciones(request):
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
 			if ordenado_por == 1:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY a.idestilo;",(proveedor,almacen))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY a.idestilo;",(proveedor,almacen))
 			elif ordenado_por == 2:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.asociadono;",(proveedor,almacen))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.asociadono;",(proveedor,almacen))
 			else:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.FechaPedido;",(proveedor,almacen))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.FechaPedido;",(proveedor,almacen))
 
 		# COLOCADOS		
 		elif tipo_consulta == 4:
@@ -3652,11 +3653,11 @@ def muestra_colocaciones(request):
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
 			if ordenado_por == 1:			
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal,almacen,))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal,almacen,))
 			elif ordenado_por == 2:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal,almacen,))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal,almacen,))
 			else:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal,almacen,))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and  e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano =1 and a.idProveedor=%s and e.encontrado='X'   and ( (l.Status='Por Confirmar' ) )  and p.FechaPedido>=%s and p.FechaPedido<=%s and e.BodegaEncontro=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal,almacen,))
 	
 
 		# DESCONTINUADOS		
@@ -3667,12 +3668,12 @@ def muestra_colocaciones(request):
 			tot_reg = total_registros[0]
 
 			if ordenado_por == 1:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY a.idestilo;",(proveedor,fechainicial,fechafinal))
 			elif ordenado_por == 2:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.asociadono;",(proveedor,fechainicial,fechafinal))
 
 			else:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.Nolinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo= 1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (`ind_emp_prov_cat_codpro`) ON  (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s and e.encontrado='D'    and p.FechaPedido>=%s and p.FechaPedido<=%s ORDER BY p.FechaPedido;",(proveedor,fechainicial,fechafinal))
 
 		# CANCELADOS
 
@@ -3687,14 +3688,14 @@ def muestra_colocaciones(request):
 			# Ejecuta segun ordenamiento solicitado (1= estilo, 2=socio,3=fechapedido )
 
 			if ordenado_por == 1:
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY a.idestilo;",(proveedor,almacen,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY a.idestilo;",(proveedor,almacen,fechainicial,fechafinal))
 			elif ordenado_por == 2:
 				#cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.asociadono;",(proveedor,almacen))
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY p.asociadono;",(proveedor,almacen,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY p.asociadono;",(proveedor,almacen,fechainicial,fechafinal))
 
 			else:
 				#cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s  and e.encontrado='S' and l.Status='Encontrado' and e.id_cierre=0 ORDER BY p.FechaPedido;",(proveedor,almacen))
-				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,a.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and e.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY p.FechaPedido;",(proveedor,almacen,fechainicial,fechafinal))
+				cursor.execute("SELECT e.Pedido,e.ProductoNo,e.Catalogo,e.NoLinea,e.BodegaEncontro,e.encontrado,e.encontrado as ver_ant_encontrado,p.FechaPedido,p.AsociadoNo,a.idmarca,a.idestilo,a.idcolor,pb.talla,l.precio,a.idProveedor,l.FechaMaximaEntrega,l.OpcionCompra,e.observaciones as encon_obser,p.idSucursal,l.Observaciones,e.`2`,e.`3`,e.`4`,e.`5`,e.`6`,e.`7`,e.`8`,e.`9`,e.`10`,l.status,CONCAT(aso.nombre,' ',aso.ApPaterno,' ',aso.ApMaterno) as nombre_socio,n.observaciones as notas FROM pedidos_encontrados e  INNER JOIN  pedidoslines l on ( l.EmpresaNo=1 and e.Pedido=l.Pedido and e.ProductoNo=l.ProductoNo and e.Catalogo=l.catalogo and e.NoLinea=l.nolinea ) INNER JOIN pedidoslinestemporada plt on (l.empresano=plt.empresano and l.pedido=plt.pedido and l.productono=plt.productono and l.catalogo=plt.catalogo and l.nolinea=plt.nolinea) INNER JOIN preciobase pb on (plt.empresano=pb.empresano and plt.productono=pb.codigoarticulo and plt.catalogo=pb.catalogo and plt.temporada=pb.temporada) INNER JOIN  pedidosheader p USE INDEX (ind_emp_fechapedido_numped) ON (p.EmpresaNo=1 and plt.Pedido=p.PedidoNo) INNER JOIN articulo a USE INDEX (ind_emp_prov_cat_codpro) ON (a.EmpresaNo=1 and e.ProductoNo=a.codigoarticulo and e.Catalogo=a.catalogo) INNER JOIN asociado as aso on (aso.asociadono=p.asociadono) left join pedidos_notas n on (e.empresano=n.empresano and e.pedido=n.pedido and e.productono=n.productono and e.catalogo=n.catalogo and e.nolinea=n.nolinea) inner join pedidos_status_fechas psf on (e.empresano=psf.empresano and e.pedido=psf.pedido and e.productono=psf.productono and e.catalogo=psf.catalogo and e.nolinea=psf.nolinea and psf.status='Encontrado') WHERE e.empresano=1 and a.idProveedor=%s  and e.BodegaEncontro=%s and l.Status='Cancelado' and e.id_cierre=0  and psf.fechamvto >=%s and psf.fechamvto<=%s ORDER BY p.FechaPedido;",(proveedor,almacen,fechainicial,fechafinal))
 
 	except DatabaseError as e:
 
@@ -8559,7 +8560,7 @@ def crea_catalogo(request,id_proveedor):
 
 
 
-'''REPORTE QUE CALCULA  LA VENTA NETA POR SOCIO Y POR PROVEEDOR '''
+'''REPORTE QUE CALCULA  LA VENTA NETA POR SOCIO Y UN PROVEEDOR '''
 
 def vtaneta_socio(request):
 
@@ -11980,6 +11981,11 @@ def crea_asociado(request):
 
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 
+				'''CREA REGISTROS DE PROVEEDOR
+				cursor.execute("SELECT proveedorno from proveedor;")
+				listaproveedor'''
+
+
 
 				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,1,fecha_hoy,hora_hoy,'Se creó el socio: '+str(ultimo_socio[0]+1)))		
 
@@ -14250,3 +14256,433 @@ def consulta_api(request):
 		socio_datos=consulta_creditos_vivos_api(request,num_socio)
 	data =json.dumps(socio_datos,cls=DjangoJSONEncoder)
 	return HttpResponse(data,content_type='application/json')
+
+
+
+
+'''REPORTE QUE CALCULA  LA VENTA NETA  TOTAL POR SOCIO EXCLUYENDO BETTERWARE '''
+
+def vtaneta_socio_gral(request):
+
+	# EL REPORTE CONSIDERA TANTO SOCIOS COMO CLIENTES PARA DETERMINAR LAS VENTAS Y
+	# QUE CUADRE CON EL REPORTE DE VENTA POR PROVEEDOR.
+	
+	''' Inicializa Variables '''
+	#pdb.set_trace()
+
+	TotalRegVentas = 0
+	TotalRegVtaDevMD = 0
+	Totaldscto  = 0.0
+	TotalVta = 0.0
+	Totaldscto = 0.0
+	TotalRegistros = 0
+	TotalRegDev = 0
+	TotalVtaDevMD = 0.0
+	registros_devgral = 0.0
+	registros_VtasDevMismodia = 0.0
+	TotalDevGral = 0.0
+	TotalCargos = 0.0
+	TotalVtaCatalogos = 0.0
+
+	""" **************************************"""
+
+	tot_vtas = 0
+	tot_ventaFD = 0
+	tot_ventabruta = 0
+	tot_descuento = 0
+	tot_devoluciones = 0
+	tot_ventaneta = 0
+	sucursal_nombre = " NOMBRE SUCURSAL"
+	sucursalinicial =1
+	sucursalfinal = 1
+
+	sucursal_activa = request.session['sucursal_activa']
+
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	hora_hoy = hoy.strftime("%H:%M:%S")
+	#fecha_hoy,hora_hoy =trae_fecha_hora_actual(,hora_hoy)
+
+
+	mensaje =''
+	if request.method == 'POST':
+
+		form = RpteVtaNetaSocioGralForm(request.POST)
+
+		if form.is_valid():
+
+			fechainicial = form.cleaned_data['fechainicial']
+			fechafinal = form.cleaned_data['fechafinal']
+			
+
+			#pdb.set_trace()
+
+			cursor=connection.cursor()
+
+
+			# CREA TABLA TEMPORAL
+			cursor.execute("DROP TEMPORARY TABLE IF EXISTS vtas_socio_tmp;")
+			cursor.execute("CREATE TEMPORARY TABLE vtas_socio_tmp SELECT * FROM ventas_socio_imagenbase;")
+
+
+			
+			# TRAE VENTA Y DESCUENTOS
+
+
+			cursor.execute("SELECT h.asociadono,\
+				TRUNCATE(sum(l.preciooriginal),2) as venta,\
+				TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto\
+				from pedidoslines l inner join pedidosheader h\
+				on (h.empresano=1 and h.pedidono=l.pedido)\
+				inner join pedidos_status_fechas f\
+				on (f.empresano=1 and f.pedido=l.pedido\
+				and f.productono=l.productono\
+				and f.status='Facturado'\
+				and f.catalogo=l.catalogo and f.nolinea=l.nolinea)\
+				inner join articulo a\
+				on (a.empresano=1 and a.codigoarticulo=l.productono\
+				and a.catalogo=l.catalogo)\
+				inner join proveedor p\
+				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
+				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+				left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+				where f.fechamvto>=%s and f.fechamvto<=%s and not(p.proveedorno=17)\
+				group by h.asociadono;",\
+				(fechainicial,fechafinal,))
+
+			
+			registros_venta = dictfetchall(cursor)
+			
+			
+			elementos = len(registros_venta)
+			print " los Elementos son elementos", elementos
+
+			# TRAE DEVOLUCIONES EN GENERAL
+			
+			cursor.execute("SELECT ph.asociadono,'',TRUNCATE(sum(l.precio),2) as devgral,0\
+			 from (SELECT psf.pedido,\
+			 psf.productono,\
+			 psf.nolinea,\
+			 psf.catalogo,\
+			 psf.fechamvto from\
+			 pedidos_status_fechas as psf USE INDEX (indice_2)\
+			 INNER JOIN pedidosheader as h\
+			 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+			 INNER JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
+			 (t3.empresano=1 and t2.pedido=t3.pedido and t2.productono=t3.productono\
+			 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
+	         INNER JOIN pedidoslines as l\
+	         on (l.empresano=1 and l.pedido=t3.pedido and l.productono=t3.productono\
+	         and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
+	         INNER JOIN articulo as art\
+	         on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
+	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
+	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
+	         where t3.status='Facturado' and not(pcb.proveedorno=17)\
+	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))
+
+			registros_devgral = dictfetchall(cursor)
+
+
+			if not registros_venta:
+
+				pass
+
+				
+			else:
+
+				cursor.execute("SELECT COUNT(*) as totrec FROM vtas_socio_tmp")
+				totrectmp=dictfetchall(cursor)
+
+				print "Total de regitron en tmporal", totrectmp
+				j=1
+				for registro in registros_venta:
+
+
+					cursor.execute("UPDATE vtas_socio_tmp vst inner join asociado s on (s.empresano=1 and s.asociadono=vst.asociadono) SET\
+						vst.ventas= %s,\
+						vst.venta_FD=0,\
+						vst.venta_bruta=0,\
+						vst.descuento=%s,\
+						vst.devoluciones=0,\
+						vst.venta_neta=0,\
+						vst.bono=0\
+						where vst.asociadono=%s;",\
+					 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
+					 		registro['asociadono']))					 
+                        										
+					TotalVta   = TotalVta + float(registro['venta'])
+					Totaldscto = Totaldscto + float(registro['dscto'])
+					
+					if (float(registro['venta']) != 0.0):
+						TotalRegVentas = TotalRegVentas + 1
+
+
+			if not registros_devgral:
+				
+				pass
+
+			else:				
+
+				for registro in registros_devgral:
+
+					cursor.execute("UPDATE vtas_socio_tmp\
+						SET devoluciones=%s WHERE asociadono=%s;",\
+					 			(registro['devgral'],registro['asociadono']))
+										
+					
+					TotalDevGral = TotalDevGral + float(registro['devgral'])
+					
+					if (float(registro['devgral']) != 0.0):
+						TotalRegDev = TotalRegDev + 1
+
+
+
+			#pdb.set_trace()
+			#cursor.execute("UPDATE vtas_socio_tmp as t INNER JOIN asociado as p on t.asociadono=p.asociadono SET t.nombreprov=p.razonsocial;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  (ventas = 0 and venta_FD=0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
+			cursor.execute("UPDATE vtas_socio_tmp SET venta_bruta = ventas + venta_FD;")
+			cursor.execute("UPDATE vtas_socio_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = 0;")
+			cursor.execute("DELETE FROM vtas_socio_tmp WHERE  venta_bruta <= 0;")
+
+			mensaje =" "
+
+			cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre FROM vtas_socio_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) ORDER BY vst.venta_neta desc;")
+			vtasresult =  dictfetchall(cursor)
+
+			if not vtasresult:
+				return HttpResponse("<h2>No existe movimientos para esta consulta !</h2>")
+												
+
+
+			
+			cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(venta_bruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(venta_neta) as tot_ventaneta,SUM(bono) as tot_bono FROM vtas_socio_tmp;")	
+			totales = dictfetchall(cursor)
+			for tot in totales:
+				tot_vtas = tot['tot_vtas']
+				tot_ventaFD = tot['tot_ventaFD']
+				tot_ventabruta = tot['tot_ventabruta']
+				tot_descuento = tot['tot_descuento']
+				tot_devoluciones = tot['tot_devoluciones']
+				tot_ventaneta = tot['tot_ventaneta']
+
+
+
+			context = {'form':form,'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':'GENERAL (Se excluye BETTERWARE)',}	
+		
+			return render(request,'pedidos/lista_vtaneta_socio_gral.html',context)
+
+		
+	else:
+
+		form = RpteVtaNetaSocioGralForm()
+	return render(request,'pedidos/vtaneta_socio_generalform.html',{'form':form,})
+
+
+
+
+# VENTA NETA POR SOCIO_PROVEEDOR (excluyendo Better ware)
+
+''' Este reporte muestra las ventas netas de un socio en cada uno de sus proveedores (general por proveedores excluyendo Betterware) '''
+
+
+def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,asociadofin):
+
+	# EL REPORTE CONSIDERA TANTO SOCIOS COMO CLIENTES PARA DETERMINAR LAS VENTAS Y
+	# QUE CUADRE CON EL REPORTE DE VENTA POR PROVEEDOR.
+	
+	''' Inicializa Variables '''
+	#pdb.set_trace()
+
+	TotalRegVentas = 0
+	TotalRegVtaDevMD = 0
+	Totaldscto  = 0.0
+	TotalVta = 0.0
+	Totaldscto = 0.0
+	TotalRegistros = 0
+	TotalRegDev = 0
+	TotalVtaDevMD = 0.0
+	registros_devgral = 0.0
+	registros_VtasDevMismodia = 0.0
+	TotalDevGral = 0.0
+	TotalCargos = 0.0
+	TotalVtaCatalogos = 0.0
+
+	""" **************************************"""
+
+	tot_vtas = 0
+	tot_ventaFD = 0
+	tot_ventabruta = 0
+	tot_descuento = 0
+	tot_devoluciones = 0
+	tot_ventaneta = 0
+	sucursal_nombre = " NOMBRE SUCURSAL"
+	sucursalinicial =1
+	sucursalfinal = 1
+
+	sucursal_activa = request.session['sucursal_activa']
+
+	hoy = datetime.now()
+	fecha_hoy = hoy.strftime("%Y-%m-%d")
+	hora_hoy = hoy.strftime("%H:%M:%S")
+	#fecha_hoy,hora_hoy =trae_fecha_hora_actual(,hora_hoy)
+
+
+	mensaje =''
+	#pdb.set_trace()
+
+	cursor=connection.cursor()
+
+
+	# CREA TABLA TEMPORAL
+	cursor.execute("DROP TEMPORARY TABLE IF EXISTS vtas_socio_proveedor_tmp;")
+	cursor.execute("CREATE TEMPORARY TABLE vtas_socio_proveedor_tmp SELECT * FROM ventas_socio_proveedor_imagenbase;")
+
+
+	
+	# TRAE VENTA Y DESCUENTOS
+
+
+	cursor.execute("SELECT h.asociadono,p.proveedorno,\
+		TRUNCATE(sum(l.preciooriginal),2) as venta,\
+		TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto\
+		from pedidoslines l inner join pedidosheader h\
+		on (h.empresano=1 and h.pedidono=l.pedido)\
+		inner join pedidos_status_fechas f\
+		on (f.empresano=1 and f.pedido=l.pedido\
+		and f.productono=l.productono\
+		and f.status='Facturado'\
+		and f.catalogo=l.catalogo and f.nolinea=l.nolinea)\
+		inner join articulo a\
+		on (a.empresano=1 and a.codigoarticulo=l.productono\
+		and a.catalogo=l.catalogo)\
+		inner join proveedor p\
+		on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
+		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
+		left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
+		where f.fechamvto>=%s and f.fechamvto<=%s and not(p.proveedorno=17) and h.asociadono>=%s and h.asociadono<=%s\
+		group by h.asociadono,p.proveedorno;",\
+		(fechainicial,fechafinal,asociadoini,asociadofin,))
+
+	
+	registros_venta = dictfetchall(cursor)
+	
+	
+	elementos = len(registros_venta)
+	print " los Elementos son elementos", elementos
+
+	# TRAE DEVOLUCIONES EN GENERAL
+	
+	cursor.execute("SELECT ph.asociadono,pcb.proveedorno,'',TRUNCATE(sum(l.precio),2) as devgral,0\
+	 from (SELECT psf.pedido,\
+	 psf.productono,\
+	 psf.nolinea,\
+	 psf.catalogo,\
+	 psf.fechamvto from\
+	 pedidos_status_fechas as psf USE INDEX (indice_2)\
+	 INNER JOIN pedidosheader as h\
+	 ON (h.empresano=1 and h.pedidono=psf.pedido) WHERE psf.status='Devuelto' and psf.fechamvto>= %s and psf.fechamvto<= %s) as t2\
+	 INNER JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
+	 (t3.empresano=1 and t2.pedido=t3.pedido and t2.productono=t3.productono\
+	 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
+     INNER JOIN pedidoslines as l\
+     on (l.empresano=1 and l.pedido=t3.pedido and l.productono=t3.productono\
+     and l.catalogo=t3.catalogo and l.nolinea=t3.nolinea)\
+     INNER JOIN articulo as art\
+     on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
+     INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
+     INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
+     where t3.status='Facturado' and not(pcb.proveedorno=17) and ph.asociadono>=%s and ph.asociadono<=%s\
+     GROUP BY ph.asociadono,pcb.proveedorno;",(fechainicial,fechafinal,asociadoini,asociadofin,))
+
+	registros_devgral = dictfetchall(cursor)
+
+
+	if not registros_venta:
+
+		pass
+
+		
+	else:
+
+		cursor.execute("SELECT COUNT(*) as totrec FROM vtas_socio_proveedor_tmp")
+		totrectmp=dictfetchall(cursor)
+
+		print "Total de regitron en tmporal", totrectmp
+		j=1
+		for registro in registros_venta:
+
+
+			cursor.execute("UPDATE vtas_socio_proveedor_tmp vst inner join asociado s on (s.empresano=1 and s.asociadono=vst.asociadono) SET\
+				vst.ventas= %s,\
+				vst.venta_FD=0,\
+				vst.venta_bruta=0,\
+				vst.descuento=%s,\
+				vst.devoluciones=0,\
+				vst.venta_neta=0,\
+				vst.bono=0\
+				where vst.asociadono=%s and vst.proveedorno=%s;",\
+			 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
+			 		registro['asociadono'],registro['proveedorno'],
+			 		))					 
+                										
+			TotalVta   = TotalVta + float(registro['venta'])
+			Totaldscto = Totaldscto + float(registro['dscto'])
+			
+			if (float(registro['venta']) != 0.0):
+				TotalRegVentas = TotalRegVentas + 1
+
+
+	if not registros_devgral:
+		
+		pass
+
+	else:				
+
+		for registro in registros_devgral:
+
+			cursor.execute("UPDATE vtas_socio_proveedor_tmp\
+				SET devoluciones=%s WHERE asociadono=%s and proveedorno=%s;",\
+			 			(registro['devgral'],registro['asociadono'],registro['proveedorno'],))
+								
+			
+			TotalDevGral = TotalDevGral + float(registro['devgral'])
+			
+			if (float(registro['devgral']) != 0.0):
+				TotalRegDev = TotalRegDev + 1
+
+
+
+	#pdb.set_trace()
+	#cursor.execute("UPDATE vtas_socio_tmp as t INNER JOIN asociado as p on t.asociadono=p.asociadono SET t.nombreprov=p.razonsocial;")
+	cursor.execute("DELETE FROM vtas_socio_proveedor_tmp WHERE  (ventas = 0 and venta_FD=0 and  descuento =0 and devoluciones = 0 and venta_neta = 0);")
+	cursor.execute("UPDATE vtas_socio_proveedor_tmp SET venta_bruta = ventas + venta_FD;")
+	cursor.execute("UPDATE vtas_socio_proveedor_tmp SET venta_neta = venta_bruta - descuento - devoluciones,bono = 0;")
+	cursor.execute("DELETE FROM vtas_socio_proveedor_tmp WHERE  venta_bruta <= 0;")
+
+	mensaje =" "
+
+	cursor.execute("SELECT vst.*,CONCAT(s.nombre,' ',s.appaterno,' ',s.apmaterno) as nombre,p.razonsocial as nombre_catalogo FROM vtas_socio_proveedor_tmp vst INNER JOIN asociado s on (s.empresano=1 and s.asociadono = vst.asociadono) INNER JOIN proveedor p on (p.empresano=1 and p.proveedorno=vst.proveedorno) ;")
+	vtasresult =  dictfetchall(cursor)
+
+	if not vtasresult:
+		return HttpResponse("<h2>No existe movimientos para esta consulta !</h2>")
+										
+
+	
+	cursor.execute("SELECT SUM(ventas) as tot_vtas,SUM(venta_FD) as tot_ventaFD,SUM(venta_bruta) as tot_ventabruta, SUM(descuento) as tot_descuento,SUM(devoluciones) as tot_devoluciones,SUM(venta_neta) as tot_ventaneta,SUM(bono) as tot_bono FROM vtas_socio_proveedor_tmp;")	
+	totales = dictfetchall(cursor)
+	for tot in totales:
+		tot_vtas = tot['tot_vtas']
+		tot_ventaFD = tot['tot_ventaFD']
+		tot_ventabruta = tot['tot_ventabruta']
+		tot_descuento = tot['tot_descuento']
+		tot_devoluciones = tot['tot_devoluciones']
+		tot_ventaneta = tot['tot_ventaneta']
+
+	
+
+	context = {'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':'GENERAL (Se excluye BETTERWARE)',}	
+
+	return render(request,'pedidos/lista_vtaneta_socio_proveedor_detalle.html',context)
+
