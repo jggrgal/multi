@@ -11981,10 +11981,9 @@ def crea_asociado(request):
 
 				cursor.execute("INSERT INTO ventas_socio_imagenbase(asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono) values(%s,%s,%s,%s,%s,%s,%s,%s);",(ultimo_socio[0]+1,0,0,0,0,0,0,0))				
 
-				'''CREA REGISTROS DE PROVEEDOR
-				cursor.execute("SELECT proveedorno from proveedor;")
-				listaproveedor'''
-
+				#CREA REGISTROS DE PROVEEDORES PARA ARCHVIVO IMAGEN 
+				cursor.execute("INSERT INTO ventas_socio_proveedor_imagenbase (asociadono,ventas,venta_fd,venta_bruta,descuento,devoluciones,venta_neta,bono,proveedorno) SELECT %s,0,0,0,0,0,0,0,proveedorno FROM proveedor;",(ultimo_socio[0]+1,))
+				#listaproveedor
 
 
 				cursor.execute("INSERT INTO log_eventos(usuariono,derechono,fecha,hora,descripcion) values(%s,%s,%s,%s,%s);",(usr_existente,1,fecha_hoy,hora_hoy,'Se creó el socio: '+str(ultimo_socio[0]+1)))		
@@ -14329,9 +14328,8 @@ def vtaneta_socio_gral(request):
 			# TRAE VENTA Y DESCUENTOS
 
 
-			cursor.execute("SELECT h.asociadono,\
-				TRUNCATE(sum(l.preciooriginal),2) as venta,\
-				TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto\
+			cursor.execute("SELECT TRUNCATE(sum(l.preciooriginal),2) as venta,\
+				TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto,h.asociadono \
 				from pedidoslines l inner join pedidosheader h\
 				on (h.empresano=1 and h.pedidono=l.pedido)\
 				inner join pedidos_status_fechas f\
@@ -14344,9 +14342,7 @@ def vtaneta_socio_gral(request):
 				and a.catalogo=l.catalogo)\
 				inner join proveedor p\
 				on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
-				inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-				left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
-				where f.fechamvto>=%s and f.fechamvto<=%s and not(p.proveedorno=17)\
+				where f.fechamvto>=%s and f.fechamvto<=%s and not(a.idproveedor=17)\
 				group by h.asociadono;",\
 				(fechainicial,fechafinal,))
 
@@ -14378,7 +14374,7 @@ def vtaneta_socio_gral(request):
 	         on (art.empresano=1 and art.codigoarticulo=t3.productono and art.catalogo=t3.catalogo)\
 	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
 	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
-	         where t3.status='Facturado' and not(pcb.proveedorno=17)\
+	         where t3.status='Facturado' and not(art.idproveedor=17)\
 	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))
 
 			registros_devgral = dictfetchall(cursor)
@@ -14543,9 +14539,8 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 	# TRAE VENTA Y DESCUENTOS
 
 
-	cursor.execute("SELECT h.asociadono,p.proveedorno,\
-		TRUNCATE(sum(l.preciooriginal),2) as venta,\
-		TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto\
+	cursor.execute("SELECT 	TRUNCATE(sum(l.preciooriginal),2) as venta,\
+		TRUNCATE(sum(if (l.preciooriginal>l.precio,l.preciooriginal-l.precio,0)),2) as dscto,h.asociadono,a.idproveedor\
 		from pedidoslines l inner join pedidosheader h\
 		on (h.empresano=1 and h.pedidono=l.pedido)\
 		inner join pedidos_status_fechas f\
@@ -14558,16 +14553,15 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 		and a.catalogo=l.catalogo)\
 		inner join proveedor p\
 		on (p.EmpresaNo=1 and p.proveedorno=a.idproveedor)\
-		inner join pedidoslinestemporada plt on (plt.empresano=l.empresano and plt.pedido=l.pedido and plt.productono=l.productono and plt.catalogo=l.catalogo and plt.nolinea=l.nolinea)\
-		left join catalogostemporada ct on (ct.proveedorno=a.idproveedor and ct.periodo=CAST(SUBSTRING(l.catalogo,1,4) as UNSIGNED) and ct.Anio=plt.Temporada and ct.clasearticulo=l.catalogo)\
-		where f.fechamvto>=%s and f.fechamvto<=%s and not(p.proveedorno=17) and h.asociadono>=%s and h.asociadono<=%s\
-		group by h.asociadono,p.proveedorno;",\
+		where f.fechamvto>=%s and f.fechamvto<=%s and not(a.idproveedor=17) and h.asociadono>=%s and h.asociadono<=%s\
+		group by h.asociadono,a.idproveedor;",\
 		(fechainicial,fechafinal,asociadoini,asociadofin,))
 
 	
 	registros_venta = dictfetchall(cursor)
 	
-	
+	for j in registros_venta:
+		print j
 	elementos = len(registros_venta)
 	print " los Elementos son elementos", elementos
 
@@ -14598,6 +14592,8 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 	registros_devgral = dictfetchall(cursor)
 
 
+
+
 	if not registros_venta:
 
 		pass
@@ -14610,21 +14606,27 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 
 		print "Total de regitron en tmporal", totrectmp
 		j=1
+
+		#pdb.set_trace()
 		for registro in registros_venta:
 
 
-			cursor.execute("UPDATE vtas_socio_proveedor_tmp vst inner join asociado s on (s.empresano=1 and s.asociadono=vst.asociadono) SET\
-				vst.ventas= %s,\
-				vst.venta_FD=0,\
-				vst.venta_bruta=0,\
-				vst.descuento=%s,\
-				vst.devoluciones=0,\
-				vst.venta_neta=0,\
-				vst.bono=0\
-				where vst.asociadono=%s and vst.proveedorno=%s;",\
-			 	(Decimal(registro['venta']),Decimal(registro['dscto']),\
-			 		registro['asociadono'],registro['proveedorno'],
-			 		))					 
+			cursor.execute("INSERT INTO vtas_socio_proveedor_tmp (asociadono,ventas,\
+				venta_FD,\
+				venta_bruta,\
+				descuento,\
+				devoluciones,\
+				venta_neta,\
+				bono,proveedorno) values(%s,%s,0,0,%s,0,0,0,%s) ON DUPLICATE KEY UPDATE \
+				ventas= %s,\
+				venta_FD=0,\
+				venta_bruta=0,\
+				descuento=%s,\
+				devoluciones=0,\
+				venta_neta=0,\
+				bono=0;",\
+			 	(registro['asociadono'],Decimal(registro['venta']),Decimal(registro['dscto']),registro['idproveedor'],\
+			 	Decimal(registro['venta']),Decimal(registro['dscto']),))					 
                 										
 			TotalVta   = TotalVta + float(registro['venta'])
 			Totaldscto = Totaldscto + float(registro['dscto'])
@@ -14680,9 +14682,27 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 		tot_devoluciones = tot['tot_devoluciones']
 		tot_ventaneta = tot['tot_ventaneta']
 
-	
+	if asociadoini != asociadofin:
 
-	context = {'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':'GENERAL (Se excluye BETTERWARE)',}	
+		response = HttpResponse(content_type='text/csv')
+		response['Content-Disposition'] = 'attachment; filename="VtaNetaSocioGral.csv"'
 
-	return render(request,'pedidos/lista_vtaneta_socio_proveedor_detalle.html',context)
+		writer = csv.writer(response)
+		writer.writerow(['SOCIO','CATALOGO','VENTA','DESCUENTO','DEVOLUCIONES','VENTA_NETA'])
+		
+		for registro in vtasresult:
+			print registro
+			# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
+			llaves_a_mostrar = ['nombre','nombre_catalogo','venta_bruta','descuento','devoluciones','venta_neta'] 
+			# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
+			lista = [registro[x] for x in llaves_a_mostrar]					
+			writer.writerow(lista)
+		
+		return response			
+
+	else:			
+
+		context = {'mensaje':mensaje,'vtasresult':vtasresult,'TotalRegistros':TotalRegistros,'tot_vtas':float(tot_vtas),'tot_ventaFD':float(tot_ventaFD),'tot_ventabruta':float(tot_ventabruta),'tot_descuento':float(tot_descuento),'tot_devoluciones':float(tot_devoluciones),'tot_ventaneta':float(tot_ventaneta),'TotalCargos':TotalCargos,'TotalVtaCatalogos':TotalVtaCatalogos,'fechainicial':fechainicial,'fechafinal':fechafinal,'sucursal_nombre':sucursal_nombre,'sucursalinicial':sucursalinicial,'sucursalfinal':sucursalfinal,'nombre_proveedor':'GENERAL (Se excluye BETTERWARE)',}	
+
+		return render(request,'pedidos/lista_vtaneta_socio_proveedor_detalle.html',context)
 
