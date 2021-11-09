@@ -700,11 +700,16 @@ $(".btn_cancela_pedido").prop('disabled',true)
         autoFill: true
           });
 
-       //$('#colocaciones_detalle_tabla').DataTable( {
-        
-       //   autoFill: true
+       $('#vta_neta_socio_general').DataTable( {
+        autoFill: true
+          });
 
-       //   });
+       /*
+       $('#colocaciones_detalle_tabla').DataTable( {
+        
+          autoFill: true
+
+          });*/
 
 
        // FIJA UN CUADRO CON TOTALES EN LA VENTA

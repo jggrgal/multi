@@ -1270,7 +1270,7 @@ class ElegirAlmacenaCerrarForm(forms.Form):
 
 	proveedores = {}
 
-	lista_almacenes = ((0,'Seleccione'),(1,'alm1'),(2,'alm2'),(3,'alm3'),(4,'alm4'),(5,'alm5'),(6,'alm6'),(7,'alm7',),(8,'alm8'),(9,'alm9'),) # Estos valores que toma la lista, son solamente default; los valores reales de este campo son dinamicos y se crean via jquery
+	lista_almacenes = ((0,'Seleccione'),(1,'alm1'),(2,'alm2'),(3,'alm3'),(4,'alm4'),(5,'alm5'),(6,'alm6'),(7,'alm7',),(8,'alm8'),(9,'alm9'),(10,'alm10'),(11,'alm11'),(12,'alm12'),) # Estos valores que toma la lista, son solamente default; los valores reales de este campo son dinamicos y se crean via jquery
 	proveedor = forms.ChoiceField(widget=forms.Select(),label='Proveedor',initial=0,required=True)
 	almacen = forms.ChoiceField(widget=forms.Select(),label='Almacén',initial='0',choices=lista_almacenes,required=True)
 	#hoy =  date.today()
