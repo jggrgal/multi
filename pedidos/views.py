@@ -4322,7 +4322,7 @@ def procesar_cierre_pedido(request):
 
 @login_required(login_url = "/pedidos/acceso/")
 def elegir_almacen_a_cerrar(request):
-	pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	#pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	
 	mensaje = " "
 	reg_encontrados = 0
