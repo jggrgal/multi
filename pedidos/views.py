@@ -13338,7 +13338,7 @@ def rpteStatusxMarca(request):
 				a.pagina,a.idmarca,a.idestilo,a.idcolor,\
 				a.talla,h.idsucursal,aso.asociadoNo,aso.Nombre,\
 				aso.appaterno,aso.apmaterno, psf.fechamvto,\
-				p.Observaciones,CONCAT(CAST(aso.asociadono AS CHAR),\
+				p.Observaciones as obs, if(trim(a.talla)='NE',p.Observaciones,a.talla) as Observaciones,CONCAT(CAST(aso.asociadono AS CHAR),\
 				' ',aso.nombre,' ',aso.appaterno,' ',aso.apmaterno)\
 				 as socio,suc.nombre as sucursal,a.idproveedor FROM pedidoslines p\
 				inner join  pedidosheader h\
@@ -13424,7 +13424,7 @@ def rpteStatusxMarca(request):
 					for registro in pedidos:
 						print registro
 						# El registro contiene los elementos a exportar pero no en el orden que se necesita para eso se define la siguiente lista con las llaves en el orden que se desea se exporten	
-						llaves_a_mostrar = ['sucursal','asociadoNo','Nombre','appaterno','apmaterno','pedido','fechamvto','status','catalogo','pagina','idmarca','idestilo','idcolor','talla','precio',] 
+						llaves_a_mostrar = ['sucursal','asociadoNo','Nombre','appaterno','apmaterno','pedido','fechamvto','status','catalogo','pagina','idmarca','idestilo','idcolor','Observaciones','precio',] 
 						# Con la siguiente linea se pasan los elementos del diccionario 'registro' a 'lista' de acuerdo al orden mostrado en 'llaves_a_mostrar'
 						lista = [registro[x] for x in llaves_a_mostrar]					
 						writer.writerow(lista)
