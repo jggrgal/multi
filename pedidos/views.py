@@ -11994,7 +11994,7 @@ def crea_asociado(request):
 
 				cursor.execute("COMMIT;")
 
-				return HttpResponseRedirect(reverse('pedidos:asociados'))
+				return HttpResponseRedirect(reverse('pedidos:entrada_sistema'))
 
 
 			except DatabaseError as e:
