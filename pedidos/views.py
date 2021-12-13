@@ -1,4 +1,3 @@
-
 #-*- encoding: utf-8 -*-
 
 from django.shortcuts import render,redirect,render_to_response
@@ -75,7 +74,8 @@ from . forms import (AccesoForm,\
 					UploadFileForm,
 					RpteVtaCatXSocioForm,
 					CreaAsociadoForm,
-					RpteVtaNetaSocioGralForm)
+					RpteVtaNetaSocioGralForm,
+					TraeSocioForm)
 
 
 
@@ -11818,7 +11818,7 @@ def edita_asociado(request,asociadono):
 							
 				cursor.execute("COMMIT;")
 
-				return HttpResponseRedirect(reverse('pedidos:asociados'))
+				return HttpResponseRedirect(reverse('pedidos:trae_socio'))
 
 
 			except DatabaseError as e:
@@ -13814,7 +13814,7 @@ def upload_file_catalogo(request):
 											precio,\
 											catalogo,\
 											costo,\
-											descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE descontinuado=%s,idmarca=%s,idestilo=%s,idcolor=%s,talla=%s,precio=%s;",(1,columna[1],fecha_hoy,fecha_hoy,columna[0],'',idproveedor,columna[4],columna[3],columna[5],columna[6],'',columna[8],Decimal(columna[7]),catalogo,0,0,0,columna[4],columna[3],columna[5],columna[8],Decimal(columna[7])))
+											descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE descontinuado=%s,idmarca=%s,idestilo=%s,idcolor=%s,talla=%s,precio=%s;",(1,columna[1],fecha_hoy,fecha_hoy,columna[0],'',idproveedor,columna[4],columna[3],columna[5][:40],columna[6],'',columna[8],Decimal(columna[7]),catalogo,0,0,0,columna[4],columna[3],columna[5][:40],columna[8],Decimal(columna[7])))
 							
 							cursor.execute("INSERT INTO preciobase (Empresano,\
 																proveedorid,\
@@ -13834,7 +13834,7 @@ def upload_file_catalogo(request):
 																idmarca,\
 																idcolor,\
 																talla\
-																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s,estilo=%s,idmarca=%s,idcolor=%s,talla=%s;",(1,idproveedor,temporada,columna[1],0,Decimal(columna[7]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,0,0,columna[0],catalogo,columna[3],columna[4],columna[5],columna[8],hora_hoy,Decimal(columna[7]),columna[3],columna[4],columna[5],columna[8]))
+																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s,estilo=%s,idmarca=%s,idcolor=%s,talla=%s;",(1,idproveedor,temporada,columna[1],0,Decimal(columna[7]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,0,0,columna[0],catalogo,columna[3],columna[4],columna[5][:40],columna[8],hora_hoy,Decimal(columna[7]),columna[3],columna[4],columna[5][:40],columna[8]))
 												
 							cursor.execute("INSERT INTO preciosopcionales (Empresano,\
 																proveedor,\
@@ -14707,3 +14707,39 @@ def vtaneta_socio_proveedor_gral(request,fechainicial,fechafinal,asociadoini,aso
 
 		return render(request,'pedidos/lista_vtaneta_socio_proveedor_detalle.html',context)
 
+
+
+def trae_socio(request):
+    # if this is a POST request we need to process the form data
+	global global_numero_socio_zapcat
+	if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+		form = TraeSocioForm(request.POST)
+        # check whether it's valid:
+		if form.is_valid():
+
+			socio_a_dar_de_alta = request.POST.get('socio')
+			
+			cursor = connection.cursor()
+		
+			cursor.execute("SELECT asociadono,nombre,appaterno,apmaterno from asociado where asociadono=%s;",[socio_a_dar_de_alta])
+
+			socio_datos = dictfetchall(cursor)
+			print socio_datos
+			if not socio_datos:
+					mensaje = 'El número de socio proporcionado no fué encontrado, intente nuevamente !'
+					return render(request,'pedidos/error_en_socio.html', {'mensaje':mensaje})
+			else:
+
+				
+				mensaje =' '
+
+				context = {'socio_datos':socio_datos,'mensaje':mensaje,'form':form,}
+				return render(request,'pedidos/muestra_socio.html',context)
+
+			cursor.close()
+
+	else:
+		form = TraeSocioForm()
+
+	return render(request,'pedidos/trae_socio.html',{'form':form})

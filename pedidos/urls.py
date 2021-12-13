@@ -150,4 +150,6 @@ urlpatterns = [
 	url(r'^rpteVtasCatalogosxSocio/$',views.rpteVtasCatalogosxSocio,name='rpteVtasCatalogosxSocio'),
 	url(r'^valida_credenciales/$',views.valida_credenciales,name='valida_credenciales'),
 	url(r'^consulta_api/$',views.consulta_api,name='consulta_api'),
+	#url(r'^muestra_socio/$',views.muestra_socio,name='muestra_socio'),
+	url(r'^trae_socio/$',views.trae_socio,name='trae_socio'),
 	]

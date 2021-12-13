@@ -1,0 +1,70 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h1>{{mensaje}}</h1>
+
+<div class="row">
+  
+  <div class="col-md-4">
+  		<div class="panel panel-success">
+
+
+
+        <div class='panel-heading'><h4 align='left'><i class=""></i>Trae socio<h4></div>
+          
+          <div class='panel-body'>
+              
+            {% if mensaje %}<p><strong> {{mensaje}}</strong></p>{% endif %}
+
+            
+            <form action="{% url 'pedidos:trae_socio' %}" method="POST">
+                
+                    <div class="alert alert-danger" role="alert">
+                      {% for error in form.non_field_errors %}
+                        {{ error }}
+                      {% endfor %}
+            
+                     </div>
+                      {% csrf_token %}   
+              
+
+                
+                   {{ form.socio | as_crispy_field }}
+                
+
+                              
+              <div class='form-row col-md-12'>
+                       <input  id='btn_crea_asociado' class="btn btn-default"  type="submit" value="Enviar" />              
+              </div>  
+
+             
+            </form>
+
+ 
+   
+
+  </div>
+  <div class="col-md-3"></div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+<!-- El siguiente div se utiliza como parte del cuadro de dialogo jquery para elminiar clientes -->
+
+<div id="dialog-1" style="display : none;" title="Advertencia !">Los registros seleccionados serán eliminados de manera definitiva de la base de datos, la acción es irreversible, desea continuar ?</div>
+
+
+
+
+
+{% endblock content %}

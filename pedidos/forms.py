@@ -4209,6 +4209,19 @@ class RpteVtaNetaSocioGralForm(forms.Form):
 
 		return self.cleaned_data
 
+class TraeSocioForm(forms.Form):
+
+	socio = forms.IntegerField(label='Numero de socio',initial=0)
+	
+	def clean(self):
+
+		cleaned_data = super( TraeSocioForm,self).clean()
+
+		socio = self.cleaned_data.get('socio')
+
+	
+
+		return(self.cleaned_data)
 
 
 

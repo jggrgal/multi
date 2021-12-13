@@ -7,10 +7,12 @@
 <div class="row">
     <div class='row'>
         <div class='col-md-4'>
-           <h1> <i class="fa fa-users"></i>   </h1>
+
+           <h1> <i class="fa fa-user"></i>   </h1>
+
         </div>
         <div class='col-md-4'>
-                  <h3 style="text-align: center;color:#7f7b38;">Catalogo de Socios</h3>
+           <h3 style="text-align: left;color:#7f7b38;">Socio</h3>       
 
         </div>
         <div class='col-md-4'>
@@ -26,35 +28,29 @@
             
         	<tr class='success'>
         		<th>id</th>
-                <th>Numero de control</th>
-            	<th>Apellido Paterno</th>
+                <th>Apellido Paterno</th>
             	<th>Apellido Materno</th>
                 <th>Nombre</th>
-                <th>Telefono casa</th>
-                <th>Celular</th>
-                <th>Correo electronico</th>
-                
+                <th>Catalogos</th>
+                <th>Descuentos</th>
               
         	</tr>
             </thead>
             <tbody>
-        	{% for item in asociados %}
+        	{% for item in socio_datos %}
         		<tr>
-        			<!--<td><a href="{% url 'pedidos:edita_asociado' item.asociadono %}">{{ item.asociadono }}</a></td>-->
-                    <td>{{item.asociadono}}</td>
-                    <td>{{item.numcontrol}}</td>
+        			<td><a href="{% url 'pedidos:edita_asociado' item.asociadono %}">{{ item.asociadono }}</a></td>
+                    
         			<td>{{ item.appaterno }}</td>
                     <td>{{ item.apmaterno }}</td>
                     <td>{{ item.nombre }}</td>
-                    <td>{{ item.telefono1}}</td>
-                    <td>{{ item.celular }}</td>
-                    <td>{{ item.direccionelectronica }}</td>
-                    <!--<td><form id="imp_pedido_form" action="/pedidos/filtrocatalogosasociado/{{ item.asociadono }}" method="GET">
+                    
+                    <td><form id="imp_pedido_form" action="/pedidos/filtrocatalogosasociado/{{ item.asociadono }}" method="GET">
                         <input id="asociadono" name="asociadono" class="btn-success-btn-lg" type="submit" value="Catalogos...">
                     </form></td>
                     <td><form id="dsctos_socio" action="/pedidos/asociado_proveedor/{{ item.asociadono }}" method="GET">
                         <input id="asociadono" name="asociadono" class="btn-success-btn-lg" type="submit" value="Dsctos...">
-                    </form></td>-->
+                    </form></td>
             		                    
             	</tr>
            {% endfor %}
@@ -66,9 +62,7 @@
 </div>
 <div class='row'>
     <div class='col-md-3'>
-        <!--<p align="left">
-                      <a href="{% url 'pedidos:crea_asociado' %}" id="crea_asociado" class="btn btn-success " role="button">Nuevo </a>
-                    </p>-->
+        
     </div>
     <div class='col-md-3'></div>
     <div class='col-md-3'></div>
