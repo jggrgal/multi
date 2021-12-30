@@ -8411,7 +8411,7 @@ def lista_catalogos_proveedor(request,proveedorno):
 
 	#pdb.set_trace() 	
 	cursor=connection.cursor()
-	cursor.execute("SELECT ProveedorNo,Periodo,anio,clasearticulo,if(activo=1,'SI','NO') AS activo,if(no_maneja_descuentos=1,'SI','NO') as no_maneja_descuentos,if(catalogo_promociones=1,'SI','NO') as catalogo_promociones from catalogostemporada where proveedorNo=%s order by Periodo desc;",(proveedorno,))
+	cursor.execute("SELECT ProveedorNo,Periodo,anio,clasearticulo,if(activo=1,'SI','NO') AS activo,if(no_maneja_descuentos=1,'NO','SI') as no_maneja_descuentos,if(catalogo_promociones=1,'SI','NO') as catalogo_promociones from catalogostemporada where proveedorNo=%s order by Periodo desc;",(proveedorno,))
 	catalogos = dictfetchall(cursor)
 	cursor.execute("SELECT razonsocial FROM proveedor where proveedorno=%s;",(proveedorno,))
 	nombre_proveedor=cursor.fetchone()

@@ -2763,7 +2763,7 @@ class DatosCatalogoForm(forms.Form):
 	Activo = forms.ChoiceField(widget=forms.Select(),
 			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
 	no_maneja_descuentos = forms.ChoiceField(widget=forms.Select(),
-			label='No maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+			label='Maneja descuento',choices =((0,'Si'),(1,'No')),required='True' )
 	catalogo_promociones = forms.ChoiceField(widget=forms.Select(),
 			label='Catalogo de promociones',choices =((1,'Si'),(0,'No')),required='True' )
 	
@@ -2837,7 +2837,7 @@ class CreaCatalogoForm(forms.Form):
 	Activo = forms.ChoiceField(widget=forms.Select(),
 			label='Activo',choices =((1,'Si'),(0,'No')),required='True' )
 	no_maneja_descuentos = forms.ChoiceField(widget=forms.Select(),
-			label='No maneja descuento',choices =((1,'Si'),(0,'No')),required='True' )
+			label='Maneja descuento',choices =((0,'Si'),(1,'No')),required='True' )
 	catalogo_promociones = forms.ChoiceField(widget=forms.Select(),
 			label='Catalogo de promociones',choices =((1,'Si'),(0,'No')),required='True' )
 	
