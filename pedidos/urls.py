@@ -152,4 +152,5 @@ urlpatterns = [
 	url(r'^consulta_api/$',views.consulta_api,name='consulta_api'),
 	#url(r'^muestra_socio/$',views.muestra_socio,name='muestra_socio'),
 	url(r'^trae_socio/$',views.trae_socio,name='trae_socio'),
+	url(r'^edita_datosempresa/$',views.edita_datosempresa,name='edita_datosempresa'),
 	]

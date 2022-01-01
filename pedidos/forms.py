@@ -4224,5 +4224,90 @@ class TraeSocioForm(forms.Form):
 		return(self.cleaned_data)
 
 
+# DATOS EMPRESA FORM
+
+class DatosEmpresaForm(forms.Form):
+
+	def __init__(self,*args,**kwargs):
+
+		
+		super(DatosEmpresaForm, self).__init__(*args,**kwargs)
+
+		def genera_tupla_anios():
+			li =[]
+			le =[]
+			for j in range(2010,2050):
+
+				for z in range(1,2):
+					li.append(j)
+					li.append(j)
+				li=tuple(li)
+				le.append(li)
+				li=[]
+			le=tuple(le)
+			return(le)	
+
+		l = genera_tupla_anios()	
 
 
+		self.fields['EmpresaNo'].widget.attrs['readonly'] = True
+		self.fields['EjercicioVigente'] = forms.ChoiceField(widget=forms.Select(),
+		label='Ejercicio',choices = l,required='True' )
+					
+
+	EmpresaNo = forms.IntegerField(label='Empresa Num.',required=True,initial=1)
+	EjercicioVigente = forms.ChoiceField(widget=forms.Select(),
+			label='Ejercicio',required='True' )
+
+	PeriodoVigente = forms.ChoiceField(label='Temporada',choices=((1,'Primavera/Verano'),(2,'Otoño/Invierno')),initial=1,required=True)
+		
+	RazonSocial =forms.CharField(label='Razon Social',max_length=45,required=True)
+	Direccion =forms.CharField(label='Direccion',max_length=45,required=True)
+	Colonia=forms.CharField(label='Colonia',max_length=45,required=True)
+	Ciudad =forms.CharField(label='Ciuidad',max_length=45,required=True)
+	Estado =forms.CharField(label='Estado',max_length=45,required=True)
+	CodigoPostal = forms.IntegerField(label='Codigo Postal',required=True)
+	Telefono = forms.CharField(label='Telefono',max_length=15, required=True)
+	rfc = forms.CharField(label='RFC',max_length=16,required=True)
+	buzonelectronico = forms.EmailField(label='Direccion email',max_length=100, required=True)
+	iva = forms.FloatField(label='IVA %',required=True)
+	porcentajeanticipo =forms.FloatField(label='Anticipo %',required=True)
+	diasextemporaniedad = forms.IntegerField(label='Dias de gracia para recoger el producto una vez que arribo a la tienda',required=True)
+	cuotadiasextemp = forms.FloatField(label='Cuota a cobrar si no se recoje el producto durante los dias de gracia',required=True)
+	diasvigenciacredito = forms.IntegerField(label='Dias de gracia que se la daran a los creditos para poder ser aplicados',required=True)
+	comisionxcalzadonorecogido = forms.FloatField(label='Comision a cobrar por producto recepcionado "Aqui" y nunca fue recogido',required=True)
+	diasPlazoVmtoAquiSocioConCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que tengan al menos un credito pendiente',required=True)
+	diasPlazoVmtoAquiSocioSinCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que no tienen creditos pendiente',required=True)
+	
+
+	error_messages = {'error_clase':'Los primeros 4 digitos del catalogo son para el año y debe ser un valor mayor al 2020 !',}
+					
+
+
+
+	def clean(self):
+
+		cleaned_data = super(DatosEmpresaForm,self).clean()
+	
+		EmpresaNo = cleaned_data.get('EmpresaNo')
+		EjercicioVigente = cleaned_data.get('EjercicioVigente')
+		PeriodoVigente = cleaned_data.get('PeriodoVigente')
+		RazonSocial = cleaned_data.get('RazonSocial')
+		Direccion = cleaned_data.get('Direccion')
+		Colonia = cleaned_data.get('Colonia')
+		Ciudad = cleaned_data.get('Ciudad')
+		Estado = cleaned_data.get('Estado')
+		CodigoPostal = cleaned_data.get('CodigoPostal')
+		Telefono = cleaned_data.get('Telefono')
+		rfc = cleaned_data.get('rfc')
+		buzonelectronico = cleaned_data.get('buzonelectronico')
+		iva = cleaned_data.get('iva')
+		porcentajeanticipo = cleaned_data.get('porcentajeanticipo')
+		diasextemporaniedad = cleaned_data.get('diasextemporaniedad')
+		cuotadiasextemp = cleaned_data.get('cuotadiasextemp')
+		diasvigenciacredito = cleaned_data.get('diasvigenciacredito')
+		comisionxcalzadonorecogido = cleaned_data.get('Comisionxcalzadonorecogido')	
+		diasPlazoVmtoAquiSocioConCred = cleaned_data.get('diasPlazoVmtoAquiSocioConCred')
+		diasPlazoVmtoAquiSocioSinCred = cleaned_data.get('diasPlazoVmtoAquiSocioSinCred')
+
+		return self.cleaned_data

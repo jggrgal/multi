@@ -75,7 +75,8 @@ from . forms import (AccesoForm,\
 					RpteVtaCatXSocioForm,
 					CreaAsociadoForm,
 					RpteVtaNetaSocioGralForm,
-					TraeSocioForm)
+					TraeSocioForm,
+					DatosEmpresaForm)
 
 
 
@@ -14743,3 +14744,108 @@ def trae_socio(request):
 		form = TraeSocioForm()
 
 	return render(request,'pedidos/trae_socio.html',{'form':form})
+
+
+
+# EDITA DATOS DE LA EMPRESA
+
+
+
+def edita_datosempresa(request):
+
+	#pdb.set_trace()
+	
+
+	if request.method == 'POST':
+
+		form = DatosEmpresaForm(request.POST)
+		if form.is_valid():
+			
+			EmpresaNo = form.cleaned_data['EmpresaNo']
+			EjercicioVigente = form.cleaned_data['EjercicioVigente']
+			PeriodoVigente = form.cleaned_data['PeriodoVigente']
+			RazonSocial = form.cleaned_data['RazonSocial']
+			Direccion = form.cleaned_data['Direccion']
+			Colonia = form.cleaned_data['Colonia']
+			Ciudad = form.cleaned_data['Ciudad']
+			Estado = form.cleaned_data['Estado']
+			CodigoPostal = form.cleaned_data['CodigoPostal']
+			Telefono = form.cleaned_data['Telefono']
+			rfc = form.cleaned_data['rfc']
+			buzonelectronico = form.cleaned_data['buzonelectronico']
+			iva = form.cleaned_data['iva']
+			porcentajeanticipo = form.cleaned_data['porcentajeanticipo']
+			diasextemporaniedad = form.cleaned_data['diasextemporaniedad']
+			cuotadiasextemp = form.cleaned_data['cuotadiasextemp']
+			diasvigenciacredito = form.cleaned_data['diasvigenciacredito']
+			comisionxcalzadonorecogido = form.cleaned_data['comisionxcalzadonorecogido']	
+			diasPlazoVmtoAquiSocioConCred = form.cleaned_data['diasPlazoVmtoAquiSocioConCred']
+			diasPlazoVmtoAquiSocioSinCred = form.cleaned_data['diasPlazoVmtoAquiSocioSinCred']
+
+
+			cursor =  connection.cursor()
+			try:
+
+				cursor.execute('START TRANSACTION')
+				cursor.execute("UPDATE configuracion SET ejerciciovigente = %s,\
+				periodovigente = %s,\
+				razonsocial = %s,\
+				direccion = %s,\
+				colonia = %s,\
+				ciudad = %s,estado = %s,codigopostal = %s,\
+				telefono = %s,rfc = %s,buzonelectronico = %s,\
+				iva=%s,porcentajeanticipo = %s,\
+				MaxDiasExtemp = %s,CuotaDiasExtemp = %s,\
+				diasvigenciacredito = %s,ComisionPorCalzadoNoRecogido = %s,\
+				diasPlazoVmtoAquiSocioConCred = %s,diasPlazoVmtoAquiSocioSinCred = %s \
+				WHERE empresano=1",(EjercicioVigente,PeriodoVigente,RazonSocial,Direccion,Colonia,\
+				Ciudad,Estado,CodigoPostal,Telefono,rfc,buzonelectronico,iva,porcentajeanticipo,\
+				diasextemporaniedad,cuotadiasextemp,diasvigenciacredito,comisionxcalzadonorecogido,\
+				diasPlazoVmtoAquiSocioConCred,diasPlazoVmtoAquiSocioSinCred,))
+
+				cursor.execute("COMMIT;")
+
+				return HttpResponseRedirect(reverse('pedidos:consulta_menu',),)
+
+
+			except DatabaseError as e:
+				print e
+				
+				cursor.execute('ROLLBACK;')
+				
+				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+
+		else:
+			pass
+
+	else:	
+
+		form = DatosEmpresaForm()		
+		cursor=connection.cursor()
+		cursor.execute("SELECT EjercicioVigente,PeriodoVigente,RazonSocial,direccion,colonia,\
+				ciudad,estado,codigopostal,telefono,rfc,buzonelectronico,iva,porcentajeanticipo,\
+				maxdiasextemp,cuotadiasextemp,diasvigenciacredito,comisionporcalzadonorecogido,\
+				diasPlazoVmtoAquiSocioConCred,diasPlazoVmtoAquiSocioSinCred \
+				from configuracion  where EmpresaNo=1")
+		resultado = cursor.fetchone()
+		try:
+			type(resultado)
+		except TypeError as e:
+						
+			error_msg = 'Ocurrió el siguiente error: '+str(e)
+			context = {'error_msg':error_msg,}
+			return render(request,'pedidos/error.html',context)
+
+		try:
+			form = DatosEmpresaForm(initial={'EjercicioVigente':resultado[0],'PeriodoVigente':resultado[1],'RazonSocial':resultado[2],'Direccion':resultado[3],'Colonia':resultado[4],\
+				'Ciudad':resultado[5],'Estado':resultado[6],'CodigoPostal':resultado[7],'Telefono':resultado[8],'rfc':resultado[9],'buzonelectronico':resultado[10],'iva':resultado[11],'porcentajeanticipo':resultado[12],\
+				'diasextemporaniedad':resultado[13],'cuotadiasextemp':resultado[14],'diasvigenciacredito':resultado[15],'comisionxcalzadonorecogido':resultado[16],\
+				'diasPlazoVmtoAquiSocioConCred':resultado[17],'diasPlazoVmtoAquiSocioSinCred':resultado[18],})
+		except TypeError as e:
+			error_msg = 'Ocurrió el siguiente error: '+str(e)
+			context = {'error_msg':error_msg,}
+			return render(request,'pedidos/error.html',context)
+			
+	context = {'form':form,}			
+	
+	return render(request,'pedidos/edita_datosempresa.html',context)
