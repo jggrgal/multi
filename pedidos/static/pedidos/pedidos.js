@@ -59,6 +59,8 @@ $("#nextBtn").click(function(){
     $("#myCarouselCustom").carousel("next");
 });
 
+
+
       
 
   

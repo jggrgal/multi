@@ -4261,24 +4261,25 @@ class DatosEmpresaForm(forms.Form):
 
 	PeriodoVigente = forms.ChoiceField(label='Temporada',choices=((1,'Primavera/Verano'),(2,'Otoño/Invierno')),initial=1,required=True)
 		
-	RazonSocial =forms.CharField(label='Razon Social',max_length=45,required=True)
-	Direccion =forms.CharField(label='Direccion',max_length=45,required=True)
+	RazonSocial =forms.CharField(label='Razón Social',max_length=45,required=True)
+	Direccion =forms.CharField(label='Dirección',max_length=45,required=True)
 	Colonia=forms.CharField(label='Colonia',max_length=45,required=True)
 	Ciudad =forms.CharField(label='Ciuidad',max_length=45,required=True)
 	Estado =forms.CharField(label='Estado',max_length=45,required=True)
-	CodigoPostal = forms.IntegerField(label='Codigo Postal',required=True)
-	Telefono = forms.CharField(label='Telefono',max_length=15, required=True)
+	CodigoPostal = forms.IntegerField(label='Código Postal',required=True)
+	Telefono = forms.CharField(label='Teléfono',max_length=15, required=True)
 	rfc = forms.CharField(label='RFC',max_length=16,required=True)
-	buzonelectronico = forms.EmailField(label='Direccion email',max_length=100, required=True)
+	buzonelectronico = forms.EmailField(label='Dirección email',max_length=100, required=True)
 	iva = forms.FloatField(label='IVA %',required=True)
 	porcentajeanticipo =forms.FloatField(label='Anticipo %',required=True)
-	diasextemporaniedad = forms.IntegerField(label='Dias de gracia para recoger el producto una vez que arribo a la tienda',required=True)
+	diasextemporaniedad = forms.IntegerField(label='Dias de gracia para recoger el producto una vez que arribó a la tienda',required=True)
 	cuotadiasextemp = forms.FloatField(label='Cuota a cobrar si no se recoje el producto durante los dias de gracia',required=True)
-	diasvigenciacredito = forms.IntegerField(label='Dias de gracia que se la daran a los creditos para poder ser aplicados',required=True)
-	comisionxcalzadonorecogido = forms.FloatField(label='Comision a cobrar por producto recepcionado "Aqui" y nunca fue recogido',required=True)
-	diasPlazoVmtoAquiSocioConCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que tengan al menos un credito pendiente',required=True)
-	diasPlazoVmtoAquiSocioSinCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que no tienen creditos pendiente',required=True)
-	
+	diasvigenciacredito = forms.IntegerField(label='Dias de gracia que se la darán a los créditos para poder ser aplicados',required=True)
+	comisionxcalzadonorecogido = forms.FloatField(label='Comisión a cobrar por producto recepcionado "Aquí" y que nunca fué recogido',required=True)
+	diasPlazoVmtoAquiSocioConCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que tengan al menos un crédito pendiente',required=True)
+	diasPlazoVmtoAquiSocioSinCred = forms.IntegerField(label='Dias de plazo de vencimiento para socios que no tienen creditos pendientes',required=True)
+	psw_paso = forms.CharField(label='psw_paso',max_length=3,widget=forms.PasswordInput(),required=True)
+
 
 	error_messages = {'error_clase':'Los primeros 4 digitos del catalogo son para el año y debe ser un valor mayor al 2020 !',}
 					
@@ -4309,5 +4310,6 @@ class DatosEmpresaForm(forms.Form):
 		comisionxcalzadonorecogido = cleaned_data.get('Comisionxcalzadonorecogido')	
 		diasPlazoVmtoAquiSocioConCred = cleaned_data.get('diasPlazoVmtoAquiSocioConCred')
 		diasPlazoVmtoAquiSocioSinCred = cleaned_data.get('diasPlazoVmtoAquiSocioSinCred')
+		psw_paso = cleaned_data.get('psw_paso')
 
 		return self.cleaned_data

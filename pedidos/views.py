@@ -13776,7 +13776,7 @@ def upload_file_catalogo(request):
 					columna[7]=columna[7].replace(',','')
 					columna[9]=columna[9].replace(',','')
 					
-					columna[8]=columna[8].strip() # elimina espacios iniciales y finales a la talla.
+					columna[8]=columna[8].strip()[0:12] # elimina espacios iniciales y finales a la talla y finalmente solo agarra los primeros 12 caracteres.
 					columna[1]=columna[1].strip() # elimina espacios iniciales y finales al codigo del art.
 					columna[4]=columna[4].strip() # elimina espacios iniciales y finales a la marca.
 					columna[3]=columna[3].strip() # elimina espacios iniciales y finales a la estilo.
@@ -14781,10 +14781,29 @@ def edita_datosempresa(request):
 			comisionxcalzadonorecogido = form.cleaned_data['comisionxcalzadonorecogido']	
 			diasPlazoVmtoAquiSocioConCred = form.cleaned_data['diasPlazoVmtoAquiSocioConCred']
 			diasPlazoVmtoAquiSocioSinCred = form.cleaned_data['diasPlazoVmtoAquiSocioSinCred']
+			psw_paso = form.cleaned_data['psw_paso']
 
+			usr_existente=0
+			permiso_exitoso=0
 
-			cursor =  connection.cursor()
 			try:
+
+				usr_existente = verifica_existencia_usr(psw_paso)
+
+				if usr_existente==0:
+
+					raise ValueError
+
+
+				permiso_exitoso = verifica_derechos_usr(usr_existente,4)
+
+				if permiso_exitoso ==0:
+
+					raise ValueError
+
+
+				cursor =  connection.cursor()
+			
 
 				cursor.execute('START TRANSACTION')
 				cursor.execute("UPDATE configuracion SET ejerciciovigente = %s,\
@@ -14804,16 +14823,30 @@ def edita_datosempresa(request):
 				diasPlazoVmtoAquiSocioConCred,diasPlazoVmtoAquiSocioSinCred,))
 
 				cursor.execute("COMMIT;")
+				context={'error_msg':"Registro modificado exitosamente !",'error':False}
+				return render(request, 'pedidos/error.html',context)
 
-				return HttpResponseRedirect(reverse('pedidos:consulta_menu',),)
+				#return HttpResponseRedirect(reverse('pedidos:consulta_menu',),)
 
-
-			except DatabaseError as e:
-				print e
 				
+			except IntegrityError as error_msg:
+
+				#print error_msg
+
+				context={'error_msg':"Error de integridad. Es posible que el valor que escogió para el campo 'Usuario' ya esté asignado a otro usuario registrado, este valor debe ser único, por favor elija otro valor distinto para este campo !",}
+				return render(request, 'pedidos/error.html',context)
+
+			except DatabaseError as error_msg:
+				context={'error_msg':error_msg,}
 				cursor.execute('ROLLBACK;')
+				return render(request, 'pedidos/error.html',context)
+			except ValueError:		
+
+				error_msg ="Usuario no registrado o bien sin los derechos para editar parámetros de la empresa !"
+				context={'error_msg':error_msg,}
 				
-				return HttpResponse('<h3>Ocurrio un error en la base de datos</h3><h2>{{e}}</h2>')
+				return render(request, 'pedidos/error.html',context)
+
 
 		else:
 			pass
