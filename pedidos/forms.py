@@ -4313,3 +4313,112 @@ class DatosEmpresaForm(forms.Form):
 		psw_paso = cleaned_data.get('psw_paso')
 
 		return self.cleaned_data
+
+
+# FORMA PARA DAR DE ALTA UN ARTICULO
+
+
+
+class ArticuloForm(forms.Form):
+
+	proveedores = {}
+	
+
+	# La funcion siguiente "init" tambien  recibe el parametro
+	# request, esto se hace para tener tambien disponibles las variables de entorno, en este caso
+	# se requerira el request.session['is_staff'] para manejarlos en los campos
+	# de fechaMaximaEntrega y el de periodo de entrega.
+	# en el views.py los llamados deben inculir request como parametro tanto si la forma es valida como si no lo es.
+	def __init__(self,request,*args,**kwargs):
+
+
+		
+		def lista_PeriodosEntrega():
+			cursor=connection.cursor()
+			cursor.execute('SELECT id,periodo from periodosentrega;')
+	
+			pr=() # Inicializa una tupla para llenar combo de Periodosentrega
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'SELECCIONE...') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lper_ent = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lper_ent)
+
+		
+		
+		lprov = lista_Proveedores()
+		lcat = (('0','Seleccione'),)
+		lestilo = []
+		lmarca = []
+		lcolor = []
+		ltalla = []
+		lper_ent = lista_PeriodosEntrega()
+		
+
+		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
+		opcion_opt = (('1','1ra.'),('2','2da'),('3','3ra.'))
+
+		
+		#pr_dict = [['1','MODELI'],['2','IMPULS'],['3','OTRO']]
+		#pr_dict = (('MODELI','MODELI'),('IMPULS','IMPULS'),('OTRO','OTRO'),)
+		#pr_dict = lista_Proveedores()
+
+		super(ArticuloForm, self).__init__(*args,**kwargs)
+		
+		self.fields['productono'] = forms.ChoiceField(label='Código ( si no indica uno el sistema lo generará automáticamente)',widget=forms.Select(),
+		label='Proveedor',choices = lprov,initial='0',required='True' )
+		
+
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+		label='Proveedor',choices = lprov,initial='0',required='True' )
+
+		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),
+		label='Temporada',choices = opcion_temporada, initial='0',required ='True')
+		
+		self.fields['catalogo']  = forms.ChoiceField(widget=forms.Select(),
+		label='Catalogo',initial = 'SELECCIONE...',required ='True' )
+
+		self.fields['productono'] = forms.ChoiceField(label='Código ( si no indica uno el sistema lo generará automáticamente)',widget=forms.Select(),
+		label='Proveedor',choices = lprov,initial='0',required='True' )
+				
+		self.fields['pagina'] = forms.CharField(label='Pagina')
+		
+		self.fields['estilo'] = forms.ChoiceField(widget=forms.Select(),
+		label='Estilo',initial='Seleccione',required='True')
+		
+		self.fields['marca'] = forms.ChoiceField(widget = forms.Select(),
+		label='Marca',initial='Seleccione',required='True')
+
+		self.fields['color'] = forms.ChoiceField(widget = forms.Select(),
+		label='Color', initial='Seleccione',required='True')
+		
+		self.fields['talla'] = forms.ChoiceField(widget = forms.Select(),
+		label='Talla',initial='Seleccione',required='True')
+
+		self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
+
+	  	

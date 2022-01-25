@@ -1,0 +1,48 @@
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+
+<div class="row">
+  <!--<div class="col-md-4"></div> -->
+  <div class="col-md-4">
+
+  	<div class="panel panel-success">
+  		<div class='panel-heading'>
+        <h3 class="panel-title">Alta Articulo </h3> 
+
+  		  <div class='panel-body'>
+  	
+  			 
+  		  	{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
+
+            </strong>	
+          <form id="ArticuloForm" action="{% url 'pedidos:alta_articulo' %}" method="post">
+  				  <div class="form-group">
+  					 {% csrf_token %}
+              {{ form | crispy }}
+              <input  style="display: none;" class="btn btn-lg btn-success btn-block" type="submit" value="Agregar" />
+  				  </div>
+            <input id="grabar_articulo" class="btn btn-success btn-lg" type="button" value="Elegir" />
+            <div id="mensaje">
+            </div>
+  			 </form>
+        </div>
+		  </div>
+		</div>	
+	
+  </div>
+    
+</div>
+
+<script>
+
+  var is_staff = "{{ is_staff }}";
+  var num_socio = "{{ num_socio }}";
+</script>
+
+
+
+
+{% endblock %}
