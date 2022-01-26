@@ -7836,11 +7836,14 @@ def calcula_bono(request):
 			 INNER JOIN pedidoslines as l\
 	         on (l.empresano=1 and l.pedido=t2.pedido and l.productono=t2.productono\
 	         and l.catalogo=t2.catalogo and l.nolinea=t2.nolinea)\
+	         INNER JOIN pedidos_status_fechas as t3 USE INDEX (indice_2) on\
+			 (t3.empresano=1 and t2.pedido=t3.pedido and t2.productono=t3.productono\
+			 and t2.nolinea=t3.nolinea and t2.catalogo=t3.catalogo)\
 	         INNER JOIN articulo as art\
 	         on (art.empresano=1 and art.codigoarticulo=t2.productono and art.catalogo=t2.catalogo)\
 	         INNER JOIN pedidosheader ph on (l.empresano=ph.empresano and l.pedido=ph.pedidono)\
 	         INNER JOIN ProvConfBono pcb on (pcb.empresano=1 and art.idproveedor=pcb.proveedorno)\
-	         where pcb.BaseParaBono>0\
+	         where pcb.BaseParaBono>0 and t3.status='Facturado'\
 	         GROUP BY ph.asociadono;",(fechainicial,fechafinal,))
 
 			registros_devgral = dictfetchall(cursor)
