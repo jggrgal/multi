@@ -1857,7 +1857,7 @@ $("#totalgral").text(v_totalgeneral);
       // observar que la funcion tiene el parametro 'e' ya que es utilizado en el llamado eventPrevent(e)..mas abajo.
       $('#id_temporada').change(function(e){
         
-         alert("funciona jquery");
+        // alert("funciona jquery");
         // Inicializa elementos subsecuentes para obligar a su captura.  
         $('#id_pagina').val('0');
         $('#id_estilo').empty();

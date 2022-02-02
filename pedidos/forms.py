@@ -4418,7 +4418,7 @@ class ArticuloForm(forms.Form):
 		#self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
 		self.fields['precio'] = forms.FloatField(label = 'Precio',initial=0.0, required='True')
 	  	
-	productono = forms.CharField(label='Codigo articulo',required=False )
+	productono = forms.CharField(label='Codigo articulo',initial='AUTOMATICO',required=False )
 	proveedor = forms.ChoiceField(widget=forms.Select(),
 		label='Proveedor',initial='0',required='True' )
 
@@ -4446,7 +4446,15 @@ class ArticuloForm(forms.Form):
 	
 	precio = forms.FloatField(label='Precio',initial=0.0)
 
-	error_messages = {'error_productono':'No se permiten caracteres especiales en el código !','error_precio':'Ingrese un precio !'}
+	error_messages = {'error_productono':'No se permiten caracteres especiales en el código !',
+	'error_precio':'Ingrese un precio !',
+	'error_estilo':'Seleccione un estilo !',
+	'error_pagina':'Ingrese un numero de pagina !',
+	'error_catalogo':'Seleccione un catálogo !',
+	'error_talla':'Seleccione una talla !',
+	'error_color':'Seleccione un color !',
+	'error_marca':'Seleccione una marca !',
+	'error_productono':'No se permiten caracteres especiales en el código !'}
 
 
 	def validate(self):
@@ -4469,7 +4477,7 @@ class ArticuloForm(forms.Form):
 		productono = cleaned_data.get('productono')
 		proveedor = cleaned_data.get('proveedor')
 		temporada = cleaned_data.get('temporada')
-		#catalogo = cleaned_data.get('catalogo')
+		catalogo = cleaned_data.get('catalogo')
 		pagina = cleaned_data.get('pagina')
 		estilo = cleaned_data.get('estilo')
 		marca = cleaned_data.get('marca')
@@ -4477,14 +4485,27 @@ class ArticuloForm(forms.Form):
 		talla = cleaned_data.get('talla')
 		precio = cleaned_data.get('precio')	
 		
-		
+		if precio ==0 or catalgo.strip()=="" or pagina.strip()=="" or estilo.strip()=="" or marca.strip()=="" or color.strip()=="" or talla.strip()=="":
+			raise forms.ValidationError("Por favor llene todos los campos del formulario !")
+
 		if not es_alfanumerica(productono):
 			
 			raise forms.ValidationError(self.error_messages['error_productono'],code='error_productono')
 		if precio <= 0:
 			raise forms.ValidationError(self.error_messages['error_precio'],code='error_precio')
+		if catalogo.strip() == 'SELECCIONE...' or catalogo.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_catalogo'],code='error_catalogo')
+		if pagina.strip() == '0' or pagina.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_pagina'],code='error_pagina')
+		if estilo.strip() == 'SELECCIONE...' or estilo.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_estilo'],code='error_estilo')
+		if marca.strip() == 'SELECCIONE...' or marca.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_marca'],code='error_marca')			
+		if color.strip() == 'SELECCIONE...' or color.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_color'],code='error_color')
+		if talla.strip() == 'SELECCIONE...' or talla.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_talla'],code='error_talla')
 
-	
 		return self.cleaned_data
 
 	

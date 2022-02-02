@@ -14883,10 +14883,25 @@ def edita_datosempresa(request):
 	
 	return render(request,'pedidos/edita_datosempresa.html',context)
 
-
+def genera_string_aleatorio():
+	#pdb.set_trace()
+	# Esta guncion nos genera un string aleatorio ( se le antepuso la cadena'GEN')
+	import string    
+	import random # define the random module  
+	S = 5  # number of characters in the string.  
+    # call random.choices() string module to find the string in Uppercase + numeric data.  
+	#ran =''.join(random.choices(string.ascii_uppercase + string.digits, k = S))    
+	ran = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(S))
+    #print("The randomly generated string is : " + str(ran)) # print the random data  
+	return str(ran)
 
 def inserta_modifica_articulo(request,proveedor,temporada,catalogo,productono,marca,estilo,color,pagina,talla,precio):
-	pdb.set_trace()
+	#pdb.set_trace()
+	# Si productono es AUTOMATICO,genera el codigo de articulo automaticamente.
+	if productono.strip() == 'AUTOMATICO':
+		productono = "GEN"+genera_string_aleatorio()
+	
+
 	fecha_hoy,hora_hoy=trae_fecha_hora_actual('','')
 	try:
 		cursor=connection.cursor()
@@ -14964,10 +14979,13 @@ def inserta_modifica_articulo(request,proveedor,temporada,catalogo,productono,ma
 		cursor.execute('ROLLBACK;')
 		status_operacion='fail'
 		error =str(error_msg)
-		messages.error(request, 'Error en base datos, inf. tecnica: '+error)
+		#messages.error(request, 'Error en base datos, inf. tecnica: '+error)
 
 
 		cursor.close()	
+		error_msg='Error en base de datos al grabar artículo !, inf técnica: '+error
+		
+		return render(request,'pedidos/error.html',{'error_msg':error_msg,})
 
 def verifica_existencia_articulo(request,proveedor,temporada,catalogo,productono):
 
@@ -14990,7 +15008,7 @@ def verifica_existencia_articulo(request,proveedor,temporada,catalogo,productono
 
 @login_required(login_url = "/pedidos/acceso/")
 def crea_articulo(request):
-	import pdb; pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	#import pdb; pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	
 	#mensaje = " "
 	#tipo = 'P'
@@ -15027,13 +15045,15 @@ def crea_articulo(request):
 
 			inserta_modifica_articulo(request,proveedor,temporada,catalogo,productono,marca[0:40],estilo[0:40],color[0:40],pagina[0:6],talla[0:12],float(precio))			
 
+			error_msg='Articulo grabado con exito !'
 
+			return render(request,'pedidos/error.html',{'error_msg':error_msg,})
 			#cursor=connection.cursor()
 			#registro_encontrado = 0
 			#cursor.execute("SELECT a.codigoarticulo from articulo a where a.proveedor=%s and a.temporada=%s and a.catalogo=%s and a.pagina=%s and a.estilo=%s and a.marca=%s and a.color=%s and a.talla=%s", (proveedor,temporada,catalogo,pagina,estilo,marca,color,talla))
 			#articulo=dictfetchall(cursor);
-			mensaje = "El articulo encontrado fue:abcd " #+ articulo.codigoarticulo
-			return render(request,'pedidos/crea_articulo.html',{'form':form,})
+			#mensaje = "Articulo grabado con exito ! " #+ articulo.codigoarticulo
+			#return render(request,'pedidos/crea_articulo.html',{'form':form,})
 		else:	
 			
 			mensaje = "Error en la forma"
