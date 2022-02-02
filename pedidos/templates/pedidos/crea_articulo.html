@@ -18,13 +18,13 @@
   		  	{% if error_message %}<p><strong> {{error_message}}</p>{% endif %}
 
             </strong>	
-          <form id="ArticuloForm" action="{% url 'pedidos:alta_articulo' %}" method="post">
+          <form id="id_crea_articulo" action="{% url 'pedidos:crea_articulo' %}" method="post">
   				  <div class="form-group">
   					 {% csrf_token %}
               {{ form | crispy }}
-              <input  style="display: none;" class="btn btn-lg btn-success btn-block" type="submit" value="Agregar" />
+              <input  id="grabar_articulo" class="btn btn-lg btn-success btn-block" type="submit" value="Enviar1" />
   				  </div>
-            <input id="grabar_articulo" class="btn btn-success btn-lg" type="button" value="Elegir" />
+            <!---<input id="grabar_articulo" style="display: none;" class="btn btn-success btn-lg" type="button" value="Enviar" />-->
             <div id="mensaje">
             </div>
   			 </form>

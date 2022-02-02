@@ -76,7 +76,8 @@ from . forms import (AccesoForm,\
 					CreaAsociadoForm,
 					RpteVtaNetaSocioGralForm,
 					TraeSocioForm,
-					DatosEmpresaForm)
+					DatosEmpresaForm,
+					ArticuloForm)
 
 
 
@@ -631,9 +632,6 @@ def crea_pedidos(request):
 			marca = form.cleaned_data['marca']
 			color = form.cleaned_data['color']
 			talla = form.cleaned_data['talla']	
-
-
-
 			#cursor=connection.cursor()
 			#registro_encontrado = 0
 			#cursor.execute("SELECT a.codigoarticulo from articulo a where a.proveedor=%s and a.temporada=%s and a.catalogo=%s and a.pagina=%s and a.estilo=%s and a.marca=%s and a.color=%s and a.talla=%s", (proveedor,temporada,catalogo,pagina,estilo,marca,color,talla))
@@ -745,7 +743,6 @@ def lista_Catalogos(id_prov,id_temp,g_numero_socio_zapcat,is_staff):
 			print e
 	
 
-
 	# Convierte el diccionario en tupla
 	for row in registros:
 		elemento = tuple(row)
@@ -767,9 +764,11 @@ def combo_catalogos(request,*args,**kwargs):
 
 	if request.session['is_staff']:
 
-
-		socio_a_validar = request.session['socio_pidiendo']
-
+		try:
+			socio_a_validar = request.session['socio_pidiendo']
+		except:
+			socio_a_validar = 1
+		
 		print "Socio staff pidiendo",socio_a_validar
 		
 	else:
@@ -779,6 +778,7 @@ def combo_catalogos(request,*args,**kwargs):
 
 
 	if request.is_ajax() and request.method == 'GET':
+		
 		id_prov = request.GET['id_prov']
 		id_temp = request.GET['id_temp']
 		
@@ -795,7 +795,7 @@ def combo_catalogos(request,*args,**kwargs):
 		# En la linea anterior ( que esta comentada ), trataba de usar
 		# serielizers para convertir a json pero no funciono.
 
-		h = {'l':l,'adquirio_catalogo':adquirio_catalogo,'is_staff':is_staff}
+		h = {'l':l,'adquirio_catalogo':True if(socio_a_validar==1) else socio_a_validar,'is_staff':is_staff}
 
 		data = json.dumps(h)
 		
@@ -14885,78 +14885,89 @@ def edita_datosempresa(request):
 
 
 
-def inserta_modifica_articulo(proveedor,temporada,catalogo,productono,marca,estilo,color,pagina,talla,precio):
+def inserta_modifica_articulo(request,proveedor,temporada,catalogo,productono,marca,estilo,color,pagina,talla,precio):
+	pdb.set_trace()
+	fecha_hoy,hora_hoy=trae_fecha_hora_actual('','')
+	try:
+		cursor=connection.cursor()
+		cursor.execute("INSERT INTO articulo (Empresano,\
+									codigoarticulo,\
+									fechaalta,\
+									fechabaja,\
+									pagina,\
+									pathfoto,\
+									idproveedor,\
+									idmarca,\
+									idestilo,\
+									idcolor,\
+									idacabado,\
+									idmodelo,\
+									talla,\
+									precio,\
+									catalogo,\
+									costo,\
+									descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)\
+									ON DUPLICATE KEY UPDATE descontinuado=%s,idmarca=%s,idestilo=%s,idcolor=%s,talla=%s,precio=%s;",\
+									(1,productono,fecha_hoy,fecha_hoy,pagina,'',proveedor,marca,estilo,color,'','',talla,Decimal(precio),catalogo,0,0,0,marca,estilo,color,talla,Decimal(precio)))
+					
+		cursor.execute("INSERT INTO preciobase (Empresano,\
+														proveedorid,\
+														temporada,\
+														codigoarticulo,\
+														costo,\
+														precio,\
+														fechacreacion,\
+														horacreacion,\
+														fechamodificacion,\
+														horamodificacion,\
+														usuariocreo,\
+														UsuarioModifico,\
+														pagina,\
+														catalogo,\
+														estilo,\
+														idmarca,\
+														idcolor,\
+														talla\
+														) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)\
+														ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s,estilo=%s,\
+														idmarca=%s,idcolor=%s,talla=%s;",\
+														(1,proveedor,temporada,productono,\
+														0,precio,fecha_hoy,hora_hoy,fecha_hoy,\
+														hora_hoy,0,0,pagina,\
+														catalogo,estilo,marca,\
+														color[:40],talla,\
+														hora_hoy,precio,\
+														estilo,marca,\
+														color[:40],talla))
+										
+		cursor.execute("INSERT INTO preciosopcionales (Empresano,\
+														proveedor,\
+														temporada,\
+														articuloid,\
+														tipoprecio,\
+														precio,\
+														fechacreacion,\
+														horacreacion,\
+														fechamodificacion,\
+														horamodificacion,\
+														catalogo\
+														) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s;",(1,proveedor,temporada,productono,'Cliente',precio,fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,catalogo,hora_hoy,precio))
 
 
-			try:
+		cursor.execute("COMMIT;")
+		cursor.close()
+		messages.info(request, 'Producto grabado exitosamente ! ')
 
-				cursor.execute("INSERT INTO articulo (Empresano,\
-											codigoarticulo,\
-											fechaalta,\
-											fechabaja,\
-											pagina,\
-											pathfoto,\
-											idproveedor,\
-											idmarca,\
-											idestilo,\
-											idcolor,\
-											idacabado,\
-											idmodelo,\
-											talla,\
-											precio,\
-											catalogo,\
-											costo,\
-											descontinuado) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)\
-											DUPLICATE KEY UPDATE descontinuado=%s,idmarca=%s,idestilo=%s,idcolor=%s,talla=%s,precio=%s;",\
-											(1,productono,date(),date(),pagina,'',proveedor,marca,estilo,color,'','',talla,decimal(precio),catalogo,0,0,0,marca,estilo,color,talla,Decimal(precio)))
-							
-							cursor.execute("INSERT INTO preciobase (Empresano,\
-																proveedorid,\
-																temporada,\
-																codigoarticulo,\
-																costo,\
-																precio,\
-																fechacreacion,\
-																horacreacion,\
-																fechamodificacion,\
-																horamodificacion,\
-																usuariocreo,\
-																UsuarioModifico,\
-																pagina,\
-																catalogo,\
-																estilo,\
-																idmarca,\
-																idcolor,\
-																talla\
-																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s,estilo=%s,idmarca=%s,idcolor=%s,talla=%s;",(1,idproveedor,temporada,columna[1],0,Decimal(columna[7]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,0,0,columna[0],catalogo,columna[3],columna[4],columna[5][:40],columna[8],hora_hoy,Decimal(columna[7]),columna[3],columna[4],columna[5][:40],columna[8]))
-												
-							cursor.execute("INSERT INTO preciosopcionales (Empresano,\
-																proveedor,\
-																temporada,\
-																articuloid,\
-																tipoprecio,\
-																precio,\
-																fechacreacion,\
-																horacreacion,\
-																fechamodificacion,\
-																horamodificacion,\
-																catalogo\
-																) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE horamodificacion=%s,precio=%s;",(1,idproveedor,temporada,columna[1],'Cliente',Decimal(columna[9]),fecha_hoy,hora_hoy,fecha_hoy,hora_hoy,catalogo,hora_hoy,Decimal(columna[9])))
+				
+	except DatabaseError as error_msg:
+		print error_msg
+		cursor.execute('ROLLBACK;')
+		status_operacion='fail'
+		error =str(error_msg)
+		messages.error(request, 'Error en base datos, inf. tecnica: '+error)
 
 
-						cursor.execute("COMMIT;")
-						cursor.close()
-						messages.info(request, 'Catálgo subido exitosamente ! ')
-
-						
-				except DatabaseError as error_msg:
-					cursor.execute('ROLLBACK;')
-					status_operacion='fail'
-					error =str(error_msg)
-					messages.error(request, 'Error en base datos, inf. tecnica: '+error)
-
-
-					cursor.close()	
+		cursor.close()	
 
 def verifica_existencia_articulo(request,proveedor,temporada,catalogo,productono):
 
@@ -14977,23 +14988,20 @@ def verifica_existencia_articulo(request,proveedor,temporada,catalogo,productono
 
 
 
-
-
-
 @login_required(login_url = "/pedidos/acceso/")
 def crea_articulo(request):
-	#import pdb; pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
+	import pdb; pdb.set_trace() # DEBUG...QUITAR AL TERMINAR DE PROBAR..
 	
-	mensaje = " "
-	tipo = 'P'
+	#mensaje = " "
+	#tipo = 'P'
 	# elimina cualquier registro de la session.
-	session_id = request.session.session_key
+	#session_id = request.session.session_key
 	# Asigna is_staff para validacines
-	is_staff = request.session['is_staff']
+	'''is_staff = request.session['is_staff']
 
 	cursor = connection.cursor()
 	cursor.execute("DELETE FROM pedidos_pedidos_tmp where session_key= %s;",[session_id])	
-	cursor.close()
+	cursor.close()'''
 
 
 	#for key,value in pr_dict.items():
@@ -15002,7 +15010,7 @@ def crea_articulo(request):
 	 
 	if request.method =='POST':
 		
-		form = articuloForm(request.POST)
+		form = ArticuloForm(request.POST)
 		
 		if form.is_valid():
 			
@@ -15017,7 +15025,7 @@ def crea_articulo(request):
 			talla = form.cleaned_data['talla']	
 			precio = form.cleaned_data['precio']
 
-			inserta_modifica_articulo(proveedor,temporada,catalogo,productono,marca[0:40],estilo[0:40],color[0:40],pagina[0:6],talla[0:12],float(precio))			
+			inserta_modifica_articulo(request,proveedor,temporada,catalogo,productono,marca[0:40],estilo[0:40],color[0:40],pagina[0:6],talla[0:12],float(precio))			
 
 
 			#cursor=connection.cursor()
@@ -15025,15 +15033,16 @@ def crea_articulo(request):
 			#cursor.execute("SELECT a.codigoarticulo from articulo a where a.proveedor=%s and a.temporada=%s and a.catalogo=%s and a.pagina=%s and a.estilo=%s and a.marca=%s and a.color=%s and a.talla=%s", (proveedor,temporada,catalogo,pagina,estilo,marca,color,talla))
 			#articulo=dictfetchall(cursor);
 			mensaje = "El articulo encontrado fue:abcd " #+ articulo.codigoarticulo
-			return render(request,'pedidos/crea_articulo.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,})
+			return render(request,'pedidos/crea_articulo.html',{'form':form,})
 		else:	
 			
 			mensaje = "Error en la forma"
-			return render(request,'pedidos/crea_articulo.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,})
+			return render(request,'pedidos/crea_articulo.html',{'form':form,})
 
-	form = articuloForm(request)
+	form = ArticuloForm()
 	mensaje = "Entrando de nuevo a la forma"
-	return render(request,'pedidos/crea_articulo.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,'tipo':tipo,'num_socio':0,})	
+	#return render(request,'pedidos/crea_articulo.html',{'form':form,'mensaje':mensaje,'is_staff':is_staff,'tipo':tipo,'num_socio':0,})	
+	return render(request,'pedidos/crea_articulo.html',{'form':form,})	
 
 
 

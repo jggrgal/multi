@@ -4318,6 +4318,11 @@ class DatosEmpresaForm(forms.Form):
 # FORMA PARA DAR DE ALTA UN ARTICULO
 
 
+class ChoiceFieldNoValidation(forms.ChoiceField):
+	def validate(self, value):
+		pass
+
+
 
 class ArticuloForm(forms.Form):
 
@@ -4329,7 +4334,7 @@ class ArticuloForm(forms.Form):
 	# se requerira el request.session['is_staff'] para manejarlos en los campos
 	# de fechaMaximaEntrega y el de periodo de entrega.
 	# en el views.py los llamados deben inculir request como parametro tanto si la forma es valida como si no lo es.
-	def __init__(self,request,*args,**kwargs):
+	def __init__(self,*args,**kwargs):
 
 
 		
@@ -4382,43 +4387,119 @@ class ArticuloForm(forms.Form):
 		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
 		opcion_opt = (('1','1ra.'),('2','2da'),('3','3ra.'))
 
-		
-		#pr_dict = [['1','MODELI'],['2','IMPULS'],['3','OTRO']]
-		#pr_dict = (('MODELI','MODELI'),('IMPULS','IMPULS'),('OTRO','OTRO'),)
-		#pr_dict = lista_Proveedores()
 
 		super(ArticuloForm, self).__init__(*args,**kwargs)
 		
-		self.fields['productono'] = forms.ChoiceField(label='Código ( si no indica uno el sistema lo generará automáticamente)',widget=forms.Select(),
-		label='Proveedor',choices = lprov,initial='0',required='True' )
-		
-
+			
 		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
 		label='Proveedor',choices = lprov,initial='0',required='True' )
 
 		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),
 		label='Temporada',choices = opcion_temporada, initial='0',required ='True')
-		
-		self.fields['catalogo']  = forms.ChoiceField(widget=forms.Select(),
-		label='Catalogo',initial = 'SELECCIONE...',required ='True' )
 
-		self.fields['productono'] = forms.ChoiceField(label='Código ( si no indica uno el sistema lo generará automáticamente)',widget=forms.Select(),
-		label='Proveedor',choices = lprov,initial='0',required='True' )
+		self.fields['catalogo']  = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Catalogo',required ='True' )
+
 				
 		self.fields['pagina'] = forms.CharField(label='Pagina')
 		
-		self.fields['estilo'] = forms.ChoiceField(widget=forms.Select(),
+		self.fields['estilo'] = ChoiceFieldNoValidation(widget=forms.Select(),
 		label='Estilo',initial='Seleccione',required='True')
 		
-		self.fields['marca'] = forms.ChoiceField(widget = forms.Select(),
+		self.fields['marca'] = ChoiceFieldNoValidation(widget = forms.Select(),
 		label='Marca',initial='Seleccione',required='True')
 
-		self.fields['color'] = forms.ChoiceField(widget = forms.Select(),
+		self.fields['color'] = ChoiceFieldNoValidation(widget = forms.Select(),
 		label='Color', initial='Seleccione',required='True')
 		
-		self.fields['talla'] = forms.ChoiceField(widget = forms.Select(),
+		self.fields['talla'] = ChoiceFieldNoValidation(widget = forms.Select(),
 		label='Talla',initial='Seleccione',required='True')
 
-		self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
-
+		#self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
+		self.fields['precio'] = forms.FloatField(label = 'Precio',initial=0.0, required='True')
 	  	
+	productono = forms.CharField(label='Codigo articulo',required=False )
+	proveedor = forms.ChoiceField(widget=forms.Select(),
+		label='Proveedor',initial='0',required='True' )
+
+	temporada = forms.ChoiceField(widget=forms.Select(),
+		label='Temporada',initial='0',required ='True')
+		
+	catalogo  = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Catalogo',initial='SELECCIONE...',required ='True' )
+
+	pagina = forms.CharField(label='Pagina')
+		
+	estilo = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Estilo',initial='Seleccione',required='True')
+		
+	marca = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Marca',initial='Seleccione',required='True')
+
+	color = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Color', initial='Seleccione',required='True')
+		
+	talla = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Talla',initial='Seleccione',required='True')
+
+
+	
+	precio = forms.FloatField(label='Precio',initial=0.0)
+
+	error_messages = {'error_productono':'No se permiten caracteres especiales en el código !','error_precio':'Ingrese un precio !'}
+
+
+	def validate(self):
+
+		catalogo= self.cleaned_data['catalogo',True]
+		if "SELECCIONE..." in catalogo:
+			raise ValidationError("Seleccione un catalogo !")
+		else:
+			pass
+
+		# Always return a value to use as the new cleaned data, even if
+		# this method didn't change it.
+		return catalogo
+
+
+  	def clean(self):
+
+		cleaned_data = super(ArticuloForm, self).clean()
+
+		productono = cleaned_data.get('productono')
+		proveedor = cleaned_data.get('proveedor')
+		temporada = cleaned_data.get('temporada')
+		#catalogo = cleaned_data.get('catalogo')
+		pagina = cleaned_data.get('pagina')
+		estilo = cleaned_data.get('estilo')
+		marca = cleaned_data.get('marca')
+		color = cleaned_data.get('color')
+		talla = cleaned_data.get('talla')
+		precio = cleaned_data.get('precio')	
+		
+		
+		if not es_alfanumerica(productono):
+			
+			raise forms.ValidationError(self.error_messages['error_productono'],code='error_productono')
+		if precio <= 0:
+			raise forms.ValidationError(self.error_messages['error_precio'],code='error_precio')
+
+	
+		return self.cleaned_data
+
+	
+
+
+def es_alfanumerica(p_entrada):
+
+	'''valida que p_entrada sea alfanumerico,
+	retorna Falso si no es y Verdadero si si es'''
+	try:
+		result=re.match(r'^[a-zA-Z0-9]{4,10}$',p_entrada)
+		if result is None:
+			raise TypeError
+		else:
+			return True
+
+	except TypeError:
+		return False
