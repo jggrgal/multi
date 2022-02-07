@@ -153,4 +153,6 @@ urlpatterns = [
 	#url(r'^muestra_socio/$',views.muestra_socio,name='muestra_socio'),
 	url(r'^trae_socio/$',views.trae_socio,name='trae_socio'),
 	url(r'^edita_datosempresa/$',views.edita_datosempresa,name='edita_datosempresa'),
+	url(r'^crea_articulo/$',views.crea_articulo,name='crea_articulo'),
+
 	]

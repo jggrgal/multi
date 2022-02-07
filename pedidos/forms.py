@@ -4313,3 +4313,214 @@ class DatosEmpresaForm(forms.Form):
 		psw_paso = cleaned_data.get('psw_paso')
 
 		return self.cleaned_data
+
+
+# FORMA PARA DAR DE ALTA UN ARTICULO
+
+
+class ChoiceFieldNoValidation(forms.ChoiceField):
+	def validate(self, value):
+		pass
+
+
+
+class ArticuloForm(forms.Form):
+
+	proveedores = {}
+	
+
+	# La funcion siguiente "init" tambien  recibe el parametro
+	# request, esto se hace para tener tambien disponibles las variables de entorno, en este caso
+	# se requerira el request.session['is_staff'] para manejarlos en los campos
+	# de fechaMaximaEntrega y el de periodo de entrega.
+	# en el views.py los llamados deben inculir request como parametro tanto si la forma es valida como si no lo es.
+	def __init__(self,*args,**kwargs):
+
+
+		
+		def lista_PeriodosEntrega():
+			cursor=connection.cursor()
+			cursor.execute('SELECT id,periodo from periodosentrega;')
+	
+			pr=() # Inicializa una tupla para llenar combo de Periodosentrega
+			
+			# Convierte el diccionario en tupla
+			for row in cursor:
+				elemento = tuple(row)
+				pr=pr+elemento
+			pr = (0L,u'SELECCIONE...') + pr
+			
+
+			# Inicializa dos listas para calculos intermedios
+			x=[]
+			y=[]	
+
+			# Forma una lista unicamente con valores
+			# significativos (nombres de proveedores y su numero)
+	
+			for i in range(0,len(pr)):
+				if i % 2 != 0:
+					x.append(pr[i-1])
+					x.append(pr[i])
+					y.append(x)
+					x=[]
+
+	
+			# tuple_of_tuples = tuple(tuple(x) for x in list_of_lists)
+			lper_ent = tuple(tuple(x) for x in y)
+
+			
+			
+			return (lper_ent)
+
+		
+		
+		lprov = lista_Proveedores()
+		lcat = (('0','Seleccione'),)
+		lestilo = []
+		lmarca = []
+		lcolor = []
+		ltalla = []
+		lper_ent = lista_PeriodosEntrega()
+		
+
+		opcion_temporada = (('0','SELECCIONE...'),('1','Primavera/Verano'),('2','Otoño/Invierno'))
+		opcion_opt = (('1','1ra.'),('2','2da'),('3','3ra.'))
+
+
+		super(ArticuloForm, self).__init__(*args,**kwargs)
+		
+			
+		self.fields['proveedor'] = forms.ChoiceField(widget=forms.Select(),
+		label='Proveedor',choices = lprov,initial='0',required='True' )
+
+		self.fields['temporada'] = forms.ChoiceField(widget=forms.Select(),
+		label='Temporada',choices = opcion_temporada, initial='0',required ='True')
+
+		self.fields['catalogo']  = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Catalogo',required ='True' )
+
+				
+		self.fields['pagina'] = forms.CharField(label='Pagina')
+		
+		self.fields['estilo'] = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Estilo',initial='Seleccione',required='True')
+		
+		self.fields['marca'] = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Marca',initial='Seleccione',required='True')
+
+		self.fields['color'] = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Color', initial='Seleccione',required='True')
+		
+		self.fields['talla'] = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Talla',initial='Seleccione',required='True')
+
+		#self.fields['precio'] = forms.FloatField(label = 'Precio cliente:',initial=0.0,widget=forms.NumberInput(attrs={'style':'display: none;'}))
+		self.fields['precio'] = forms.FloatField(label = 'Precio',initial=0.0, required='True')
+	  	
+	productono = forms.CharField(label='Codigo articulo',initial='AUTOMATICO',required=False )
+	proveedor = forms.ChoiceField(widget=forms.Select(),
+		label='Proveedor',initial='0',required='True' )
+
+	temporada = forms.ChoiceField(widget=forms.Select(),
+		label='Temporada',initial='0',required ='True')
+		
+	catalogo  = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Catalogo',initial='SELECCIONE...',required ='True' )
+
+	pagina = forms.CharField(label='Pagina')
+		
+	estilo = ChoiceFieldNoValidation(widget=forms.Select(),
+		label='Estilo',initial='Seleccione',required='True')
+		
+	marca = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Marca',initial='Seleccione',required='True')
+
+	color = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Color', initial='Seleccione',required='True')
+		
+	talla = ChoiceFieldNoValidation(widget = forms.Select(),
+		label='Talla',initial='Seleccione',required='True')
+
+
+	
+	precio = forms.FloatField(label='Precio',initial=0.0)
+
+	error_messages = {'error_productono':'No se permiten caracteres especiales en el código !',
+	'error_precio':'Ingrese un precio !',
+	'error_estilo':'Seleccione un estilo !',
+	'error_pagina':'Ingrese un numero de pagina !',
+	'error_catalogo':'Seleccione un catálogo !',
+	'error_talla':'Seleccione una talla !',
+	'error_color':'Seleccione un color !',
+	'error_marca':'Seleccione una marca !',
+	'error_productono':'No se permiten caracteres especiales en el código !'}
+
+
+	def validate(self):
+
+		catalogo= self.cleaned_data['catalogo',True]
+		if "SELECCIONE..." in catalogo:
+			raise ValidationError("Seleccione un catalogo !")
+		else:
+			pass
+
+		# Always return a value to use as the new cleaned data, even if
+		# this method didn't change it.
+		return catalogo
+
+
+  	def clean(self):
+
+		cleaned_data = super(ArticuloForm, self).clean()
+
+		productono = cleaned_data.get('productono')
+		proveedor = cleaned_data.get('proveedor')
+		temporada = cleaned_data.get('temporada')
+		catalogo = cleaned_data.get('catalogo')
+		pagina = cleaned_data.get('pagina')
+		estilo = cleaned_data.get('estilo')
+		marca = cleaned_data.get('marca')
+		color = cleaned_data.get('color')
+		talla = cleaned_data.get('talla')
+		precio = cleaned_data.get('precio')	
+		
+		if precio ==0 or catalgo.strip()=="" or pagina.strip()=="" or estilo.strip()=="" or marca.strip()=="" or color.strip()=="" or talla.strip()=="":
+			raise forms.ValidationError("Por favor llene todos los campos del formulario !")
+
+		if not es_alfanumerica(productono):
+			
+			raise forms.ValidationError(self.error_messages['error_productono'],code='error_productono')
+		if precio <= 0:
+			raise forms.ValidationError(self.error_messages['error_precio'],code='error_precio')
+		if catalogo.strip() == 'SELECCIONE...' or catalogo.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_catalogo'],code='error_catalogo')
+		if pagina.strip() == '0' or pagina.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_pagina'],code='error_pagina')
+		if estilo.strip() == 'SELECCIONE...' or estilo.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_estilo'],code='error_estilo')
+		if marca.strip() == 'SELECCIONE...' or marca.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_marca'],code='error_marca')			
+		if color.strip() == 'SELECCIONE...' or color.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_color'],code='error_color')
+		if talla.strip() == 'SELECCIONE...' or talla.strip()=="":
+			raise forms.ValidationError(self.error_messages['error_talla'],code='error_talla')
+
+		return self.cleaned_data
+
+	
+
+
+def es_alfanumerica(p_entrada):
+
+	'''valida que p_entrada sea alfanumerico,
+	retorna Falso si no es y Verdadero si si es'''
+	try:
+		result=re.match(r'^[a-zA-Z0-9]{4,10}$',p_entrada)
+		if result is None:
+			raise TypeError
+		else:
+			return True
+
+	except TypeError:
+		return False
